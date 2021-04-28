@@ -1,0 +1,16 @@
+Package: GISAIDR
+Type: Package
+Title: R wrapper for GISAID "API"
+Version: 0.1.0
+Author: Wytamma Wirth
+Maintainer: Wytamma Wirth <wytamma.wirth@me.com>
+Description: programmatically interact with the GISAID database search.
+License: Please see the GISAID license
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Imports: 
+    httr,
+    rjson
