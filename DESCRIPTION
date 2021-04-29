@@ -13,4 +13,5 @@ Suggests:
 Config/testthat/edition: 3
 Imports: 
     httr,
-    rjson
+    rjson,
+    xml2
