@@ -35,7 +35,7 @@ head(df[0:6])
 
 ## Pagination 
 
-Use `nrows` and `start_index` to load page through results.
+Use `nrows` and `start_index` to page through results.
 
 ```R
 df <- getData(credentials=credentials, nrows=1000, start_index=100)
