@@ -71,9 +71,12 @@ getData <-
     }
     if (length(j$records) > 1){
       df <- data.frame(do.call(rbind, j$records))
+      df <- data.frame(lapply(df, function(col) {col[sapply(col, is.null)] <- NA; unlist(col)}))
     } else {
       df <- data.frame(j$records)
     }
+
+
 
     return(setColumnNames(df))
   }
