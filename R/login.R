@@ -47,6 +47,8 @@ extract_PID_from_res <- function(res) {
 #' @param password GISAID password.
 #' @return credentials used to query GISAID.
 #' @examples
+#' username = Sys.getenv("GISAIDR_USERNAME")
+#' password = Sys.getenv("GISAIDR_PASSWORD")
 #' login(username, password)
 login <- function(username, password) {
   # get a session ID

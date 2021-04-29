@@ -18,5 +18,7 @@ credentials used to query GISAID.
 Login to GISAID
 }
 \examples{
+username = Sys.getenv("GISAIDR_USERNAME")
+password = Sys.getenv("GISAIDR_PASSWORD")
 login(username, password)
 }
