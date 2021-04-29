@@ -16,7 +16,7 @@ test_that("can change number of rows", {
 test_that("can change index", {
   df1 <- getData(credentials=credentials, nrows=50, start_index=0)
   df2 <- getData(credentials=credentials, nrows=1, start_index=49)
-  expect_equal(df2[1,1], df1[50,1])
+  expect_true(df2[1,1] == df1[50,1])
 })
 
 test_that("expried session fails", {
