@@ -33,5 +33,8 @@ jobs:
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
       - name: Check
+        env:
+          GISAIDR_PASSWORD: ${{ secrets.GISAIDR_PASSWORD }}
+          GISAIDR_USERNAME: ${{ secrets.GISAIDR_USERNAME }}
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
