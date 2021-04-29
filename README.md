@@ -11,7 +11,7 @@ username = Sys.getenv("GISAIDR_USERNAME")
 password = Sys.getenv("GISAIDR_PASSWORD")
 ```
 
-Login and save your credentials (they are used for all future databse queries)
+Login and save your credentials (they are used for all future database queries)
 ```R
 credentials <- login(username = username, password = password)
 ```
