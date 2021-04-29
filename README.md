@@ -42,3 +42,12 @@ df <- getData(credentials=credentials, nrows=1000, start_index=100)
 nrow(df)
 [1] 1000
 ```
+
+## Installation
+
+Install from github using `devtools`.
+
+```R
+install.packages("devtools") # if you have not installed "devtools" package
+devtools::install_github("Wytamma/GISAIDR")
+```
