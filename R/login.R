@@ -1,4 +1,4 @@
-#' Login to GISAID
+
 GISAID_URL = "https://www.epicov.org/epi3/frontend"
 
 create_command <-
@@ -40,6 +40,14 @@ extract_PID_from_res <- function(res) {
   return(PID)
 }
 
+
+#' Login to GISAID
+#'
+#' @param username GISAID username.
+#' @param password GISAID password.
+#' @return credentials used to query GISAID.
+#' @examples
+#' login(username, password)
 login <- function(username, password) {
   # get a session ID
   res <- httr::GET(GISAID_URL)
