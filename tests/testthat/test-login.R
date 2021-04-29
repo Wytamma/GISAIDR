@@ -9,6 +9,6 @@ test_that("login returns credentials", {
 test_that("invalid login fails", {
   username = 'NOT_A_REAL_PERSON'
   password = Sys.getenv("GISAIDR_PASSWORD")
-  credentials <- login(username=Sys.getenv("GISAIDR_USERNAME"), password=Sys.getenv("GISAIDR_PASSWORD"))
+  expect_error(login(username=Sys.getenv("GISAIDR_USERNAME"), password=Sys.getenv("GISAIDR_PASSWORD")))
 })
 
