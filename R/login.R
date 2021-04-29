@@ -90,5 +90,8 @@ login <- function(username, password) {
   res <- httr::GET(paste0(GISAID_URL, '?', data))
   PID <- extract_PID_from_res(res)
   credentials <- list(pid = PID, sid = SID, wid = WID)
+  if (!all(unlist(sapply(credentials, function(x) isTRUE(nchar(x) != 0))))) {
+    stop("Login failed")
+  }
   return(credentials)
 }
