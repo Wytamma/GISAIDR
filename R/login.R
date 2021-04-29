@@ -1,37 +1,4 @@
 
-GISAID_URL = "https://www.epicov.org/epi3/frontend"
-
-create_command <-
-  function(wid, pid, cid, cmd, params, equiv = NULL) {
-    ev = list(
-      wid = wid,
-      pid = pid,
-      cid = cid,
-      cmd = cmd,
-      params = params,
-      equiv = equiv
-    )
-    return(ev)
-  }
-
-create_url_data <- function(sid, wid, pid, queue, ts, mode = 'ajax') {
-  data <- paste0(
-    "sid=",
-    sid,
-    "&wid=",
-    wid,
-    "&pid=",
-    pid,
-    "&data=",
-    URLencode(rjson::toJSON(queue), reserved = TRUE),
-    "&ts=",
-    ts,
-    "&mode=",
-    mode
-  )
-  return(data)
-}
-
 extract_PID_from_res <- function(res) {
   j = httr::content(res, as = 'parsed')
   j$responses[[1]]$data
@@ -66,7 +33,7 @@ login <- function(username, password) {
   CID <- regmatches(t, gregexpr('<div cid="([^"]*)', t))
   CID <- strsplit(CID[[1]][[2]], '="')[[1]][[2]]
   # create doLogin command
-  ev <- create_command(
+  ev <- createCommand(
     wid = WID,
     pid = PID,
     cid = CID,
@@ -78,7 +45,7 @@ login <- function(username, password) {
 
   ts = as.character(as.integer(Sys.time()) * 1000)
 
-  data <- create_url_data(SID, WID, PID, json_queue, ts)
+  data <- createUrlData(SID, WID, PID, json_queue, ts)
 
   headers = c(accept = "application/json, text/javascript, */*; q=0.01",
               "content-type" = "application/x-www-form-urlencoded; charset=UTF-8")
@@ -86,7 +53,7 @@ login <- function(username, password) {
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
   PID <- extract_PID_from_res(res)
 
-  ev <- create_command(
+  ev <- createCommand(
     wid = WID,
     pid = PID,
     cid = 'c_qs8mrs_p5',
@@ -96,7 +63,7 @@ login <- function(username, password) {
 
   json_queue <- list(queue = list(ev))
 
-  data <- create_url_data(SID, WID, PID, json_queue, ts)
+  data <- createUrlData(SID, WID, PID, json_queue, ts)
   res <- httr::GET(paste0(GISAID_URL, '?', data))
   PID <- extract_PID_from_res(res)
   credentials <- list(pid = PID, sid = SID, wid = WID)
