@@ -75,9 +75,6 @@ getData <-
     } else {
       df <- data.frame(j$records)
     }
-
-
-
     return(setColumnNames(df))
   }
 
