@@ -78,7 +78,7 @@ login <- function(username, password) {
     pid = PID,
     cid = CID,
     cmd = 'Go',
-    params = list(link = 'page_corona2020.Corona2020BrowsePage')
+    params = list(link = 'page_corona2020.PartnerDownloadsPage')
   )
 
   json_queue <- list(queue = list(ev))
@@ -87,7 +87,32 @@ login <- function(username, password) {
   res <- httr::GET(paste0(GISAID_URL, '?', data))
   j <- parseResponse(res)
   PID <-
-    substr(j$responses[[1]]$data, 13, nchar(j$responses[[1]]$data) - 2)
+    strsplit(j$responses[[1]]$data, "'")[[1]][4]
+
+  # get genmoic epi cid
+  res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', PID))
+  t = httr::content(res, as = 'text')
+  CID <-
+    regmatches(t,
+               regexpr("sys.call\\('(.*)','GoAugur", t, perl = TRUE))
+  CID <- strsplit(CID, "'")[[1]][2]
+
+  # data: {"queue":[{"wid":"wid_qsbxxp_1r0u","pid":"pid_qsbxxp_1r0v","cid":"c_qsbxxp_vf","cmd":"GoAugur","params":{},"equiv":null}]}
+  ev <- createCommand(
+    wid = WID,
+    pid = PID,
+    cid = CID,
+    cmd = 'GoAugur',
+    params = setNames(list(), character(0)) #hack for empty {}
+  )
+  json_queue <- list(queue = list(ev))
+  data <- createUrlData(SID, WID, PID, json_queue, ts)
+
+  res <-
+    httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+  j <- parseResponse(res)
+  PID <-
+    strsplit(j$responses[[3]]$data, "'")[[1]][4]
 
   # get search CID
   res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', PID))
