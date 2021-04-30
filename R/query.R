@@ -35,7 +35,7 @@ getData <-
       pid = credentials$pid,
       cid = credentials$search_cid,
       cmd = 'SetPaginating',
-      params = list(start_index=start_index, rows_per_page=nrows)
+      params = list(start_index = start_index, rows_per_page = nrows)
     )
     queue <- append(queue, list(command))
 
@@ -65,17 +65,20 @@ getData <-
 
     if ("responses" %in% names(j)) {
       if ("expired." %in% strsplit(j$responses[[1]]$data, " ")[[1]]) {
-      stop("The session has expired. Please login again.")
+        stop("The session has expired. Please login again.")
       } else {
         stop("An error has occured.")
       }
     }
-    if (length(j$records) > 1){
+    if (length(j$records) > 1) {
       df <- data.frame(do.call(rbind, j$records))
-      df <- data.frame(lapply(df, function(col) {col[sapply(col, is.null)] <- NA; unlist(col)}))
+      df <-
+        data.frame(lapply(df, function(col) {
+          col[sapply(col, is.null)] <- NA
+          unlist(col)
+        }))
     } else {
       df <- data.frame(j$records)
     }
     return(setColumnNames(df))
   }
-

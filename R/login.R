@@ -1,10 +1,12 @@
 parseResponse <- function(res) {
   j = httr::content(res, as = 'parsed')
-  if (isTRUE(grep('Error', j$responses[[1]]$data) == 1)) { # make a better check
+  if (isTRUE(grep('Error', j$responses[[1]]$data) == 1)) {
+    # make a better check
     warning(j$responses[[1]]$data)
     stop("Login failed")
   }
-  if (isTRUE(grep('showMessage', j$responses[[1]]$data) == 1)) { # make a better check
+  if (isTRUE(grep('showMessage', j$responses[[1]]$data) == 1)) {
+    # make a better check
     stop("Username or password wrong!")
   }
   return(j)
@@ -60,9 +62,15 @@ login <- function(username, password) {
     substr(j$responses[[1]]$data, 13, nchar(j$responses[[1]]$data) - 2)
 
   # get CID
-  res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', PID ))
+  res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', PID))
   t = httr::content(res, as = 'text')
-  CID <- regmatches(t, regexpr("sys-actionbar-action\" onclick=\"sys.getC\\('([^']*)", t, perl=TRUE))
+  CID <-
+    regmatches(t,
+               regexpr(
+                 "sys-actionbar-action\" onclick=\"sys.getC\\('([^']*)",
+                 t,
+                 perl = TRUE
+               ))
   CID <- strsplit(CID, "sys.getC\\(\'")[[1]][[2]]
 
   ev <- createCommand(
@@ -82,17 +90,23 @@ login <- function(username, password) {
     substr(j$responses[[1]]$data, 13, nchar(j$responses[[1]]$data) - 2)
 
   # get search CID
-  res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', PID ))
+  res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', PID))
   t = httr::content(res, as = 'text')
-  CID <- regmatches(t, regexpr("div class=\"sys-datatable\" id=\"(.*)_table", t, perl=TRUE))
+  CID <-
+    regmatches(t,
+               regexpr("div class=\"sys-datatable\" id=\"(.*)_table", t, perl = TRUE))
   CID <- strsplit(CID, " id=\"")[[1]][[2]]
-  CID <- substr(CID, 0, nchar(CID)-6)
-  #r = curSession.get(f"https://www.epicov.org/epi3/frontend?sid={ids['SID']}&pid={ids['PID']}")
-  #ids['CID'] = re.findall(r"div class=\"sys-datatable\" id=\"(.*)_table", r.text)[0]
+  CID <- substr(CID, 0, nchar(CID) - 6)
 
-
-  credentials <- list(pid = PID, sid = SID, wid = WID, search_cid=CID)
-  if (!all(unlist(sapply(credentials, function(x) isTRUE(nchar(x) != 0))))) {
+  credentials <-
+    list(
+      pid = PID,
+      sid = SID,
+      wid = WID,
+      search_cid = CID
+    )
+  if (!all(unlist(sapply(credentials, function(x)
+    isTRUE(nchar(x) != 0))))) {
     stop("Login failed")
   }
   return(credentials)
