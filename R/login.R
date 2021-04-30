@@ -121,14 +121,18 @@ login <- function(username, password) {
     regmatches(t,
                regexpr("div class=\"sys-datatable\" id=\"(.*)_table", t, perl = TRUE))
   CID <- strsplit(CID, " id=\"")[[1]][[2]]
-  CID <- substr(CID, 0, nchar(CID) - 6)
+  search_cid <- substr(CID, 0, nchar(CID) - 6)
+
+  # get download cid
+
 
   credentials <-
     list(
       pid = PID,
       sid = SID,
       wid = WID,
-      search_cid = CID
+      search_cid = search_cid,
+      download_cid = search_cid
     )
   if (!all(unlist(sapply(credentials, function(x)
     isTRUE(nchar(x) != 0))))) {

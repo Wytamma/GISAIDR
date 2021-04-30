@@ -22,7 +22,7 @@ setColumnNames <- function(df) {
 #'
 #' @param credentials GISAID credentials.
 #' @return Dataframe.
-getData <-
+search <-
   function(credentials = credentials,
            start_index = 0,
            nrows = 50) {

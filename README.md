@@ -18,10 +18,10 @@ credentials <- login(username = username, password = password)
 
 ## Get Data
 
-Query the database with `getData()` using your credentials
+Query the database with `search()` using your credentials
 
 ```R
-df <- getData(credentials=credentials)
+df <- search(credentials=credentials)
 head(df[0:6])
 ```
 |#     |id             |virus_name                            |passage_details_history|accession_id   |collection_date|submission_date|
@@ -38,7 +38,7 @@ head(df[0:6])
 Use `nrows` and `start_index` to page through results.
 
 ```R
-df <- getData(credentials=credentials, nrows=1000, start_index=100)
+df <- search(credentials=credentials, nrows=1000, start_index=100)
 nrow(df)
 [1] 1000
 ```
