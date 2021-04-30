@@ -1,10 +1,14 @@
-
-extract_PID_from_res <- function(res) {
+parseResponse <- function(res) {
   j = httr::content(res, as = 'parsed')
-  j$responses[[1]]$data
-  PID <-
-    substr(j$responses[[1]]$data, 13, nchar(j$responses[[1]]$data) - 2)
-  return(PID)
+  if (isTRUE(grep('Error', j$responses[[1]]$data) == 1)) { # make a better check
+    warning(j$responses[[1]]$data)
+    stop("Login failed")
+  }
+  if (isTRUE(grep('showMessage', j$responses[[1]]$data) == 1)) { # make a better check
+    stop("Username or password wrong!")
+  }
+  return(j)
+
 }
 
 
@@ -51,12 +55,20 @@ login <- function(username, password) {
               "content-type" = "application/x-www-form-urlencoded; charset=UTF-8")
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
-  PID <- extract_PID_from_res(res)
+  j <- parseResponse(res)
+  PID <-
+    substr(j$responses[[1]]$data, 13, nchar(j$responses[[1]]$data) - 2)
+
+  # get CID
+  res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', PID ))
+  t = httr::content(res, as = 'text')
+  CID <- regmatches(t, regexpr("sys-actionbar-action\" onclick=\"sys.getC\\('([^']*)", t, perl=TRUE))
+  CID <- strsplit(CID, "sys.getC\\(\'")[[1]][[2]]
 
   ev <- createCommand(
     wid = WID,
     pid = PID,
-    cid = 'c_qs8mrs_p5',
+    cid = CID,
     cmd = 'Go',
     params = list(link = 'page_corona2020.Corona2020BrowsePage')
   )
@@ -65,7 +77,10 @@ login <- function(username, password) {
 
   data <- createUrlData(SID, WID, PID, json_queue, ts)
   res <- httr::GET(paste0(GISAID_URL, '?', data))
-  PID <- extract_PID_from_res(res)
+  j <- parseResponse(res)
+  PID <-
+    substr(j$responses[[1]]$data, 13, nchar(j$responses[[1]]$data) - 2)
+
   credentials <- list(pid = PID, sid = SID, wid = WID)
   if (!all(unlist(sapply(credentials, function(x) isTRUE(nchar(x) != 0))))) {
     stop("Login failed")

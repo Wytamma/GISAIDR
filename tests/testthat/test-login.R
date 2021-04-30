@@ -11,6 +11,6 @@ test_that("invalid login fails", {
   password = Sys.getenv("GISAIDR_PASSWORD")
   expect_error(
     login(username=username, password=password),
-    "Login failed")
+    "Username or password wrong!")
 })
 
