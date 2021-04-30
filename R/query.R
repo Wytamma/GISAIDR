@@ -28,11 +28,12 @@ getData <-
            nrows = 50) {
     queue = list()
 
+
     # pagination
     command <- createCommand(
       wid = credentials$wid,
       pid = credentials$pid,
-      cid = 'c_qs8mrs_pj',
+      cid = credentials$search_cid,
       cmd = 'SetPaginating',
       params = list(start_index=start_index, rows_per_page=nrows)
     )
@@ -42,7 +43,7 @@ getData <-
     command <- createCommand(
       wid = credentials$wid,
       pid = credentials$pid,
-      cid = 'c_qs8mrs_pj',
+      cid = credentials$search_cid,
       cmd = 'GetData',
       params = setNames(list(), character(0)) #hack for empty {}
     )

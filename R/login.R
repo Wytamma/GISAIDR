@@ -81,7 +81,17 @@ login <- function(username, password) {
   PID <-
     substr(j$responses[[1]]$data, 13, nchar(j$responses[[1]]$data) - 2)
 
-  credentials <- list(pid = PID, sid = SID, wid = WID)
+  # get search CID
+  res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', PID ))
+  t = httr::content(res, as = 'text')
+  CID <- regmatches(t, regexpr("div class=\"sys-datatable\" id=\"(.*)_table", t, perl=TRUE))
+  CID <- strsplit(CID, " id=\"")[[1]][[2]]
+  CID <- substr(CID, 0, nchar(CID)-6)
+  #r = curSession.get(f"https://www.epicov.org/epi3/frontend?sid={ids['SID']}&pid={ids['PID']}")
+  #ids['CID'] = re.findall(r"div class=\"sys-datatable\" id=\"(.*)_table", r.text)[0]
+
+
+  credentials <- list(pid = PID, sid = SID, wid = WID, search_cid=CID)
   if (!all(unlist(sapply(credentials, function(x) isTRUE(nchar(x) != 0))))) {
     stop("Login failed")
   }
