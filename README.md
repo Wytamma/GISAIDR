@@ -11,7 +11,7 @@ username = Sys.getenv("GISAIDR_USERNAME")
 password = Sys.getenv("GISAIDR_PASSWORD")
 ```
 
-Login and save your credentials (they are used for all future databse queries)
+Login and save your credentials (they are used for all future database queries)
 ```R
 credentials <- login(username = username, password = password)
 ```
@@ -35,7 +35,7 @@ head(df[0:6])
 
 ## Pagination 
 
-Use `nrows` and `start_index` to load page through results.
+Use `nrows` and `start_index` to page through results.
 
 ```R
 df <- getData(credentials=credentials, nrows=1000, start_index=100)
