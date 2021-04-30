@@ -22,7 +22,7 @@ setColumnNames <- function(df) {
 #'
 #' @param credentials GISAID credentials.
 #' @return Dataframe.
-search <-
+query <-
   function(credentials = credentials,
            start_index = 0,
            nrows = 50) {
@@ -33,7 +33,7 @@ search <-
     command <- createCommand(
       wid = credentials$wid,
       pid = credentials$pid,
-      cid = credentials$search_cid,
+      cid = credentials$query_cid,
       cmd = 'SetPaginating',
       params = list(start_index = start_index, rows_per_page = nrows)
     )
@@ -43,7 +43,7 @@ search <-
     command <- createCommand(
       wid = credentials$wid,
       pid = credentials$pid,
-      cid = credentials$search_cid,
+      cid = credentials$query_cid,
       cmd = 'GetData',
       params = setNames(list(), character(0)) #hack for empty {}
     )

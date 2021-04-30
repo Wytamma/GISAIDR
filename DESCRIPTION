@@ -4,7 +4,7 @@ Title: R wrapper for GISAID "API"
 Version: 0.1.0
 Author: Wytamma Wirth
 Maintainer: Wytamma Wirth <wytamma.wirth@me.com>
-Description: programmatically interact with the GISAID database search.
+Description: programmatically interact with the GISAID database query.
 License: Please see the GISAID license
 Encoding: UTF-8
 LazyData: true

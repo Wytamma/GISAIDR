@@ -114,14 +114,14 @@ login <- function(username, password) {
   PID <-
     strsplit(j$responses[[3]]$data, "'")[[1]][4]
 
-  # get search CID
+  # get query CID
   res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', PID))
   t = httr::content(res, as = 'text')
   CID <-
     regmatches(t,
                regexpr("div class=\"sys-datatable\" id=\"(.*)_table", t, perl = TRUE))
   CID <- strsplit(CID, " id=\"")[[1]][[2]]
-  search_cid <- substr(CID, 0, nchar(CID) - 6)
+  query_cid <- substr(CID, 0, nchar(CID) - 6)
 
   # get download cid
 
@@ -131,8 +131,8 @@ login <- function(username, password) {
       pid = PID,
       sid = SID,
       wid = WID,
-      search_cid = search_cid,
-      download_cid = search_cid
+      query_cid = query_cid,
+      download_cid = query_cid
     )
   if (!all(unlist(sapply(credentials, function(x)
     isTRUE(nchar(x) != 0))))) {
