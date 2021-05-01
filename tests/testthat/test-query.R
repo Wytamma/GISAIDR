@@ -15,12 +15,10 @@ test_that("can change number of rows", {
 
 test_that("can change index", {
   df1 <- query(credentials = credentials,
-                 nrows = 100,
                  start_index = 0)
   df2 <- query(credentials = credentials,
-                 nrows = 1,
-                 start_index = 99)
-  expect_true(df2[1, 1] == df1[100, 1])
+                 start_index = 49)
+  expect_true(df2[1, 1] == df1[50, 1])
 })
 
 test_that("expried session fails", {
