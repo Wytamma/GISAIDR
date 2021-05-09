@@ -51,25 +51,19 @@ query <-
     queue <- append(queue, list(command))
 
     command_queue <- list(queue = queue)
-    ts = as.character(as.integer(Sys.time()) * 1000)
+
     data <-
       createUrlData(
         sid = credentials$sid,
         wid = credentials$wid,
         pid = credentials$pid,
         queue = command_queue,
-        ts = ts
+        timestamp = timestamp()
       )
     res <- httr::GET(paste0(GISAID_URL, '?', data))
     j = httr::content(res, as = 'parsed')
+    j <- parseResponse(res)
 
-    if ("responses" %in% names(j)) {
-      if ("expired." %in% strsplit(j$responses[[1]]$data, " ")[[1]]) {
-        stop("The session has expired. Please login again.")
-      } else {
-        stop("An error has occured.")
-      }
-    }
     if (length(j$records) > 1) {
       df <- data.frame(do.call(rbind, j$records))
       df <-

@@ -1,18 +1,3 @@
-parseResponse <- function(res) {
-  j = httr::content(res, as = 'parsed')
-  if (isTRUE(grep('Error', j$responses[[1]]$data) == 1)) {
-    # make a better check
-    warning(j$responses[[1]]$data)
-    stop("Login failed")
-  }
-  if (isTRUE(grep('showMessage', j$responses[[1]]$data) == 1)) {
-    # make a better check
-    stop("Username or password wrong!")
-  }
-  return(j)
-
-}
-
 
 #' Login to GISAID
 #'
@@ -46,15 +31,10 @@ login <- function(username, password) {
     cmd = 'doLogin',
     params = list(login = username, hash = openssl::md5(password))
   )
-
   json_queue <- list(queue = list(ev))
 
-  ts = as.character(as.integer(Sys.time()) * 1000)
+  data <- createUrlData(SID, WID, PID, json_queue, timestamp())
 
-  data <- createUrlData(SID, WID, PID, json_queue, ts)
-
-  headers = c(accept = "application/json, text/javascript, */*; q=0.01",
-              "content-type" = "application/x-www-form-urlencoded; charset=UTF-8")
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
   j <- parseResponse(res)
@@ -83,7 +63,7 @@ login <- function(username, password) {
 
   json_queue <- list(queue = list(ev))
 
-  data <- createUrlData(SID, WID, PID, json_queue, ts)
+  data <- createUrlData(SID, WID, PID, json_queue, timestamp())
   res <- httr::GET(paste0(GISAID_URL, '?', data))
   j <- parseResponse(res)
   PID <-
@@ -97,7 +77,7 @@ login <- function(username, password) {
                regexpr("sys.call\\('(.*)','GoAugur", t, perl = TRUE))
   CID <- strsplit(CID, "'")[[1]][2]
 
-  # data: {"queue":[{"wid":"wid_qsbxxp_1r0u","pid":"pid_qsbxxp_1r0v","cid":"c_qsbxxp_vf","cmd":"GoAugur","params":{},"equiv":null}]}
+  # go to custom search
   ev <- createCommand(
     wid = WID,
     pid = PID,
@@ -106,7 +86,7 @@ login <- function(username, password) {
     params = setNames(list(), character(0)) #hack for empty {}
   )
   json_queue <- list(queue = list(ev))
-  data <- createUrlData(SID, WID, PID, json_queue, ts)
+  data <- createUrlData(SID, WID, PID, json_queue, timestamp())
 
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
@@ -121,10 +101,38 @@ login <- function(username, password) {
     regmatches(t,
                regexpr("div class=\"sys-datatable\" id=\"(.*)_table", t, perl = TRUE))
   CID <- strsplit(CID, " id=\"")[[1]][[2]]
-  query_cid <- substr(CID, 0, nchar(CID) - 6)
+  CID <- substr(CID, 0, nchar(CID) - 6)
+  query_cid <- CID
 
-  # get download cid
+  # send selection command
+  ev <- createCommand(
+    wid = WID,
+    pid = PID,
+    cid = CID,
+    cmd = 'Selection',
+    params = setNames(list(), character(0)) #hack for empty {}
+  )
+  json_queue <- list(queue = list(ev))
+  data <- createUrlData(SID, WID, PID, json_queue, timestamp())
 
+  res <-
+    httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+  j <- parseResponse(res)
+
+  # extract PID
+  selection_PID <-
+    strsplit(j$responses[[1]]$data, "'")[[1]][4]
+
+  #load panel
+  res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', selection_PID))
+  t = httr::content(res, as = 'text')
+
+  # extract cids
+  CID <-
+    regmatches(t,
+               regexpr("onselect=\"sys.getC\\('([^']*)'\\).getFI\\('([^']*)'\\).onSelect()", t, perl = TRUE))
+  panel_CID <- strsplit(CID, "'")[[1]][[2]]
+  selection_CID <- strsplit(CID, "'")[[1]][[4]]
 
   credentials <-
     list(
@@ -132,6 +140,9 @@ login <- function(username, password) {
       sid = SID,
       wid = WID,
       query_cid = query_cid,
+      panel_CID = panel_CID,
+      selection_PID=selection_PID,
+      selection_CID = selection_CID,
       download_cid = query_cid
     )
   if (!all(unlist(sapply(credentials, function(x)
