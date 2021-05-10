@@ -71,6 +71,9 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     res <- httr::GET(paste0('https://www.epicov.org/epi3/check_async/', check_async_id, '?_=', timestamp()))
     j <- parseResponse(res)
     is_ready <- j$is_ready
+    if (!is_ready) {
+      Sys.sleep(3)
+    }
   }
   # get download link
   ev$cmd <- "generateDownloadDone"
