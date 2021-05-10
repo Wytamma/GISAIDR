@@ -33,7 +33,7 @@ head(df[0:6])
 |5     |EPI_ISL_1789197|hCoV-19/USA/IL-S21WGS882/2021         |Original               |EPI_ISL_1789197|2021-04-15     |2021-04-29     |
 |6     |EPI_ISL_1789196|hCoV-19/USA/IL-S21WGS881/2021         |Original               |EPI_ISL_1789196|2021-04-13     |2021-04-29     |
 
-## Pagination 
+### Pagination 
 
 Use `nrows` and `start_index` to page through results.
 
@@ -42,6 +42,25 @@ df <- query(credentials=credentials, nrows=1000, start_index=100)
 nrow(df)
 [1] 1000
 ```
+
+## Download
+
+To download the full data set you need a accession IDs (which can be obtained from `query` results).
+
+```R
+df <- query(credentials = credentials)
+list_of_accession_ids <- df$accession_id
+full_df <- download(credentials, list_of_accession_ids)
+colnames(full_df)
+```
+[1] "strain"                "virus"              "gisaid_epi_isl"        "genbank_accession"    
+[5] "date"                  "region"                "country"               "division"             
+[9] "location"              "region_exposure"       "country_exposure"      "division_exposure"    
+[13] "segment"               "length"                "host"                  "age"                  
+[17] "sex"                   "Nextstrain_clade"      "pangolin_lineage"      "GISAID_clade"         
+[21] "originating_lab"       "submitting_lab"        "authors"               "url"                  
+[25] "title"                 "paper_url"             "date_submitted"        "purpose_of_sequencing"
+
 
 ## Installation
 
