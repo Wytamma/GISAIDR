@@ -6,15 +6,9 @@
 #' @param list_of_accession_ids list of accession_id from GISAID
 #' @return data.frame of complete data
 download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
-  # select rows
-  # POST
-  # {"queue":[{"wid":"wid_qsbxxp_1q6r","pid":"pid_qsbxxp_1q6s","cid":"c_qsbxxp_wu","cmd":"setTarget","params":{"cvalue":"EPI_ISL_1804387, EPI_ISL_1804911, EPI_ISL_1804916, EPI_ISL_1804923, EPI_ISL_1804970","ceid":"ce_qsbxxp_cf"},"equiv":"STce_qsbxxp_cf"},{"wid":"wid_qsbxxp_1q6r","pid":"pid_qsbxxp_1q6s","cid":"c_qsbxxp_wu","cmd":"ChangeValue","params":{"cvalue":"EPI_ISL_1804387, EPI_ISL_1804911, EPI_ISL_1804916, EPI_ISL_1804923, EPI_ISL_1804970","ceid":"ce_qsbxxp_cf"},"equiv":"CVce_qsbxxp_cf"},{"wid":"wid_qsbxxp_1q6r","pid":"pid_qsbxxp_1q6s","cid":"c_qsbxxp_wu","cmd":"OK","params":{},"equiv":null}]}
-  # download
-  # {"queue":[{"wid":"wid_qsbxxp_1pe8","pid":"pid_qsbxxp_1pe9","cid":"c_qsbxxp_yq","cmd":"SetTargetColumn","params":{"col":"m"},"equiv":null},{"wid":"wid_qsbxxp_1pe8","pid":"pid_qsbxxp_1pe9","cid":"c_qsbxxp_yq","cmd":"ToolDownload","params":{},"equiv":null}]}
-  # Wait for downlaod
-  # async
-  #  https://www.epicov.org/epi3/check_async/_qsbxxp_1qc3?_=1619760721443
-  # _qsbxxp_1qc3 from download response
+  if (length(list_of_accession_ids) > 5000) {
+    stop('Can only download a maxium of 5000 samples at a time.')
+  }
   # select
   accession_ids_string <- paste(list_of_accession_ids, collapse=", ")
 
@@ -59,6 +53,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
   )
   json_queue <- list(queue = list(ev))
   data <- createUrlData(credentials$sid, credentials$wid, credentials$pid, json_queue, timestamp())
+  message('Compressing data.')
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
   j <- parseResponse(res)
@@ -72,10 +67,12 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     j <- parseResponse(res)
     is_ready <- j$is_ready
     if (!is_ready) {
-      Sys.sleep(3)
+      message('Waiting...')
+      Sys.sleep(1)
     }
   }
   # get download link
+  message('Data ready.')
   ev$cmd <- "generateDownloadDone"
   json_queue <- list(queue = list(ev))
   data <- createUrlData(credentials$sid, credentials$wid, credentials$pid, json_queue, timestamp())
@@ -87,16 +84,17 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
   download_url <- paste0("https://www.epicov.org",strsplit(j$responses[[1]]$data, '"')[[1]][2])
   # download zip
   tryCatch({
-    download.file(download_url, "gisaid_data.tar", quiet = TRUE)
+    message('Downloading...')
+    download.file(download_url, "gisaidr_data_tmp.tar", quiet = TRUE, method = 'auto', )
     # unzip
-    untar("gisaid_data.tar", exdir="gisaid_data")
+    untar("gisaidr_data_tmp.tar", exdir="gisaidr_data_tmp", restore_times = FALSE)
     # load into df
-    con <- xzfile(paste0("gisaid_data/", list.files("gisaid_data", pattern = "*.metadata.tsv.xz")[1]), open = 'r')
-    df <- read.csv(con, sep="\t")
+    con <- xzfile(paste0("gisaidr_data_tmp/", list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv.xz")[1]), open = 'r')
+    df <- read.csv(con, sep="\t", quote="")
     close(con)
     if (get_sequence) {
       # join sequence
-      con <- xzfile(paste0("gisaid_data/", list.files("gisaid_data", pattern = "*.sequences.fasta.xz")[1]), open = 'r')
+      con <- xzfile(paste0("gisaidr_data_tmp/", list.files("gisaidr_data_tmp", pattern = "*.sequences.fasta.xz")[1]), open = 'r')
       seq_df <- read_fasta(con)
       close(con)
       df <- merge(x = df, y = seq_df, by = "strain", all = TRUE)
