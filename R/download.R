@@ -53,7 +53,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
   )
   json_queue <- list(queue = list(ev))
   data <- createUrlData(credentials$sid, credentials$wid, credentials$pid, json_queue, timestamp())
-  message('Compressing data.')
+  message('Compressing data. Please wait...')
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
   j <- parseResponse(res)
@@ -67,7 +67,6 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     j <- parseResponse(res)
     is_ready <- j$is_ready
     if (!is_ready) {
-      message('Waiting...')
       Sys.sleep(1)
     }
   }
@@ -92,6 +91,8 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     con <- xzfile(paste0("gisaidr_data_tmp/", list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv.xz")[1]), open = 'r')
     df <- read.csv(con, sep="\t", quote="")
     close(con)
+    df <- df[order(df$gisaid_epi_isl, decreasing = TRUE),]
+    colnames(df)[3] <- "accession_id"
     if (get_sequence) {
       # join sequence
       con <- xzfile(paste0("gisaidr_data_tmp/", list.files("gisaidr_data_tmp", pattern = "*.sequences.fasta.xz")[1]), open = 'r')
@@ -101,11 +102,11 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     }
   }, finally = {
     # clean up
-    if (file.exists("gisaid_data.tar")) {
-      file.remove("gisaid_data.tar")
+    if (file.exists("gisaidr_data_tmp.tar")) {
+      file.remove("gisaidr_data_tmp.tar")
     }
-    if (file.exists("gisaid_data/")) {
-      unlink("gisaid_data/", recursive = TRUE)
+    if (file.exists("gisaidr_data_tmp/")) {
+      unlink("gisaidr_data_tmp/", recursive = TRUE)
     }
   })
 
