@@ -44,6 +44,10 @@ parseResponse <- function(res) {
     stop("Server error")
   }
   j = httr::content(res, as = 'parsed')
+  if (length(j$responses) == 0 & length(j) == 2) {
+    print(j)
+    stop("incorrect PID?")
+  }
   if (isTRUE(grep('Error', j$responses[[1]]$data) == 1)) {
     # make a better check
     warning(j$responses[[1]]$data)
