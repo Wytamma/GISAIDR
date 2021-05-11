@@ -61,6 +61,15 @@ colnames(full_df)
 [21] "originating_lab"       "submitting_lab"        "authors"               "url"                  
 [25] "title"                 "paper_url"             "date_submitted"        "purpose_of_sequencing"
 
+### Get sequence data 
+
+Use the `get_sequence` argument to download the sequences with the full data.
+
+```R
+full_df_with_seq <- download(credentials, list_of_accession_ids, get_sequence=TRUE)
+full_df_with_seq$sequence
+```
+[1] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...
 
 ## Installation
 
