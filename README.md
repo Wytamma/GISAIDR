@@ -21,7 +21,7 @@ credentials <- login(username = username, password = password)
 Query the database with `query()` using your credentials
 
 ```R
-df <- query(credentials=credentials)
+df <- query(credentials = credentials)
 head(df[0:6])
 ```
 |#     |id             |virus_name                            |passage_details_history|accession_id   |collection_date|submission_date|
@@ -38,7 +38,7 @@ head(df[0:6])
 Use `nrows` and `start_index` to page through results.
 
 ```R
-df <- query(credentials=credentials, nrows=1000, start_index=100)
+df <- query(credentials = credentials, nrows = 1000, start_index = 100)
 nrow(df)
 [1] 1000
 ```
@@ -50,7 +50,7 @@ To download the full data set you need a accession IDs (which can be obtained fr
 ```R
 df <- query(credentials = credentials)
 list_of_accession_ids <- df$accession_id
-full_df <- download(credentials, list_of_accession_ids)
+full_df <- download(credentials = credentials, list_of_accession_ids = list_of_accession_ids)
 colnames(full_df)
 ```
 [1] "strain"                "virus"              "gisaid_epi_isl"        "genbank_accession"    
@@ -68,7 +68,11 @@ Note: a maximum of 5000 results can be download at a time.
 Use the `get_sequence` argument to download the sequences with the full data.
 
 ```R
-full_df_with_seq <- download(credentials, list_of_accession_ids, get_sequence=TRUE)
+full_df_with_seq <- download(
+    credentials = credentials, 
+    list_of_accession_ids = list_of_accession_ids, 
+    get_sequence=TRUE
+)
 full_df_with_seq$sequence
 ```
 [1] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
