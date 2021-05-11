@@ -61,6 +61,8 @@ colnames(full_df)
 [21] "originating_lab"       "submitting_lab"        "authors"               "url"                  
 [25] "title"                 "paper_url"             "date_submitted"        "purpose_of_sequencing"
 
+Note: a maximum of 5000 results can be download at a time. 
+
 ### Get sequence data 
 
 Use the `get_sequence` argument to download the sequences with the full data.
