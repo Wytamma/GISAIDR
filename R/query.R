@@ -17,6 +17,10 @@ setColumnNames <- function(df) {
   return(df)
 }
 
+setDataTypes <- function(df) {
+  # date
+  return(df)
+}
 
 #' Query GISAID Database
 #'
@@ -24,12 +28,60 @@ setColumnNames <- function(df) {
 #' @return Dataframe.
 query <-
   function(credentials = credentials,
+           location = NULL,
            start_index = 0,
            nrows = 50) {
-    queue = list()
+    # search
+    if (!is.null(location)) {
+      queue = list()
+      command <- createCommand(
+        wid = credentials$wid,
+        pid = credentials$pid,
+        cid = credentials$search_CID,
+        cmd = 'setTarget',
+        params = list(cvalue = location, ceid = credentials$location_CID),
+        equiv = paste0('ST', credentials$location_CID)
+      )
+      queue <- append(queue, list(command))
 
+      command <- createCommand(
+        wid = credentials$wid,
+        pid = credentials$pid,
+        cid = credentials$search_CID,
+        cmd = 'ChangeValue',
+        params = list(cvalue = location, ceid = credentials$location_CID),
+        equiv = paste0('CV', credentials$location_CID)
+      )
+
+      queue <- append(queue, list(command))
+
+      command <- createCommand(
+        wid = credentials$wid,
+        pid = credentials$pid,
+        cid = credentials$search_CID,
+        cmd = 'FilterChange',
+        params = list(ceid = credentials$location_CID),
+      )
+
+      queue <- append(queue, list(command))
+
+      command_queue <- list(queue = queue)
+
+      data <-
+        createUrlData(
+          sid = credentials$sid,
+          wid = credentials$wid,
+          pid = credentials$pid,
+          queue = command_queue,
+          timestamp = timestamp()
+        )
+      res <-
+        httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+      j = httr::content(res, as = 'parsed')
+    }
 
     # pagination
+    queue = list()
     command <- createCommand(
       wid = credentials$wid,
       pid = credentials$pid,
@@ -74,5 +126,7 @@ query <-
     } else {
       df <- data.frame(j$records)
     }
-    return(setColumnNames(df))
+    df <- setColumnNames(df)
+    df <- setDataTypes(df)
+    return(df)
   }

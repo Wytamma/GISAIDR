@@ -104,6 +104,18 @@ login <- function(username, password) {
   CID <- substr(CID, 0, nchar(CID) - 6)
   query_cid <- CID
 
+  # Search
+  search_CID <- regmatches(t, regexpr("sys.createComponent\\('(.*)','Corona2020ToolSearchComponent'", t, perl = TRUE))
+  search_CID <- strsplit(search_CID, "'")
+  search_CID <- search_CID[[1]][2]
+
+
+  # Location
+  location_CID <- regmatches(t, regexpr(".createFI\\('(.*)','EntryWidget','covv_location',", t, perl = TRUE))
+  location_CID <- strsplit(location_CID, "'")
+  location_CID <- location_CID[[1]][length(location_CID[[1]]) - 5]
+
+
   # send selection command
   ev <- createCommand(
     wid = WID,
@@ -143,7 +155,9 @@ login <- function(username, password) {
       panel_CID = panel_CID,
       selection_PID=selection_PID,
       selection_CID = selection_CID,
-      download_cid = query_cid
+      download_cid = query_cid,
+      location_CID = location_CID,
+      search_CID = search_CID
     )
   if (!all(unlist(sapply(credentials, function(x)
     isTRUE(nchar(x) != 0))))) {

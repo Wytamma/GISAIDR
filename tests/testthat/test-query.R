@@ -32,6 +32,19 @@ test_that("expried session fails", {
   "The session has expired. Please login again.")
 })
 
+test_that("location search works", {
+  df <- query(
+    credentials = credentials,
+    location = 'Australia'
+  )
+  expect_true(
+    all(lapply(
+      df$location,
+      function(x) grepl( "Australia", x, fixed = TRUE)
+      ))
+  )
+})
+
 # test_that("download all", {
 #   df <- query(credentials = credentials, download_all = TRUE)
 # })
