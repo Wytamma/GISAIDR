@@ -109,7 +109,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
       unlink("gisaidr_data_tmp/", recursive = TRUE)
     }
   })
-
-
+  # replace ? with NA
+  df[ df == "?" ] <- NA
   return(df)
 }
