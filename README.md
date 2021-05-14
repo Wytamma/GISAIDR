@@ -40,8 +40,21 @@ Use `nrows` and `start_index` to page through results.
 ```R
 df <- query(credentials = credentials, nrows = 1000, start_index = 100)
 nrow(df)
-[1] 1000
 ```
+[1] 1000
+
+### Search by location
+
+Use `location` to search for entries based on geographic location. 
+
+```R
+df <- query(credentials = credentials, location = 'Australia')
+df$location
+```
+[1] "Oceania / Australia / Western Australia" "Oceania / Australia / Queensland"       
+[3] "Oceania / Australia / Queensland"        "Oceania / Australia / Queensland"       
+[5] "Oceania / Australia / Western Australia" "Oceania / Australia / Western Australia" ...     
+
 
 ## Download
 
