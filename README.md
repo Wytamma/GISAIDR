@@ -58,7 +58,7 @@ df$location
 
 ## Download
 
-To download the full data set you need a accession IDs (which can be obtained from `query` results).
+To download the full data set you need a list of accession IDs (which can be obtained from `query` results).
 
 ```R
 df <- query(credentials = credentials)
