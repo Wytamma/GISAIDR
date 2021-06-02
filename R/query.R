@@ -8,7 +8,7 @@ setColumnNames <- function(df) {
       "collection_date",
       "submission_date",
       "information",
-      "lenght",
+      "length",
       "host",
       "location",
       "originating_lab",
