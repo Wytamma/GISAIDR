@@ -29,6 +29,7 @@ setDataTypes <- function(df) {
 query <-
   function(credentials = credentials,
            location = NULL,
+           lineage = NULL,
            start_index = 0,
            nrows = 50) {
     # search
