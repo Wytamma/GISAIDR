@@ -15,9 +15,9 @@ test_that("can change number of rows", {
 
 test_that("can change index", {
   df1 <- query(credentials = credentials,
-                 start_index = 0)
+               start_index = 0)
   df2 <- query(credentials = credentials,
-                 start_index = 49)
+               start_index = 49)
   expect_true(df2[1, 1] == df1[50, 1])
 })
 
@@ -33,16 +33,25 @@ test_that("expried session fails", {
 })
 
 test_that("location search works", {
-  df <- query(
-    credentials = credentials,
-    location = 'Australia'
-  )
-  expect_true(
-    all(lapply(
-      df$location,
-      function(x) grepl( "Australia", x, fixed = TRUE)
-      ))
-  )
+  df <- query(credentials = credentials,
+              location = 'Australia')
+  expect_true(all(lapply(df$location,
+                         function(x)
+                           grepl("Australia", x, fixed = TRUE))))
+})
+
+test_that("lineage search works", {
+  df <- query(credentials = credentials,
+              lineage = 'W.1')
+  # need a better way to test this...
+  expect_true(is.data.frame(df))
+})
+
+test_that("combination search works", {
+  df <- query(credentials = credentials,
+              location = 'Australia',
+              lineage = 'W.1')
+  expect_true(df$id[1] == "EPI_ISL_678350")
 })
 
 # test_that("download all", {

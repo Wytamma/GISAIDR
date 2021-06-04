@@ -1,5 +1,6 @@
 
 
+
 GISAID_URL = "https://www.epicov.org/epi3/frontend"
 
 headers = c(accept = "application/json, text/javascript, */*; q=0.01",
@@ -10,7 +11,12 @@ timestamp <- function() {
 }
 
 createCommand <-
-  function(wid, pid, cid, cmd, params = setNames(list(), character(0)), equiv = NULL) {
+  function(wid,
+           pid,
+           cid,
+           cmd,
+           params = setNames(list(), character(0)),
+           equiv = NULL) {
     ev = list(
       wid = wid,
       pid = pid,
@@ -66,4 +72,26 @@ parseResponse <- function(res) {
 
   return(j)
 
+}
+
+resetQuery <- function(credentials) {
+  queue = list()
+  command <- createCommand(
+    wid = credentials$wid,
+    pid = credentials$pid,
+    cid = credentials$search_cid,
+    cmd = "Reset"
+  )
+  queue <- append(queue, list(command))
+  command_queue <- list(queue = queue)
+  data <-
+    createUrlData(
+      sid = credentials$sid,
+      wid = credentials$wid,
+      pid = credentials$pid,
+      queue = command_queue,
+      timestamp = timestamp()
+    )
+  res <-
+    httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
 }

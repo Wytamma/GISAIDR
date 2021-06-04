@@ -22,6 +22,42 @@ setDataTypes <- function(df) {
   return(df)
 }
 
+create_search_queue <- function(credentials, ceid, cvalue, cmd) {
+  queue = list()
+  command <- createCommand(
+    wid = credentials$wid,
+    pid = credentials$pid,
+    cid = credentials$search_cid,
+    cmd = 'setTarget',
+    params = list(cvalue = cvalue, ceid = ceid),
+    equiv = paste0('ST', ceid)
+  )
+  queue <- append(queue, list(command))
+
+  command <- createCommand(
+    wid = credentials$wid,
+    pid = credentials$pid,
+    cid = credentials$search_cid,
+    cmd = 'ChangeValue',
+    params = list(cvalue = cvalue, ceid = ceid),
+    equiv = paste0('CV', ceid)
+  )
+
+  queue <- append(queue, list(command))
+
+  command <- createCommand(
+    wid = credentials$wid,
+    pid = credentials$pid,
+    cid = credentials$search_cid,
+    cmd = cmd,
+    params = list(ceid = ceid),
+  )
+
+  queue <- append(queue, list(command))
+
+  return(queue)
+}
+
 #' Query GISAID Database
 #'
 #' @param credentials GISAID credentials.
@@ -29,44 +65,19 @@ setDataTypes <- function(df) {
 query <-
   function(credentials = credentials,
            location = NULL,
+           lineage = NULL,
            start_index = 0,
            nrows = 50) {
     # search
+    queue = list()
     if (!is.null(location)) {
-      queue = list()
-      command <- createCommand(
-        wid = credentials$wid,
-        pid = credentials$pid,
-        cid = credentials$search_cid,
-        cmd = 'setTarget',
-        params = list(cvalue = location, ceid = credentials$location_ceid),
-        equiv = paste0('ST', credentials$location_ceid)
-      )
-      queue <- append(queue, list(command))
-
-      command <- createCommand(
-        wid = credentials$wid,
-        pid = credentials$pid,
-        cid = credentials$search_cid,
-        cmd = 'ChangeValue',
-        params = list(cvalue = location, ceid = credentials$location_ceid),
-        equiv = paste0('CV', credentials$location_ceid)
-      )
-
-      queue <- append(queue, list(command))
-
-      command <- createCommand(
-        wid = credentials$wid,
-        pid = credentials$pid,
-        cid = credentials$search_cid,
-        cmd = 'FilterChange',
-        params = list(ceid = credentials$location_ceid),
-      )
-
-      queue <- append(queue, list(command))
-
+      queue <- append(queue, create_search_queue(credentials, credentials$location_ceid, location, 'FilterChange'))
+    }
+    if (!is.null(lineage)) {
+      queue <- append(queue, create_search_queue(credentials, credentials$linage_ceid, lineage, 'LineageChange'))
+    }
+    if (length(queue) > 0){
       command_queue <- list(queue = queue)
-
       data <-
         createUrlData(
           sid = credentials$sid,
@@ -95,8 +106,7 @@ query <-
       wid = credentials$wid,
       pid = credentials$pid,
       cid = credentials$query_cid,
-      cmd = 'GetData',
-      params = setNames(list(), character(0)) #hack for empty {}
+      cmd = 'GetData'
     )
 
     queue <- append(queue, list(command))
@@ -127,5 +137,9 @@ query <-
     }
     df <- setColumnNames(df)
     df <- setDataTypes(df)
+
+    # reset search params
+    resetQuery(credentials)
+
     return(df)
   }
