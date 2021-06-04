@@ -1,15 +1,16 @@
 
+
 GISAID_URL = "https://www.epicov.org/epi3/frontend"
 
 headers = c(accept = "application/json, text/javascript, */*; q=0.01",
             "content-type" = "application/x-www-form-urlencoded; charset=UTF-8")
 
 timestamp <- function() {
-  return( as.character(as.integer(Sys.time()) * 1000))
+  return(as.character(as.integer(Sys.time()) * 1000))
 }
 
 createCommand <-
-  function(wid, pid, cid, cmd, params, equiv = NULL) {
+  function(wid, pid, cid, cmd, params = setNames(list(), character(0)), equiv = NULL) {
     ev = list(
       wid = wid,
       pid = pid,
@@ -21,23 +22,24 @@ createCommand <-
     return(ev)
   }
 
-createUrlData <- function(sid, wid, pid, queue, timestamp, mode = 'ajax') {
-  data <- paste0(
-    "sid=",
-    sid,
-    "&wid=",
-    wid,
-    "&pid=",
-    pid,
-    "&data=",
-    utils::URLencode(rjson::toJSON(queue), reserved = TRUE),
-    "&ts=",
-    timestamp,
-    "&mode=",
-    mode
-  )
-  return(data)
-}
+createUrlData <-
+  function(sid, wid, pid, queue, timestamp, mode = 'ajax') {
+    data <- paste0(
+      "sid=",
+      sid,
+      "&wid=",
+      wid,
+      "&pid=",
+      pid,
+      "&data=",
+      utils::URLencode(rjson::toJSON(queue), reserved = TRUE),
+      "&ts=",
+      timestamp,
+      "&mode=",
+      mode
+    )
+    return(data)
+  }
 
 parseResponse <- function(res) {
   if (res$status_code >= 500) {
@@ -65,4 +67,3 @@ parseResponse <- function(res) {
   return(j)
 
 }
-
