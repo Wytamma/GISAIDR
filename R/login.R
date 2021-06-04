@@ -1,4 +1,5 @@
 
+
 #' Login to GISAID
 #'
 #' @param username GISAID username.
@@ -105,13 +106,27 @@ login <- function(username, password) {
   query_cid <- CID
 
   # Search
-  search_CID <- regmatches(t, regexpr("sys.createComponent\\('(.*)','Corona2020ToolSearchComponent'", t, perl = TRUE))
+  search_CID <-
+    regmatches(
+      t,
+      regexpr(
+        "sys.createComponent\\('(.*)','Corona2020ToolSearchComponent'",
+        t,
+        perl = TRUE
+      )
+    )
   search_CID <- strsplit(search_CID, "'")
   search_CID <- search_CID[[1]][2]
 
 
   # Location
-  location_CID <- regmatches(t, regexpr(".createFI\\('(.*)','EntryWidget','covv_location',", t, perl = TRUE))
+  location_CID <-
+    regmatches(t,
+               regexpr(
+                 ".createFI\\('(.*)','EntryWidget','covv_location',",
+                 t,
+                 perl = TRUE
+               ))
   location_CID <- strsplit(location_CID, "'")
   location_CID <- location_CID[[1]][length(location_CID[[1]]) - 5]
 
@@ -136,13 +151,20 @@ login <- function(username, password) {
     strsplit(j$responses[[1]]$data, "'")[[1]][4]
 
   #load panel
-  res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', selection_PID))
+  res <-
+    httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', selection_PID))
   t = httr::content(res, as = 'text')
 
   # extract cids
   CID <-
-    regmatches(t,
-               regexpr("onselect=\"sys.getC\\('([^']*)'\\).getFI\\('([^']*)'\\).onSelect()", t, perl = TRUE))
+    regmatches(
+      t,
+      regexpr(
+        "onselect=\"sys.getC\\('([^']*)'\\).getFI\\('([^']*)'\\).onSelect()",
+        t,
+        perl = TRUE
+      )
+    )
   panel_CID <- strsplit(CID, "'")[[1]][[2]]
   selection_CID <- strsplit(CID, "'")[[1]][[4]]
 
@@ -153,7 +175,7 @@ login <- function(username, password) {
       wid = WID,
       query_cid = query_cid,
       panel_CID = panel_CID,
-      selection_PID=selection_PID,
+      selection_PID = selection_PID,
       selection_CID = selection_CID,
       download_cid = query_cid,
       location_CID = location_CID,
