@@ -37,20 +37,20 @@ query <-
       command <- createCommand(
         wid = credentials$wid,
         pid = credentials$pid,
-        cid = credentials$search_CID,
+        cid = credentials$search_cid,
         cmd = 'setTarget',
-        params = list(cvalue = location, ceid = credentials$location_CID),
-        equiv = paste0('ST', credentials$location_CID)
+        params = list(cvalue = location, ceid = credentials$location_ceid),
+        equiv = paste0('ST', credentials$location_ceid)
       )
       queue <- append(queue, list(command))
 
       command <- createCommand(
         wid = credentials$wid,
         pid = credentials$pid,
-        cid = credentials$search_CID,
+        cid = credentials$search_cid,
         cmd = 'ChangeValue',
-        params = list(cvalue = location, ceid = credentials$location_CID),
-        equiv = paste0('CV', credentials$location_CID)
+        params = list(cvalue = location, ceid = credentials$location_ceid),
+        equiv = paste0('CV', credentials$location_ceid)
       )
 
       queue <- append(queue, list(command))
@@ -58,9 +58,9 @@ query <-
       command <- createCommand(
         wid = credentials$wid,
         pid = credentials$pid,
-        cid = credentials$search_CID,
+        cid = credentials$search_cid,
         cmd = 'FilterChange',
-        params = list(ceid = credentials$location_CID),
+        params = list(ceid = credentials$location_ceid),
       )
 
       queue <- append(queue, list(command))
@@ -77,7 +77,6 @@ query <-
         )
       res <-
         httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
-      j = httr::content(res, as = 'parsed')
     }
 
     # pagination

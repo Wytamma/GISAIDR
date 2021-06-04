@@ -106,7 +106,7 @@ login <- function(username, password) {
   query_cid <- CID
 
   # Search
-  search_CID <-
+  search_cid <-
     regmatches(
       t,
       regexpr(
@@ -115,20 +115,20 @@ login <- function(username, password) {
         perl = TRUE
       )
     )
-  search_CID <- strsplit(search_CID, "'")
-  search_CID <- search_CID[[1]][2]
+  search_cid <- strsplit(search_cid, "'")
+  search_cid <- search_cid[[1]][2]
 
 
   # Location
-  location_CID <-
+  location_ceid <-
     regmatches(t,
                regexpr(
                  ".createFI\\('(.*)','EntryWidget','covv_location',",
                  t,
                  perl = TRUE
                ))
-  location_CID <- strsplit(location_CID, "'")
-  location_CID <- location_CID[[1]][length(location_CID[[1]]) - 5]
+  location_ceid <- strsplit(location_ceid, "'")
+  location_ceid <- location_ceid[[1]][length(location_ceid[[1]]) - 5]
 
 
   # send selection command
@@ -147,12 +147,12 @@ login <- function(username, password) {
   j <- parseResponse(res)
 
   # extract PID
-  selection_PID <-
+  selection_pid <-
     strsplit(j$responses[[1]]$data, "'")[[1]][4]
 
   #load panel
   res <-
-    httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', selection_PID))
+    httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', selection_pid))
   t = httr::content(res, as = 'text')
 
   # extract cids
@@ -165,8 +165,8 @@ login <- function(username, password) {
         perl = TRUE
       )
     )
-  panel_CID <- strsplit(CID, "'")[[1]][[2]]
-  selection_CID <- strsplit(CID, "'")[[1]][[4]]
+  panel_cid <- strsplit(CID, "'")[[1]][[2]]
+  selection_ceid <- strsplit(CID, "'")[[1]][[4]]
 
   credentials <-
     list(
@@ -174,12 +174,12 @@ login <- function(username, password) {
       sid = SID,
       wid = WID,
       query_cid = query_cid,
-      panel_CID = panel_CID,
-      selection_PID = selection_PID,
-      selection_CID = selection_CID,
+      panel_cid = panel_cid,
+      selection_pid = selection_pid,
+      selection_ceid = selection_ceid,
       download_cid = query_cid,
-      location_CID = location_CID,
-      search_CID = search_CID
+      location_ceid = location_ceid,
+      search_cid = search_cid
     )
   if (!all(unlist(sapply(credentials, function(x)
     isTRUE(nchar(x) != 0))))) {

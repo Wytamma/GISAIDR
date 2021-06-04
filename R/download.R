@@ -14,36 +14,34 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
 
   ev1 <- createCommand(
     wid = credentials$wid,
-    pid = credentials$selection_PID,
-    cid = credentials$panel_CID,
+    pid = credentials$selection_pid,
+    cid = credentials$panel_cid,
     cmd = 'setTarget',
-    params = list(cvalue=accession_ids_string, ceid=credentials$selection_CID), #hack for empty {}
-    equiv = paste0("ST", credentials$selection_CID)
+    params = list(cvalue=accession_ids_string, ceid=credentials$selection_ceid), #hack for empty {}
+    equiv = paste0("ST", credentials$selection_ceid)
   )
 
   ev2 <- createCommand(
     wid = credentials$wid,
-    pid = credentials$selection_PID,
-    cid = credentials$panel_CID,
+    pid = credentials$selection_pid,
+    cid = credentials$panel_cid,
     cmd = 'ChangeValue',
-    params = list(cvalue=accession_ids_string, ceid=credentials$selection_CID), #hack for empty {}
-    equiv = paste0("CV", credentials$selection_CID)
+    params = list(cvalue=accession_ids_string, ceid=credentials$selection_ceid), #hack for empty {}
+    equiv = paste0("CV", credentials$selection_ceid)
   )
 
   ev3 <- createCommand(
     wid = credentials$wid,
-    pid = credentials$selection_PID,
-    cid = credentials$panel_CID,
+    pid = credentials$selection_pid,
+    cid = credentials$panel_cid,
     cmd = 'OK',
     params = setNames(list(), character(0)) #hack for empty {}
   )
   json_queue <- list(queue = list(ev1, ev2, ev3))
-  data <- createUrlData(credentials$sid, credentials$wid, credentials$selection_PID, json_queue, timestamp())
+  data <- createUrlData(credentials$sid, credentials$wid, credentials$selection_pid, json_queue, timestamp())
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
-  #{"queue":[{"wid":"wid_qsdwp3_ra2","pid":"pid_qsdwp3_ra3","cid":"c_qsdwp3_yg","cmd":"ToolDownload","params":{},"equiv":null}]}
-  # maybe need to do all this?
-  # {"wid":"wid_qstszr_wqj","pid":"pid_qstszr_wqk","cid":"c_qstszr_y4","cmd":"SetTargetColumn","params":{"col":"n"},"equiv":null},{"wid":"wid_qstszr_wqj","pid":"pid_qstszr_wqk","cid":"c_qstszr_y4","cmd":"ToolDownload","params":{},"equiv":null}
+
   ev <- createCommand(
     wid = credentials$wid,
     pid = credentials$pid,
@@ -78,7 +76,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
   j <- parseResponse(res)
-  # reset <- httr::GET(paste0(GISAID_URL, '?sid=', credentials$SID, '&pid=', strsplit(j$responses[[4]]$data, "'")[[1]][2]))
+
   # extract download url
   download_url <- paste0("https://www.epicov.org",strsplit(j$responses[[1]]$data, '"')[[1]][2])
   # download zip
