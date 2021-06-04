@@ -1,4 +1,15 @@
-
+extract_search_ceid <- function(identifier, t) {
+  ceid <-
+    regmatches(t,
+               regexpr(
+                 paste0(".createFI\\('(.*)','EntryWidget','", identifier),
+                 t,
+                 perl = TRUE
+               ))
+  ceid <- strsplit(ceid, "'")
+  ceid <- ceid[[1]][length(ceid[[1]]) - 4]
+  return(ceid)
+}
 
 #' Login to GISAID
 #'
@@ -118,18 +129,11 @@ login <- function(username, password) {
   search_cid <- strsplit(search_cid, "'")
   search_cid <- search_cid[[1]][2]
 
-
   # Location
-  location_ceid <-
-    regmatches(t,
-               regexpr(
-                 ".createFI\\('(.*)','EntryWidget','covv_location',",
-                 t,
-                 perl = TRUE
-               ))
-  location_ceid <- strsplit(location_ceid, "'")
-  location_ceid <- location_ceid[[1]][length(location_ceid[[1]]) - 5]
+  location_ceid <- extract_search_ceid('covv_location', t)
 
+  # Lineage
+  linage_ceid <- extract_search_ceid('pangolin_lineage', t)
 
   # send selection command
   ev <- createCommand(
@@ -179,7 +183,8 @@ login <- function(username, password) {
       selection_ceid = selection_ceid,
       download_cid = query_cid,
       location_ceid = location_ceid,
-      search_cid = search_cid
+      search_cid = search_cid,
+      linage_ceid = linage_ceid
     )
   if (!all(unlist(sapply(credentials, function(x)
     isTRUE(nchar(x) != 0))))) {
