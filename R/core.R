@@ -58,7 +58,7 @@ parseResponse <- function(res) {
   }
   if (isTRUE(grep('Error', j$responses[[1]]$data) == 1)) {
     warning(utils::URLdecode(strsplit(j$responses[[1]]$data, '"')[[1]][2]))
-    stop("Error during download.")
+    stop("Internal server Error.")
   }
   if (isTRUE(grep('expired', j$responses[[1]]$data) == 1)) {
     stop("The session has expired. Please login again.")
