@@ -53,16 +53,14 @@ parseResponse <- function(res) {
   }
   j = httr::content(res, as = 'parsed')
   if (length(j$responses) == 0 & length(j) == 2) {
-    print(j)
-    stop("incorrect PID?")
+    warning("There was an error please see: https://github.com/Wytamma/GISAIDR/issues/1")
+    stop("Error!")
   }
   if (isTRUE(grep('Error', j$responses[[1]]$data) == 1)) {
-    # make a better check
-    warning(j$responses[[1]]$data)
-    stop("Login failed")
+    warning(utils::URLdecode(strsplit(j$responses[[1]]$data, '"')[[1]][2]))
+    stop("Error during download.")
   }
   if (isTRUE(grep('expired', j$responses[[1]]$data) == 1)) {
-    warning(j$responses[[1]]$data)
     stop("The session has expired. Please login again.")
   }
   if (isTRUE(grep('showMessage', j$responses[[1]]$data) == 1)) {
