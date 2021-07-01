@@ -65,5 +65,5 @@ test_that("load all works", {
 
 test_that("date search works", {
   df <- query(credentials = credentials, from = '2021-04-05', to = '2021-04-05')
-  expect_true(df$collection_date == "2021-04-05")
+  expect_true(all(df$collection_date == "2021-04-05"))
 })
