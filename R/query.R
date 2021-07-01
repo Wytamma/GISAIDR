@@ -170,7 +170,7 @@ query <-
     j = httr::content(res, as = 'parsed')
     j <<- parseResponse(res)
     if (load_all) {
-      message(paste0("Loading all ", j$totalRecords, " records..."))
+      message(paste0("Loading all ", j$totalRecords, " entries..."))
       return(
         query(
           credentials = credentials,
@@ -181,7 +181,7 @@ query <-
         )
       )
     }
-    message(paste0("Returning ", start_index, "-", nrows, " of ", j$totalRecords, " records"))
+    message(paste0("Returning ", start_index, "-", nrows, " of ", j$totalRecords, " entries"))
     if (length(j$records) > 1) {
       df <- data.frame(do.call(rbind, j$records))
       df <-
