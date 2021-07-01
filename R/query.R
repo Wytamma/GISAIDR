@@ -66,6 +66,8 @@ query <-
   function(credentials = credentials,
            location = NULL,
            lineage = NULL,
+           from = NULL,
+           to = NULL,
            start_index = 0,
            nrows = 50,
            load_all = FALSE) {
@@ -92,6 +94,30 @@ query <-
             credentials$linage_ceid,
             lineage,
             'LineageChange'
+          )
+        )
+    }
+    if (!is.null(from)) {
+      queue <-
+        append(
+          queue,
+          create_search_queue(
+            credentials,
+            credentials$from_ceid,
+            from,
+            'FilterChange'
+          )
+        )
+    }
+    if (!is.null(to)) {
+      queue <-
+        append(
+          queue,
+          create_search_queue(
+            credentials,
+            credentials$to_ceid,
+            to,
+            'FilterChange'
           )
         )
     }

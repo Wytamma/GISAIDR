@@ -2,7 +2,7 @@ extract_search_ceid <- function(identifier, t) {
   ceid <-
     regmatches(t,
                regexpr(
-                 paste0(".createFI\\('(.*)','EntryWidget','", identifier),
+                 paste0(".createFI\\('(.*)','.*Widget','", identifier),
                  t,
                  perl = TRUE
                ))
@@ -135,6 +135,12 @@ login <- function(username, password) {
   # Lineage
   linage_ceid <- extract_search_ceid('pangolin_lineage', t)
 
+  # From
+  from_ceid <- extract_search_ceid('covv_collection_date_from', t)
+
+  # To
+  to_ceid <- extract_search_ceid('covv_collection_date_to', t)
+
   # send selection command
   ev <- createCommand(
     wid = WID,
@@ -184,7 +190,9 @@ login <- function(username, password) {
       download_cid = query_cid,
       location_ceid = location_ceid,
       search_cid = search_cid,
-      linage_ceid = linage_ceid
+      linage_ceid = linage_ceid,
+      from_ceid = from_ceid,
+      to_ceid = to_ceid
     )
   if (!all(unlist(sapply(credentials, function(x)
     isTRUE(nchar(x) != 0))))) {

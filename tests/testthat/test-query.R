@@ -54,7 +54,7 @@ test_that("combination search works", {
   expect_true(df$id[1] == "EPI_ISL_678350")
 })
 
-test_that("laod all works", {
+test_that("load all works", {
   df <- query(
     credentials = credentials,
     lineage = 'W.1',
@@ -63,16 +63,7 @@ test_that("laod all works", {
   expect_true(nrow(df) == 100)
 })
 
-# test_that("from search works", {
-#   df <- query(credentials = credentials, from = '2021-04-05')
-#   expect_true(is.data.frame(df))
-# })
-#
-# test_that("to search works", {
-#   df <- query(credentials = credentials, to = '2021-04-05')
-#   expect_true(is.data.frame(df))
-# })
-
-# test_that("download all", {
-#   df <- query(credentials = credentials, download_all = TRUE)
-# })
+test_that("date search works", {
+  df <- query(credentials = credentials, from = '2021-04-05', to = '2021-04-05')
+  expect_true(df$collection_date == "2021-04-05")
+})

@@ -68,10 +68,21 @@ full_df$pangolin_lineage
 [11] "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7"  
 [21] ...   
 
+### Search by Date
 
-### Load all records that match query
+Use `from` and `to` to search for entries from specific dates.
 
-Use `load_all` to get all the sequences that match your query without having to specify `nrows`. Note that you may end up downloading all of GISAID if your query is too general.  
+```R
+df <- query(credentials = credentials, from = '2021-04-05', to = '2021-04-05')
+df$collection_date
+```
+[1] "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05"  
+[8] "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05"  
+[15] ...  
+
+### Load all entries
+
+Use `load_all` to get all the entries that match your query without having to specify `nrows`. Note that you may end up downloading all of GISAID if your query is too general.  
 
 ```R
 df <- query(credentials = credentials, lineage = 'W.1', load_all = TRUE)
