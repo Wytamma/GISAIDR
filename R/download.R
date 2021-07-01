@@ -86,14 +86,16 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     # unzip
     untar("gisaidr_data_tmp.tar", exdir="gisaidr_data_tmp", restore_times = FALSE)
     # load into df
-    con <- xzfile(paste0("gisaidr_data_tmp/", list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv.xz")[1]), open = 'r')
+    metadataFile <- list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv.xz")[1]
+    con <- xzfile(paste0("gisaidr_data_tmp/", metadataFile), open = 'r')
     df <- read.csv(con, sep="\t", quote="")
     close(con)
     df <- df[order(df$gisaid_epi_isl, decreasing = TRUE),]
     colnames(df)[3] <- "accession_id"
     if (get_sequence) {
       # join sequence
-      con <- xzfile(paste0("gisaidr_data_tmp/", list.files("gisaidr_data_tmp", pattern = "*.sequences.fasta.xz")[1]), open = 'r')
+      sequencesFile <- list.files("gisaidr_data_tmp", pattern = "*.sequences.fasta.xz")[1]
+      con <- xzfile(paste0("gisaidr_data_tmp/", sequencesFile), open = 'r')
       seq_df <- read_fasta(con)
       close(con)
       df <- merge(x = df, y = seq_df, by = "strain", all = TRUE)
