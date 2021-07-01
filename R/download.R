@@ -87,6 +87,9 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     untar("gisaidr_data_tmp.tar", exdir="gisaidr_data_tmp", restore_times = FALSE)
     # load into df
     metadataFile <- list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv.xz")[1]
+    if (is.na(metadataFile)) {
+      stop("Could not find metadata file.")
+    }
     con <- xzfile(paste0("gisaidr_data_tmp/", metadataFile), open = 'r')
     df <- read.csv(con, sep="\t", quote="")
     close(con)
@@ -95,6 +98,9 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     if (get_sequence) {
       # join sequence
       sequencesFile <- list.files("gisaidr_data_tmp", pattern = "*.sequences.fasta.xz")[1]
+      if (is.na(metadataFile)) {
+        stop("Could not find sequences file.")
+      }
       con <- xzfile(paste0("gisaidr_data_tmp/", sequencesFile), open = 'r')
       seq_df <- read_fasta(con)
       close(con)
