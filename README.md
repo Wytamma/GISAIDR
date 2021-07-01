@@ -61,12 +61,23 @@ Use `lineage` to search for entries based on geographic location.
 
 ```R
 df <- query(credentials = credentials, lineage = 'B.1.1.7')
-full_df <- download(credentials = credentials, list_of_accession_ids = df$accession_id)
+full_df <- download(credentials = credentials, list_of_accession_ids = df$accession_id)  # see below for download() info.
 full_df$pangolin_lineage
 ```
 [1] "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7"  
 [11] "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7"  
 [21] ...   
+
+
+### Load all records that match query
+
+Use `load_all` to get all the sequences that match your query without having to specify `nrows`. Note that you may end up downloading all of GISAID if your query is too general.  
+
+```R
+df <- query(credentials = credentials, lineage = 'W.1', load_all = TRUE)
+nrow(df)
+```
+[1] 100
 
 ## Download
 

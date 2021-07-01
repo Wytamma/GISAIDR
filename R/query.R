@@ -67,16 +67,35 @@ query <-
            location = NULL,
            lineage = NULL,
            start_index = 0,
-           nrows = 50) {
+           nrows = 50,
+           load_all = FALSE) {
     # search
     queue = list()
     if (!is.null(location)) {
-      queue <- append(queue, create_search_queue(credentials, credentials$location_ceid, location, 'FilterChange'))
+      queue <-
+        append(
+          queue,
+          create_search_queue(
+            credentials,
+            credentials$location_ceid,
+            location,
+            'FilterChange'
+          )
+        )
     }
     if (!is.null(lineage)) {
-      queue <- append(queue, create_search_queue(credentials, credentials$linage_ceid, lineage, 'LineageChange'))
+      queue <-
+        append(
+          queue,
+          create_search_queue(
+            credentials,
+            credentials$linage_ceid,
+            lineage,
+            'LineageChange'
+          )
+        )
     }
-    if (length(queue) > 0){
+    if (length(queue) > 0) {
       command_queue <- list(queue = queue)
       data <-
         createUrlData(
@@ -123,8 +142,20 @@ query <-
       )
     res <- httr::GET(paste0(GISAID_URL, '?', data))
     j = httr::content(res, as = 'parsed')
-    j <- parseResponse(res)
-
+    j <<- parseResponse(res)
+    if (load_all) {
+      message(paste0("Loading all ", j$totalRecords, " records..."))
+      return(
+        query(
+          credentials = credentials,
+          location = location,
+          lineage = lineage,
+          nrows = j$totalRecords,
+          load_all = FALSE
+        )
+      )
+    }
+    message(paste0("Returning ", start_index, "-", nrows, " of ", j$totalRecords, " records"))
     if (length(j$records) > 1) {
       df <- data.frame(do.call(rbind, j$records))
       df <-
