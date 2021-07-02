@@ -136,3 +136,61 @@ Install from github using `devtools`.
 install.packages("devtools") # if you have not installed "devtools" package
 devtools::install_github("Wytamma/GISAIDR")
 ```
+
+## Examples 
+
+Download all of the sequences in Asia but outside China. 
+
+```R
+library(GISAIDR)
+
+# country list from GISAID
+Asia <- c('Asia / Afghanistan',
+ 'Asia / Armenia',
+ 'Asia / Bahrain',
+ 'Asia / Bangladesh',
+ 'Asia / Brunei',
+ 'Asia / Cambodia',
+ # 'Asia / China', # remove China
+ 'Asia / Georgia',
+ 'Asia / Hong Kong',
+ 'Asia / India',
+ 'Asia / Indonesia / ...',
+ 'Asia / Iran',
+ 'Asia / Iraq',
+ 'Asia / Israel',
+ 'Asia / Japan',
+ 'Asia / Jordan / ...',
+ 'Asia / Kazakhstan / ...',
+ 'Asia / Kuwait',
+ 'Asia / Lebanon',
+ 'Asia / Malaysia',
+ 'Asia / Mongolia',
+ 'Asia / Myanmar',
+ 'Asia / Nepal',
+ 'Asia / Oman / ...',
+ 'Asia / Pakistan',
+ 'Asia / Palestine / ...',
+ 'Asia / Philippines',
+ 'Asia / Qatar / ...',
+ 'Asia / Saudi Arabia',
+ 'Asia / Singapore',
+ 'Asia / South Korea',
+ 'Asia / Sri Lanka',
+ 'Asia / Taiwan',
+ 'Asia / Thailand',
+ 'Asia / Timor-Leste',
+ 'Asia / United Arab Emirates',
+ 'Asia / Uzbekistan',
+ 'Asia / Vietnam')
+
+credentials <- login(username = username, password = password)
+
+asia_not_china_df <- data.frame()
+for (country in Asia) {
+  print(country)
+  df <- query(credentials = credentials, location = country, load_all=TRUE)
+  asia_not_china_df <- rbind(asia_not_china_df, df)
+}
+head(asia_not_china_df)
+```
