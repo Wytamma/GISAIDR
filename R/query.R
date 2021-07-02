@@ -186,7 +186,7 @@ query <-
     if (nrows > j$totalRecords) {
       nrows <- j$totalRecords
     }
-    message(paste0("Returning ", start_index, "-", nrows, " of ", j$totalRecords, " entries"))
+    message(paste0("Returning ", start_index, "-", nrows, " of ", j$totalRecords, " entries."))
     if (length(j$records) > 1) {
       df <- data.frame(do.call(rbind, j$records))
       df <-
