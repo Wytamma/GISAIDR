@@ -176,6 +176,8 @@ query <-
           credentials = credentials,
           location = location,
           lineage = lineage,
+          from = from,
+          to = to,
           nrows = j$totalRecords,
           load_all = FALSE
         )
