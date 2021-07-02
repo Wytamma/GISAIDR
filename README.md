@@ -139,7 +139,7 @@ devtools::install_github("Wytamma/GISAIDR")
 
 ## Examples 
 
-Download all of the sequences in Asia but outside China. 
+Download all of the entries in Asia but outside China. 
 
 ```R
 library(GISAIDR)
