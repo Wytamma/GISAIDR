@@ -82,13 +82,14 @@ df$collection_date
 
 ### Load all entries
 
-Use `load_all` to get all the entries that match your query without having to specify `nrows`. Note that you may end up downloading all of GISAID if your query is too general.  
-
+Use `load_all` to get all the entries that match your query without having to specify `nrows`. 
 ```R
 df <- query(credentials = credentials, lineage = 'W.1', load_all = TRUE)
 nrow(df)
 ```
 [1] 100
+
+Note: you may end up downloading the entire GISAID database if your query is too general.  
 
 ## Download
 
