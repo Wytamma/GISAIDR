@@ -139,7 +139,7 @@ devtools::install_github("Wytamma/GISAIDR")
 
 ## Examples 
 
-Download all of the entries in Asia but outside China. 
+Download all of the 2020 entries from Asia but outside China. 
 
 ```R
 library(GISAIDR)
@@ -189,7 +189,7 @@ credentials <- login(username = username, password = password)
 asia_not_china_df <- data.frame()
 for (country in Asia) {
   print(country)
-  df <- query(credentials = credentials, location = country, load_all=TRUE)
+  df <- query(credentials = credentials, location = country, load_all = TRUE, from = "2020-01-01", to = "2020-12-31")
   asia_not_china_df <- rbind(asia_not_china_df, df)
 }
 head(asia_not_china_df)
