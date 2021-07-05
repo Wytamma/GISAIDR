@@ -60,7 +60,7 @@ test_that("load all works", {
     lineage = 'W.1',
     load_all = TRUE
   )
-  expect_true(nrow(df) == 100)
+  expect_true(nrow(df) > 50)
 })
 
 test_that("date search works", {

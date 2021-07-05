@@ -169,7 +169,7 @@ query <-
     res <- httr::GET(paste0(GISAID_URL, '?', data))
     j = httr::content(res, as = 'parsed')
     j <<- parseResponse(res)
-    if (load_all & j$totalRecords > nrows) {
+    if (load_all && j$totalRecords > nrows) {
       message(paste0("Loading all ", j$totalRecords, " entries..."))
       return(
         query(
