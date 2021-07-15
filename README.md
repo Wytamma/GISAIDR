@@ -135,8 +135,6 @@ Install from github using `devtools`.
 ```R
 install.packages("devtools") # if you have not installed "devtools" package
 devtools::install_github("Wytamma/GISAIDR")
-
-# this is a comment that should be removed...
 ```
 
 ## Examples 
