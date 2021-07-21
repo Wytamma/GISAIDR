@@ -55,15 +55,23 @@ test_that("combination search works", {
 })
 
 test_that("load all works", {
-  df <- query(
-    credentials = credentials,
-    lineage = 'W.1',
-    load_all = TRUE
-  )
+  df <- query(credentials = credentials,
+              lineage = 'W.1',
+              load_all = TRUE)
   expect_true(nrow(df) > 50)
 })
 
 test_that("date search works", {
-  df <- query(credentials = credentials, from = '2021-04-05', to = '2021-04-05')
+  df <-
+    query(credentials = credentials,
+          from = '2021-04-05',
+          to = '2021-04-05')
   expect_true(all(df$collection_date == "2021-04-05"))
+})
+
+
+test_that("low_coverage_excl works", {
+  df <- query(credentials = credentials, low_coverage_excl = TRUE)
+  # need a better way to test this...
+  expect_true(is.data.frame(df))
 })
