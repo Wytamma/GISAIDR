@@ -81,7 +81,10 @@ df$collection_date
 [15] ...  
 
 
-### Use `low_coverage_excl` to exclude low coverage entries. 
+### Exclude low coverage entries 
+
+Use `low_coverage_excl` to exclude low coverage entries from the results.
+
 ```R
 df <- query(credentials = credentials, low_coverage_excl = TRUE)
 grep("Long stretches of NNNs", df$information)
