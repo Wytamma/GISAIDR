@@ -141,6 +141,9 @@ login <- function(username, password) {
   # To
   to_ceid <- extract_search_ceid('covv_collection_date_to', t)
 
+  # low_coverage_excl
+  low_coverage_excl_ceid <- extract_search_ceid('low_quality', t)
+
   # send selection command
   ev <- createCommand(
     wid = WID,
@@ -192,7 +195,8 @@ login <- function(username, password) {
       search_cid = search_cid,
       linage_ceid = linage_ceid,
       from_ceid = from_ceid,
-      to_ceid = to_ceid
+      to_ceid = to_ceid,
+      low_coverage_excl_ceid = low_coverage_excl_ceid
     )
   if (!all(unlist(sapply(credentials, function(x)
     isTRUE(nchar(x) != 0))))) {

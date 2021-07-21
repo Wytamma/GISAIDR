@@ -70,7 +70,8 @@ query <-
            to = NULL,
            start_index = 0,
            nrows = 50,
-           load_all = FALSE) {
+           load_all = FALSE,
+           low_coverage_excl = FALSE) {
     # search
     queue = list()
     if (!is.null(location)) {
@@ -101,24 +102,30 @@ query <-
       queue <-
         append(
           queue,
-          create_search_queue(
-            credentials,
-            credentials$from_ceid,
-            from,
-            'FilterChange'
-          )
+          create_search_queue(credentials,
+                              credentials$from_ceid,
+                              from,
+                              'FilterChange')
         )
     }
     if (!is.null(to)) {
       queue <-
         append(
           queue,
-          create_search_queue(
-            credentials,
-            credentials$to_ceid,
-            to,
-            'FilterChange'
-          )
+          create_search_queue(credentials,
+                              credentials$to_ceid,
+                              to,
+                              'FilterChange')
+        )
+    }
+    if (low_coverage_excl) {
+      queue <-
+        append(
+          queue,
+          create_search_queue(credentials,
+                              credentials$low_coverage_excl_ceid,
+                              list('lowco'),
+                              'FilterChange')
         )
     }
     if (length(queue) > 0) {
@@ -178,14 +185,23 @@ query <-
           from = from,
           to = to,
           nrows = j$totalRecords,
-          load_all = FALSE
+          load_all = FALSE, # set to false to break the recursion
+          low_coverage_excl = low_coverage_excl
         )
       )
     }
     if (nrows > j$totalRecords) {
       nrows <- j$totalRecords
     }
-    message(paste0("Returning ", start_index, "-", nrows, " of ", j$totalRecords, " entries."))
+    message(paste0(
+      "Returning ",
+      start_index,
+      "-",
+      nrows,
+      " of ",
+      j$totalRecords,
+      " entries."
+    ))
     if (length(j$records) > 1) {
       df <- data.frame(do.call(rbind, j$records))
       df <-

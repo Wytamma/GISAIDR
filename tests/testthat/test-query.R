@@ -69,9 +69,7 @@ test_that("date search works", {
   expect_true(all(df$collection_date == "2021-04-05"))
 })
 
-
 test_that("low_coverage_excl works", {
   df <- query(credentials = credentials, low_coverage_excl = TRUE)
-  # need a better way to test this...
-  expect_true(is.data.frame(df))
+  expect_true(length(grep("Long stretches of NNNs", df$information)) == 0)
 })
