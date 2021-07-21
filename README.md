@@ -80,6 +80,15 @@ df$collection_date
 [8] "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05"  
 [15] ...  
 
+
+### Use `low_coverage_excl` to exclude low coverage entries. 
+```R
+df <- query(credentials = credentials, low_coverage_excl = TRUE)
+grep("Long stretches of NNNs", df$information)
+```
+integer(0)
+
+
 ### Load all entries
 
 Use `load_all` to get all the entries that match your query without having to specify `nrows`. 
