@@ -197,7 +197,7 @@ query <-
       "Returning ",
       start_index,
       "-",
-      nrows,
+      start_index + nrows,
       " of ",
       j$totalRecords,
       " entries."
