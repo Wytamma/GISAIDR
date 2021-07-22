@@ -51,7 +51,7 @@ test_that("combination search works", {
   df <- query(credentials = credentials,
               location = 'Australia',
               lineage = 'W.1')
-  expect_true(df$id[1] == "EPI_ISL_678350")
+  expect_true(df$accession_id[1] == "EPI_ISL_678350")
 })
 
 test_that("load all works", {
