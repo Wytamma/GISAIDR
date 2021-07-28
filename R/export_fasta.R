@@ -3,6 +3,7 @@ export_fasta <- function(seqs, out_file_name, export_dated_only = T){
     dates <- round(decimal_date(ymd(seqs$date)), 3)
     if(export_dated_only){
         seqs <- seqs[!is.na(dates), ]
+        dates <- dates[!is.na(dates)]
     } 
     newnames <- paste(seqs$country, seqs$pangolin_lineage,
                       seqs$accession_id, dates, sep = '@')
