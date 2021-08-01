@@ -522,6 +522,61 @@ North America / Sint Eustatius
 North America / Sint Maarten
 North America / Turks and Caicos Islands
 North America / USA
+North America / USA / Alabama
+North America / USA / Alaska
+North America / USA / Arizona
+North America / USA / Arkansas
+North America / USA / California
+North America / USA / Colorado
+North America / USA / Connecticut
+North America / USA / Delaware
+North America / USA / District of Columbia
+North America / USA / Dominican Republic
+North America / USA / Florida
+North America / USA / Georgia
+North America / USA / Hawaii
+North America / USA / Idaho
+North America / USA / Illinois
+North America / USA / Indiana
+North America / USA / Iowa
+North America / USA / Kansas
+North America / USA / Kentucky
+North America / USA / Louisiana
+North America / USA / Maine
+North America / USA / Maryland
+North America / USA / Massachusetts
+North America / USA / Michigan
+North America / USA / Minnesota
+North America / USA / Mississippi
+North America / USA / Missouri
+North America / USA / Montana
+North America / USA / Nebraska
+North America / USA / Nevada
+North America / USA / New Hampshire
+North America / USA / New Jersey
+North America / USA / New Mexico
+North America / USA / New York
+North America / USA / North Carolina
+North America / USA / North Dakota
+North America / USA / Ohio
+North America / USA / Oklahoma
+North America / USA / Oregon
+North America / USA / Pennsylvania
+North America / USA / Puerto Rico
+North America / USA / Rhode Island
+North America / USA / South Carolina
+North America / USA / South Dakota
+North America / USA / Tennessee
+North America / USA / Texas
+North America / USA / Utah
+North America / USA / Vermont
+North America / USA / Virgin Islands
+North America / USA / Virgin Islands of the U.S.
+North America / USA / Virginia
+North America / USA / Washington
+North America / USA / West Virginia
+North America / USA / Wisconsin
+North America / USA / Wyoming
 Oceania / ...
 Oceania / Australia
 Oceania / Australia / Australian Capital Territory
