@@ -55,6 +55,8 @@ df$location
 [3] "Oceania / Australia / Queensland"        "Oceania / Australia / Queensland"       
 [5] "Oceania / Australia / Western Australia"  ...     
 
+A list of all GISAID location can be found in [GISAID_LOCATIONS.txt](https://github.com/Wytamma/GISAIDR/blob/master/GISAID_LOCATIONS.txt). The location search is hierarchical e.g. querying for 'Africa / ...' will return all the regions within Africa, while querying for 'Africa / Angola / ...' will only return the regions in Angola. 
+
 ### Search by lineage
 
 Use `lineage` to search for entries based on geographic location. 
