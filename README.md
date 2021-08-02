@@ -160,6 +160,10 @@ install.packages("devtools") # if you have not installed "devtools" package
 devtools::install_github("Wytamma/GISAIDR")
 ```
 
+## Errors
+
+GISAIDR relies on the custom search interface of [gisaid.org](https://www.gisaid.org/). If GISAIDR is giving you errors, first check that it is not gisaid.org producing these errors. We can't do anything to fix errors with gisaid.org.
+
 ## Examples 
 
 Download all of the 2020 entries from Asia but outside China. 
