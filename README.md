@@ -162,7 +162,7 @@ devtools::install_github("Wytamma/GISAIDR")
 
 ## Errors
 
-GISAIDR relies on the custom search interface of [gisaid.org](https://www.gisaid.org/). If GISAIDR is giving you errors, first check that it is not gisaid.org producing these errors. We can't do anything to fix errors with gisaid.org.
+GISAIDR relies on the custom selection interface of [gisaid.org](https://www.gisaid.org/). If GISAIDR is giving you errors, first check that it is not gisaid.org producing these errors. We can't do anything to fix errors with gisaid.org.
 
 ## Examples 
 
