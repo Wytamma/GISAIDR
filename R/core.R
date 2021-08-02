@@ -63,11 +63,14 @@ parseResponse <- function(res) {
   if (isTRUE(grep('expired', j$responses[[1]]$data) == 1)) {
     stop("The session has expired. Please login again.")
   }
-  if (isTRUE(grep('showMessage', j$responses[[1]]$data) == 1)) {
+  if (isTRUE(grep('password', j$responses[[1]]$data) == 1)) {
     # make a better check
     stop("Username or password wrong!")
   }
-
+  if (isTRUE(grep('No data.', j$responses[[1]]$data) == 1)) {
+    # make a better check
+    stop("No data found.")
+  }
   return(j)
 
 }
