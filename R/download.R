@@ -29,7 +29,6 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     params = list(cvalue=accession_ids_string, ceid=credentials$selection_ceid), #hack for empty {}
     equiv = paste0("CV", credentials$selection_ceid)
   )
-
   ev3 <- createCommand(
     wid = credentials$wid,
     pid = credentials$selection_pid,
@@ -86,24 +85,20 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     # unzip
     untar("gisaidr_data_tmp.tar", exdir="gisaidr_data_tmp", restore_times = FALSE)
     # load into df
-    metadataFile <- list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv.xz")[1]
+    metadataFile <- list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv")[1]
     if (is.na(metadataFile)) {
       stop("Could not find metadata file.")
     }
-    con <- xzfile(paste0("gisaidr_data_tmp/", metadataFile), open = 'r')
-    df <- read.csv(con, sep="\t", quote="")
-    close(con)
+    df <- read.csv(paste0("gisaidr_data_tmp/", metadataFile), sep="\t", quote="")
     df <- df[order(df$gisaid_epi_isl, decreasing = TRUE),]
     colnames(df)[3] <- "accession_id"
     if (get_sequence) {
       # join sequence
-      sequencesFile <- list.files("gisaidr_data_tmp", pattern = "*.sequences.fasta.xz")[1]
-      if (is.na(metadataFile)) {
+      sequencesFile <- list.files("gisaidr_data_tmp", pattern = "*.sequences.fasta")[1]
+      if (is.na(sequencesFile)) {
         stop("Could not find sequences file.")
       }
-      con <- xzfile(paste0("gisaidr_data_tmp/", sequencesFile), open = 'r')
-      seq_df <- read_fasta(con)
-      close(con)
+      seq_df <- read_fasta(paste0("gisaidr_data_tmp/", sequencesFile))
       df <- merge(x = df, y = seq_df, by = "strain", all = TRUE)
     }
   }, finally = {

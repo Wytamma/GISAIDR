@@ -54,7 +54,7 @@ parseResponse <- function(res) {
   j = httr::content(res, as = 'parsed')
   if (length(j$responses) == 0 & length(j) == 2) {
     warning("There was an error please see: https://github.com/Wytamma/GISAIDR/issues/1")
-    stop("Error!")
+    stop("Error! Please login again.")
   }
   if (isTRUE(grep('Error', j$responses[[1]]$data) == 1)) {
     warning(utils::URLdecode(strsplit(j$responses[[1]]$data, '"')[[1]][2]))
