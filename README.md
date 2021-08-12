@@ -260,4 +260,4 @@ test_that("complete works", {
 ```
 12. Run **all** tests. If tests pass create a PR to merge the new feature. 
 
-See [this PR](https://github.com/Wytamma/GISAIDR/pull/9) for the full details. 
+See [this PR](https://github.com/Wytamma/GISAIDR/pull/9/commits/72e0a4456563d03ded0626b7d47e0f4f90d2ef44) for the full details. 
