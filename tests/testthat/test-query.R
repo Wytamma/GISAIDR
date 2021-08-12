@@ -73,3 +73,8 @@ test_that("low_coverage_excl works", {
   df <- query(credentials = credentials, low_coverage_excl = TRUE)
   expect_true(length(grep("Long stretches of NNNs", df$information)) == 0)
 })
+
+test_that("complete works", {
+  df <- query(credentials = credentials, complete = TRUE)
+  expect_true(all(df$length > 29000))
+})

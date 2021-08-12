@@ -144,6 +144,8 @@ login <- function(username, password) {
   # low_coverage_excl
   low_coverage_excl_ceid <- extract_search_ceid('low_quality', t)
 
+  # Complete
+  complete_ceid <- extract_search_ceid('quality', t)
   # send selection command
   ev <- createCommand(
     wid = WID,
@@ -196,7 +198,8 @@ login <- function(username, password) {
       linage_ceid = linage_ceid,
       from_ceid = from_ceid,
       to_ceid = to_ceid,
-      low_coverage_excl_ceid = low_coverage_excl_ceid
+      low_coverage_excl_ceid = low_coverage_excl_ceid,
+      complete_ceid = complete_ceid
     )
   if (!all(unlist(sapply(credentials, function(x)
     isTRUE(nchar(x) != 0))))) {

@@ -71,7 +71,8 @@ query <-
            start_index = 0,
            nrows = 50,
            load_all = FALSE,
-           low_coverage_excl = FALSE) {
+           low_coverage_excl = FALSE,
+           complete = FALSE) {
     # search
     queue = list()
     if (!is.null(location)) {
@@ -128,6 +129,16 @@ query <-
                               'FilterChange')
         )
     }
+    if (complete) {
+      queue <-
+        append(
+          queue,
+          create_search_queue(credentials,
+                              credentials$complete_ceid,
+                              list('lowco'),
+                              'FilterChange')
+        )
+    }
     if (length(queue) > 0) {
       command_queue <- list(queue = queue)
       data <-
@@ -175,6 +186,7 @@ query <-
       )
     res <- httr::GET(paste0(GISAID_URL, '?', data))
     j <- parseResponse(res)
+    # Load all
     if (load_all && j$totalRecords > nrows) {
       message(paste0("Loading all ", j$totalRecords, " entries..."))
       return(
@@ -186,7 +198,8 @@ query <-
           to = to,
           nrows = j$totalRecords,
           load_all = FALSE, # set to false to break the recursion
-          low_coverage_excl = low_coverage_excl
+          low_coverage_excl = low_coverage_excl,
+          complete = complete,
         )
       )
     }
