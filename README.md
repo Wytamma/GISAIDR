@@ -225,10 +225,10 @@ head(asia_not_china_df)
 ## Dev guide 
 
 1. Go to the custom selection interface on https://www.epicov.org/epi3/frontend (Downloads > Genomic epidemiology > Custom Selection).
-2. Right click on the feature you want to add (e.g. the `complete` checkbox)
+2. Right click on the feature you want to add (e.g. the `complete` checkbox) and inspect the source code.
 3. Find the `ceid` for this element (`<div id="ce_qxos9a_bi">`) e.g. `ce_qxos9a_bi` 
 4. Find the the value of the checkbox element (`<input class="sys-event-hook" name="ce_qxos9a_bi_name" style="vertical-align: middle;" type="checkbox" value="complete">`) e.g. `complete`.
-5. Search for the id in the page source. In one of the `<script>` header tags you'll find a createFI() function e.g. `this.getForm().createFI('ce_qxos9a_bi','CheckboxWidget','quality'`. The `ce` ids are dynamic so you need to use the widget name i.e. `quality` to find the `ce` id dynamically. 
+5. Search for the id in the page source. In one of the `<script>` header tags you'll find a createFI() function e.g. `this.getForm().createFI('ce_qxos9a_bi','CheckboxWidget','quality'`. The `ceid` is dynamic so you need to use the widget name i.e. `quality` to find the `ceid` dynamically. 
 6. In the GISAIDR `login.R` file add code to extract the `ceid` using the `extract_search_ceid()` function and the widget e.g.
 
 ```R
