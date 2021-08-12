@@ -221,3 +221,43 @@ for (country in Asia) {
 }
 head(asia_not_china_df)
 ```
+
+## Dev guide 
+
+1. Go to the custom selection interface on https://www.epicov.org/epi3/frontend (Downloads > Genomic epidemiology > Custom Selection).
+2. Right click on the feature you want to add (e.g. the `complete` checkbox)
+3. Find the `ceid` for this element (`<div id="ce_qxos9a_bi">`) e.g. `ce_qxos9a_bi` 
+4. Find the the value of the checkbox element (`<input class="sys-event-hook" name="ce_qxos9a_bi_name" style="vertical-align: middle;" type="checkbox" value="complete">`) e.g. `complete`.
+5. Search for the id in the page source. In one of the `<script>` header tags you'll find a createFI() function e.g. `this.getForm().createFI('ce_qxos9a_bi','CheckboxWidget','quality'`. The `ce` ids are dynamic so you need to use the widget name i.e. `quality` to find the `ce` id dynamically. 
+6. In the GISAIDR `login.R` file add code to extract the `ceid` using the `extract_search_ceid()` function and the widget e.g.
+
+```R
+# Complete 
+complete_ceid <- extract_search_ceid('quality', t)
+```
+7. Add the extracted `ceid` to the list of `credentials` e.g. `complete_ceid = complete_ceid`
+8. Add the new argument and default value to the `query()` function in `query.R` e.g. `complete = FALSE`.
+9. Create and append a search queue to the main queue if the `complete` argument is used. Create the command using the `create_search_queue()` function. Use the `complete_ceid` for the `ceid` and the checkbox value (identified in step 4) for the `cvalue` e.g. 
+```R
+if (complete) {
+  queue <-
+    append(
+      queue,
+      create_search_queue(credentials,
+                          ceid=credentials$complete_ceid,
+                          cvalue=list('complete'),
+                          cmd='FilterChange')
+    )
+}
+```
+10. Add the new argument to the recursive load all `query()` call e.g. `complete = complete`
+11. Add test for new feature in `test-query.R`  e.g.
+```R
+test_that("complete works", {
+  df <- query(credentials = credentials, complete = TRUE)
+  expect_true(all(df$length > 29000))
+})
+```
+12. Run **all** tests. If tests pass create a PR to merge the new feature. 
+
+See [this PR](https://github.com/Wytamma/GISAIDR/pull/9) for the full details. 
