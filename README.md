@@ -3,6 +3,15 @@
 
 Programmatically interact with the GISAID database.
 
+## Installation
+
+Install from github using `devtools`.
+
+```R
+install.packages("devtools") # if you have not installed "devtools" package
+devtools::install_github("Wytamma/GISAIDR")
+```
+
 ## Login 
 
 Get `username` and `password` from [GISAID](https://www.epicov.org/).
@@ -150,15 +159,6 @@ Use the export_fasta function to write sequence data to a file in fasta format. 
 export_fasta(full_df_with_seq, out_file_name = 'GISAID_sequences.fasta')
 ```
 The default is to only export sequences for which a decimal date could be set. To prevent this, use the argument export_dated_only = F. 
-
-## Installation
-
-Install from github using `devtools`.
-
-```R
-install.packages("devtools") # if you have not installed "devtools" package
-devtools::install_github("Wytamma/GISAIDR")
-```
 
 ## Errors
 
