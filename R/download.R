@@ -87,6 +87,8 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     # load into df
     metadataFile <- list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv")[1]
     if (is.na(metadataFile)) {
+      message("gisaid_data files:")
+      message(list.files("gisaidr_data_tmp"))
       stop("Could not find metadata file.")
     }
     df <- read.csv(paste0("gisaidr_data_tmp/", metadataFile), sep="\t", quote="")
