@@ -103,6 +103,15 @@ grep("Long stretches of NNNs", df$information)
 ```
 integer(0)
 
+### Include only complete entries
+
+GISAID considers genomes >29,000 nt as complete. Use `complete` to include only complete entries in the results.
+
+```R
+df <- query(credentials = credentials, complete = TRUE)
+all(df$length > 29000)
+```
+[1] TRUE
 
 ### Load all entries
 
