@@ -135,7 +135,7 @@ query <-
           queue,
           create_search_queue(credentials,
                               credentials$complete_ceid,
-                              list('lowco'),
+                              list('complete'),
                               'FilterChange')
         )
     }

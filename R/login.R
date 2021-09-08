@@ -145,7 +145,7 @@ login <- function(username, password) {
   low_coverage_excl_ceid <- extract_search_ceid('low_quality', t)
 
   # Complete
-  complete_ceid <- extract_search_ceid('quality', t)
+  complete_ceid <- extract_search_ceid("quality'", t) # avoid match with quality2
   # send selection command
   ev <- createCommand(
     wid = WID,

@@ -237,7 +237,7 @@ head(asia_not_china_df)
 
 ```R
 # Complete 
-complete_ceid <- extract_search_ceid('quality', t)
+complete_ceid <- extract_search_ceid("quality'", t) # ' to avoid matches with 'quality2'
 ```
 7. Add the extracted `ceid` to the list of `credentials` e.g. `complete_ceid = complete_ceid`
 8. Add the new argument and default value to the `query()` function in `query.R` e.g. `complete = FALSE`.
