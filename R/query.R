@@ -67,7 +67,10 @@ query <-
            location = NULL,
            lineage = NULL,
            from = NULL,
+           from_subm = NULL,
            to = NULL,
+           to_subm = NULL,
+
            start_index = 0,
            nrows = 50,
            load_all = FALSE,
@@ -109,6 +112,18 @@ query <-
                               'FilterChange')
         )
     }
+
+    if (!is.null(from_subm)) {
+      queue <-
+        append(
+          queue,
+          create_search_queue(credentials,
+                              credentials$from_sub_ceid,
+                              from_subm,
+                              'FilterChange')
+        )
+    }
+
     if (!is.null(to)) {
       queue <-
         append(
@@ -119,6 +134,18 @@ query <-
                               'FilterChange')
         )
     }
+
+    if (!is.null(to_subm)) {
+      queue <-
+        append(
+          queue,
+          create_search_queue(credentials,
+                              credentials$to_sub_ceid,
+                              to_subm,
+                              'FilterChange')
+        )
+    }
+
     if (low_coverage_excl) {
       queue <-
         append(
@@ -149,8 +176,10 @@ query <-
           queue = command_queue,
           timestamp = timestamp()
         )
+        print(data)
       res <-
         httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+        print(res)
     }
 
     # pagination
@@ -195,7 +224,9 @@ query <-
           location = location,
           lineage = lineage,
           from = from,
+          from_subm = from_subm,
           to = to,
+          to_subm = to_subm,
           nrows = j$totalRecords,
           load_all = FALSE, # set to false to break the recursion
           low_coverage_excl = low_coverage_excl,

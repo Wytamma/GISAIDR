@@ -138,8 +138,15 @@ login <- function(username, password) {
   # From
   from_ceid <- extract_search_ceid('covv_collection_date_from', t)
 
+  # from submission
+  from_sub_ceid <- extract_search_ceid('covv_subm_date_from', t)
+  print(from_sub_ceid)
+
   # To
   to_ceid <- extract_search_ceid('covv_collection_date_to', t)
+
+  # To submission
+  to_sub_ceid <- extract_search_ceid('covv_subm_date_to', t)
 
   # low_coverage_excl
   low_coverage_excl_ceid <- extract_search_ceid('low_quality', t)
@@ -197,7 +204,9 @@ login <- function(username, password) {
       search_cid = search_cid,
       linage_ceid = linage_ceid,
       from_ceid = from_ceid,
+      from_sub_ceid = from_sub_ceid,
       to_ceid = to_ceid,
+      to_sub_ceid = to_sub_ceid,
       low_coverage_excl_ceid = low_coverage_excl_ceid,
       complete_ceid = complete_ceid
     )
