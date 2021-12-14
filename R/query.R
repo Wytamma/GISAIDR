@@ -176,10 +176,8 @@ query <-
           queue = command_queue,
           timestamp = timestamp()
         )
-        print(data)
       res <-
         httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
-        print(res)
     }
 
     # pagination

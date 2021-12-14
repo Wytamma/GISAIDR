@@ -140,7 +140,6 @@ login <- function(username, password) {
 
   # from submission
   from_sub_ceid <- extract_search_ceid('covv_subm_date_from', t)
-  print(from_sub_ceid)
 
   # To
   to_ceid <- extract_search_ceid('covv_collection_date_to', t)
