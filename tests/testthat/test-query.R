@@ -78,3 +78,11 @@ test_that("complete works", {
   df <- query(credentials = credentials, complete = TRUE)
   expect_true(all(df$length > 29000))
 })
+
+test_that("submission date search works", {
+  df <-
+    query(credentials = credentials,
+          from_subm = '2021-04-05',
+          to_subm = '2021-04-05')
+  expect_true(all(df$submission_date == "2021-04-05"))
+})
