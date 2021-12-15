@@ -186,7 +186,7 @@ The default is to only export sequences for which a decimal date could be set. T
 
 GISAIDR relies on the custom selection interface of [gisaid.org](https://www.gisaid.org/). If GISAIDR is giving you errors, first check that it is not gisaid.org producing these errors. We can't do anything to fix errors with gisaid.org.
 
-If you have an epiflu account i.e. you were using GISAID before COVID-19 you may have issues logging in in as GISAID may default you to the epiflu database.
+If you have an epiflu account (i.e. you were using GISAID before COVID-19) you may have issues logging in as GISAID may default you to the epiflu database.
 
 ## Updating
 When updating GISAIDR run `detach("package:GISAIDR", unload=TRUE)` first to ensure the update is applied.
