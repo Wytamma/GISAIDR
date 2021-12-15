@@ -69,7 +69,7 @@ A list of GISAID locations (not complete) can be found in [GISAID_LOCATIONS.txt]
 
 ### Search by lineage
 
-Use `lineage` to search for entries based on geographic location. 
+Use `lineage` to search for entries based on pango lineage designations.
 
 ```R
 df <- query(credentials = credentials, lineage = 'B.1.1.7')
