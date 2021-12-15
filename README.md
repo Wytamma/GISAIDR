@@ -80,13 +80,25 @@ full_df$pangolin_lineage
 [11] "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7"  
 [21] ...   
 
-### Search by Date
+### Search by collection date
 
 Use `from` and `to` to search for entries from specific dates.
 
 ```R
-df <- query(credentials = credentials, from = '2021-04-05', to = '2021-04-05')
+df <- query(credentials = credentials, from = '2021-04-05', to = '2021-04-06')
 df$collection_date
+```
+[1] "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05"  
+[8] "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05"  
+[15] ...  
+
+### Search by submission date
+
+Use `from_subm` and `to_subm` to search for entries from specific dates.
+
+```R
+df <- query(credentials = credentials, from_subm = '2021-04-05', to_subm = '2021-04-05')
+df$submission_date
 ```
 [1] "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05"  
 [8] "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05"  
@@ -173,6 +185,8 @@ The default is to only export sequences for which a decimal date could be set. T
 ## Errors
 
 GISAIDR relies on the custom selection interface of [gisaid.org](https://www.gisaid.org/). If GISAIDR is giving you errors, first check that it is not gisaid.org producing these errors. We can't do anything to fix errors with gisaid.org.
+
+If you have an epiflu account i.e. you were using GISAID before COVID-19 you may have issues logging in in as GISAID may default you to the epiflu database.
 
 ## Updating
 When updating GISAIDR run `detach("package:GISAIDR", unload=TRUE)` first to ensure the update is applied.
