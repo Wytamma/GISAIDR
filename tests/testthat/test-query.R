@@ -86,3 +86,16 @@ test_that("submission date search works", {
           to_subm = '2021-04-05')
   expect_true(all(df$submission_date == "2021-04-05"))
 })
+
+test_that("collection date complete works", {
+  df_complete_dates <-
+    query(credentials = credentials,
+          lineage = 'BA.2', location = 'Australia',
+          collection_date_complete = T, to_subm = '2021-12-30', load_all = T)
+  df_all <-
+    query(credentials = credentials,
+          lineage = 'BA.2', location = 'Australia',
+          collection_date_complete = F, to_subm = '2021-12-30', load_all = T)
+  expect_true(nrow(df_all) > nrow(df_complete_dates))
+})
+

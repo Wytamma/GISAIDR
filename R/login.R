@@ -213,8 +213,6 @@ login <- function(username, password) {
       complete_ceid = complete_ceid,
       collection_date_complete_ceid = collection_date_complete_ceid
     )
-    print(collection_date_complete_ceid)
-    print(complete_ceid)
   if (!all(unlist(sapply(credentials, function(x)
     isTRUE(nchar(x) != 0))))) {
     stop("Login failed")

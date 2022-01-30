@@ -91,7 +91,7 @@ query <-
           )
         )
     }
-      if (!is.null(collection_date_complete)){
+      if (collection_date_complete){
           queue <-
               append(
                   queue,
