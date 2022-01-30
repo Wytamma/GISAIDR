@@ -88,13 +88,13 @@ test_that("submission date search works", {
 })
 
 test_that("collection date complete works", {
-  df_complete_dates <-
-    query(credentials = credentials,
-          lineage = 'BA.2', location = 'Australia',
-          collection_date_complete = T, to_subm = '2021-12-30', load_all = T)
+    df_complete_dates <-
+        query(credentials = credentials,
+              lineage = 'BA.1', location = 'Australia',
+              collection_date_complete = T, to_subm = '2021-12-30', load_all = T)
   df_all <-
     query(credentials = credentials,
-          lineage = 'BA.2', location = 'Australia',
+          lineage = 'BA.1', location = 'Australia',
           collection_date_complete = F, to_subm = '2021-12-30', load_all = T)
   expect_true(nrow(df_all) > nrow(df_complete_dates))
 })
