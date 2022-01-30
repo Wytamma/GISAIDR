@@ -151,7 +151,10 @@ login <- function(username, password) {
   low_coverage_excl_ceid <- extract_search_ceid('low_quality', t)
 
   # Complete
-  complete_ceid <- extract_search_ceid("quality'", t) # avoid match with quality2
+    complete_ceid <- extract_search_ceid("quality'", t) # avoid match with quality2
+  # collection date complete
+    collection_date_complete_ceid <- extract_search_ceid('quality2', t)
+    
   # send selection command
   ev <- createCommand(
     wid = WID,
@@ -207,8 +210,11 @@ login <- function(username, password) {
       to_ceid = to_ceid,
       to_sub_ceid = to_sub_ceid,
       low_coverage_excl_ceid = low_coverage_excl_ceid,
-      complete_ceid = complete_ceid
+      complete_ceid = complete_ceid,
+      collection_date_complete_ceid = collection_date_complete_ceid
     )
+    print(collection_date_complete_ceid)
+    print(complete_ceid)
   if (!all(unlist(sapply(credentials, function(x)
     isTRUE(nchar(x) != 0))))) {
     stop("Login failed")

@@ -75,7 +75,8 @@ query <-
            nrows = 50,
            load_all = FALSE,
            low_coverage_excl = FALSE,
-           complete = FALSE) {
+           complete = FALSE,
+           collection_date_complete = FALSE) {
     # search
     queue = list()
     if (!is.null(location)) {
@@ -89,6 +90,18 @@ query <-
             'FilterChange'
           )
         )
+    }
+      if (!is.null(collection_date_complete)){
+          queue <-
+              append(
+                  queue,
+                  create_search_queue(
+                      credentials,
+                      credentials$collection_date_complete_ceid,
+                      list('coldc'),
+                      'FilterChange'
+                  )
+              )
     }
     if (!is.null(lineage)) {
       queue <-
@@ -229,6 +242,7 @@ query <-
           load_all = FALSE, # set to false to break the recursion
           low_coverage_excl = low_coverage_excl,
           complete = complete,
+          collection_date_complete = collection_date_complete,
         )
       )
     }
