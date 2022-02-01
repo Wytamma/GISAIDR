@@ -59,10 +59,11 @@ login <- function(username, password) {
   CID <-
     regmatches(t,
                regexpr(
-                 "sys-actionbar-action\" onclick=\"sys.getC\\('([^']*)",
+                 "sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
                  t,
                  perl = TRUE
                ))
+
   CID <- strsplit(CID, "sys.getC\\(\'")[[1]][[2]]
 
   ev <- createCommand(
@@ -81,7 +82,7 @@ login <- function(username, password) {
   PID <-
     strsplit(j$responses[[1]]$data, "'")[[1]][4]
 
-  # get genmoic epi cid
+  # get genomic epi cid
   res <- httr::GET(paste0(GISAID_URL, '?sid=', SID, '&pid=', PID))
   t = httr::content(res, as = 'text')
   CID <-
@@ -154,7 +155,7 @@ login <- function(username, password) {
     complete_ceid <- extract_search_ceid("quality'", t) # avoid match with quality2
   # collection date complete
     collection_date_complete_ceid <- extract_search_ceid('quality2', t)
-    
+
   # send selection command
   ev <- createCommand(
     wid = WID,

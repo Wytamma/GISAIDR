@@ -70,7 +70,6 @@ query <-
            from_subm = NULL,
            to = NULL,
            to_subm = NULL,
-
            start_index = 0,
            nrows = 50,
            load_all = FALSE,
