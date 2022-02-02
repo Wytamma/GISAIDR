@@ -63,7 +63,7 @@ create_search_queue <- function(credentials, ceid, cvalue, cmd) {
 #' @param credentials GISAID credentials.
 #' @return Dataframe.
 query <-
-  function(credentials = credentials,
+  function(credentials,
            location = NULL,
            lineage = NULL,
            from = NULL,

@@ -80,6 +80,34 @@ full_df$pangolin_lineage
 [11] "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7"  
 [21] ...   
 
+Variants can be queried with special terms (from GISAID). 
+
+```R
+# VOC Omicron GRA (B.1.1.529+BA.*) first detected in Botswana/Hong Kong/South Africa
+Omicron_df <- query(credentials = credentials, lineage = 'B.1.1.529 / BA.*')
+
+# VUM GH/490R (B.1.640+B.1.640.*) first detected in Congo/France
+GH_df <- query(credentials = credentials, lineage = 'B.1.640 / B.1.640.*')
+
+# VOC Delta GK (B.1.617.2+AY.*) first detected in India
+Delta = df <- query(credentials = credentials, lineage = 'B.1.617.2 / AY.*')
+
+# VOC Alpha GRY (B.1.1.7+Q.*) first detected in the UK
+Alpha_df <- query(credentials = credentials, lineage = 'B.1.1.7 / Q.*')
+
+# VOC Beta GH/501Y.V2 (B.1.351+B.1.351.2+B.1.351.3) first detected in South Africa
+Beta_df <- query(credentials = credentials, lineage = 'B.1.351 / B.1.351.2 / B.1.351.3')
+
+# VOC Gamma GR/501Y.V3 (P.1+P.1.*) first detected in Brazil/Japan
+Gamma_df <- query(credentials = credentials, lineage = 'P.1 / P.1.*')
+
+# VOI Lambda GR/452Q.V1 (C.37+C.37.1) first detected in Peru
+Lambda_df <- query(credentials = credentials, lineage = 'C.37 / C.37.1')
+
+# VOI Mu GH (B.1.621+B.1.621.1) first detected in Colombia
+Mu_df <- query(credentials = credentials, lineage = 'B.1.621 / B.1.621.1')
+```
+
 ### Search by collection date
 
 Use `from` and `to` to search for entries from specific dates.
