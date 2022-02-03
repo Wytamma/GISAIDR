@@ -90,7 +90,7 @@ Omicron_df <- query(credentials = credentials, lineage = 'B.1.1.529 / BA.*')
 GH_df <- query(credentials = credentials, lineage = 'B.1.640 / B.1.640.*')
 
 # VOC Delta GK (B.1.617.2+AY.*) first detected in India
-Delta = df <- query(credentials = credentials, lineage = 'B.1.617.2 / AY.*')
+Delta_df <- query(credentials = credentials, lineage = 'B.1.617.2 / AY.*')
 
 # VOC Alpha GRY (B.1.1.7+Q.*) first detected in the UK
 Alpha_df <- query(credentials = credentials, lineage = 'B.1.1.7 / Q.*')
