@@ -203,12 +203,17 @@ full_df_with_seq$sequence
 
 ### Export to fasta file
 
-Use the export_fasta function to write sequence data to a file in fasta format. The sequence names will be country@pango_lineage@accesion_id@date, with the date in decimal format (requires the [lubridate](https://cran.r-project.org/web/packages/lubridate/index.html) package). 
+Use the export_fasta function to write sequence data to a file in fasta format. The sequence names will be country@pango_lineage@accesion_id@date, with the date in decimal format (requires the [lubridate](https://cran.r-project.org/web/packages/lubridate/index.html) package). The default is to only export sequences for which a decimal date could be set. To prevent this, use the argument export_dated_only = F. 
 
 ```R
 export_fasta(full_df_with_seq, out_file_name = 'GISAID_sequences.fasta')
 ```
-The default is to only export sequences for which a decimal date could be set. To prevent this, use the argument export_dated_only = F. 
+
+Date format (default: decimal year) and delimiter (default: @) can be set with the date_format and delimiter arguments respectively. 
+
+```R
+export_fasta(full_df_with_seq, out_file_name = 'GISAID_sequences.fasta', date_format='%Y-%m-%d', delimiter='|')
+```
 
 ## Errors
 
