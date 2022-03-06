@@ -88,10 +88,13 @@ test_that("submission date search works", {
 })
 
 test_that("collection date complete works", {
-    df <-
-        query(credentials = credentials,
-              lineage = 'BA.1', location = 'Australia',
-              collection_date_complete = T)
+  df <-
+    query(
+      credentials = credentials,
+      lineage = 'BA.1',
+      location = 'Australia',
+      collection_date_complete = T
+    )
   expect_true(all(nchar(df$collection_date) == 10))
 })
 

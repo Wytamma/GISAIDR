@@ -280,7 +280,8 @@ query <-
         " entries."
       )
     )
-    if (length(j$records) > 1) {
+
+    if (length(j$records) >= 1) {
       df <- data.frame(do.call(rbind, j$records))
       df <-
         data.frame(lapply(df, function(col) {
