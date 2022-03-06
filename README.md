@@ -153,6 +153,16 @@ all(df$length > 29000)
 ```
 [1] TRUE
 
+### Include only high coverage entries
+
+GISAID considers genomes with <1% Ns and <0.05% unique amino acid mutations as high coverage . Use `high_coverage` to include only high coverage entries in the results.
+
+```R
+df <- query(credentials = credentials, high_coverage = TRUE)
+length(grep("warn_sign", df$information)) == 0
+```
+[1] TRUE
+
 ### Load all entries
 
 Use `load_all` to get all the entries that match your query without having to specify `nrows`. 
