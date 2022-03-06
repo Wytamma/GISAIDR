@@ -1,7 +1,7 @@
 Package: GISAIDR
 Type: Package
 Title: R wrapper for GISAID "API"
-Version: 0.6.1
+Version: 0.6.2
 Author: Wytamma Wirth
 Maintainer: Wytamma Wirth <wytamma.wirth@me.com>
 Description: programmatically interact with the GISAID database query.

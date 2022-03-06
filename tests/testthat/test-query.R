@@ -95,3 +95,9 @@ test_that("collection date complete works", {
   expect_true(all(nchar(df$collection_date) == 10))
 })
 
+test_that("high coverage works", {
+  df <-
+    query(credentials = credentials, high_coverage = T)
+  expect_true(length(grep("warn_sign", df$information)) == 0)
+})
+

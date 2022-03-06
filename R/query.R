@@ -75,6 +75,7 @@ query <-
            load_all = FALSE,
            low_coverage_excl = FALSE,
            complete = FALSE,
+           high_coverage = FALSE,
            collection_date_complete = FALSE) {
     # search
     queue = list()
@@ -90,17 +91,17 @@ query <-
           )
         )
     }
-      if (collection_date_complete){
-          queue <-
-              append(
-                  queue,
-                  create_search_queue(
-                      credentials,
-                      credentials$collection_date_complete_ceid,
-                      list('coldc'),
-                      'FilterChange'
-                  )
-              )
+    if (collection_date_complete) {
+      queue <-
+        append(
+          queue,
+          create_search_queue(
+            credentials,
+            credentials$collection_date_complete_ceid,
+            list('coldc'),
+            'FilterChange'
+          )
+        )
     }
     if (!is.null(lineage)) {
       queue <-
@@ -129,10 +130,12 @@ query <-
       queue <-
         append(
           queue,
-          create_search_queue(credentials,
-                              credentials$from_sub_ceid,
-                              from_subm,
-                              'FilterChange')
+          create_search_queue(
+            credentials,
+            credentials$from_sub_ceid,
+            from_subm,
+            'FilterChange'
+          )
         )
     }
 
@@ -151,10 +154,12 @@ query <-
       queue <-
         append(
           queue,
-          create_search_queue(credentials,
-                              credentials$to_sub_ceid,
-                              to_subm,
-                              'FilterChange')
+          create_search_queue(
+            credentials,
+            credentials$to_sub_ceid,
+            to_subm,
+            'FilterChange'
+          )
         )
     }
 
@@ -162,22 +167,36 @@ query <-
       queue <-
         append(
           queue,
-          create_search_queue(credentials,
-                              credentials$low_coverage_excl_ceid,
-                              list('lowco'),
-                              'FilterChange')
+          create_search_queue(
+            credentials,
+            credentials$low_coverage_excl_ceid,
+            list('lowco'),
+            'FilterChange'
+          )
         )
     }
+    quality <- list()
+
     if (complete) {
+      quality <- append(quality, 'complete')
+    }
+    if (high_coverage) {
+      quality <- append(quality, 'highq')
+    }
+
+    if (length(quality) > 0) {
       queue <-
         append(
           queue,
-          create_search_queue(credentials,
-                              credentials$complete_ceid,
-                              list('complete'),
-                              'FilterChange')
+          create_search_queue(
+            credentials,
+            credentials$quality_ceid,
+            quality,
+            'FilterChange'
+          )
         )
     }
+
     if (length(queue) > 0) {
       command_queue <- list(queue = queue)
       data <-
@@ -225,6 +244,7 @@ query <-
       )
     res <- httr::GET(paste0(GISAID_URL, '?', data))
     j <- parseResponse(res)
+
     # Load all
     if (load_all && j$totalRecords > nrows) {
       message(paste0("Loading all ", j$totalRecords, " entries..."))
@@ -241,6 +261,7 @@ query <-
           load_all = FALSE, # set to false to break the recursion
           low_coverage_excl = low_coverage_excl,
           complete = complete,
+          high_coverage = high_coverage,
           collection_date_complete = collection_date_complete,
         )
       )
@@ -248,15 +269,17 @@ query <-
     if (nrows > j$totalRecords) {
       nrows <- j$totalRecords
     }
-    message(paste0(
-      "Returning ",
-      start_index,
-      "-",
-      start_index + nrows,
-      " of ",
-      j$totalRecords,
-      " entries."
-    ))
+    message(
+      paste0(
+        "Returning ",
+        start_index,
+        "-",
+        start_index + nrows,
+        " of ",
+        j$totalRecords,
+        " entries."
+      )
+    )
     if (length(j$records) > 1) {
       df <- data.frame(do.call(rbind, j$records))
       df <-
