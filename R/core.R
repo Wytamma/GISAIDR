@@ -109,7 +109,7 @@ extract_search_ceid <- function(identifier, t) {
 
 log.debug <- function(msg) {
   if (Sys.getenv("GISAIDR_DEBUG") == 1) {
-    message(msg, appendLF=FALSE)
+    message(msg)
   }
   invisible()
 }
@@ -139,7 +139,7 @@ send_request <-
   }
 
 extract_first_match <- function(regex, text) {
-  log.debug(sprintf("Extracting '%s' from '%s' [...trimmed to 30 chars]", regex, substr(text, 0, 30)))
+  log.debug(sprintf("Extracting '%s' from '%s'", regex, text))
   matches <- regmatches(text, regexec(regex, text))
   return(matches[[1]][[2]])
 }

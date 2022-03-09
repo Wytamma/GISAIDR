@@ -46,6 +46,30 @@ login <- function(username, password) {
   response <- send_request(method = 'POST', data=data)
   response_data <- parseResponse(response)
 
+  if (length(grep("^sys.goPage", response_data$responses[[1]]$data)) == 0) {
+    # handle event that the default page is not frontend
+    default_page <- send_request(paste0('sid=', session_id))
+    default_page_text = httr::content(default_page, as = 'text')
+
+    EpiCov_CID <- extract_first_match("sys.call\\('(.{5,20})','Go'", default_page_text)
+
+    goto_EpiCov_page_command <- createCommand(
+      wid = WID,
+      pid = login_page_ID,
+      cid = EpiCov_CID,
+      cmd = 'Go',
+      params = list(page = 'corona2020')
+    )
+
+    queue <- list(queue = list(goto_EpiCov_page_command))
+
+    data <-
+      formatDataForRequest(session_id, WID, login_page_ID, queue, timestamp())
+
+    response <- send_request(data)
+    response_data <- parseResponse(response)
+  }
+
   frontend_page_ID <- extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
 
   frontend_page <- send_request(paste0('sid=', session_id, '&pid=', frontend_page_ID))
