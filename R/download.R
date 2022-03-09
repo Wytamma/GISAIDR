@@ -37,7 +37,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     params = setNames(list(), character(0)) #hack for empty {}
   )
   json_queue <- list(queue = list(ev1, ev2, ev3))
-  data <- createUrlData(credentials$sid, credentials$wid, credentials$selection_pid, json_queue, timestamp())
+  data <- formatDataForRequest(credentials$sid, credentials$wid, credentials$selection_pid, json_queue, timestamp())
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
 
@@ -49,7 +49,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
     params = setNames(list(), character(0)) #hack for empty {}
   )
   json_queue <- list(queue = list(ev))
-  data <- createUrlData(credentials$sid, credentials$wid, credentials$pid, json_queue, timestamp())
+  data <- formatDataForRequest(credentials$sid, credentials$wid, credentials$pid, json_queue, timestamp())
   message('Compressing data. Please wait...')
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
@@ -71,7 +71,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE) {
   message('Data ready.')
   ev$cmd <- "generateDownloadDone"
   json_queue <- list(queue = list(ev))
-  data <- createUrlData(credentials$sid, credentials$wid, credentials$pid, json_queue, timestamp())
+  data <- formatDataForRequest(credentials$sid, credentials$wid, credentials$pid, json_queue, timestamp())
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
   j <- parseResponse(res)

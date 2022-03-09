@@ -200,7 +200,7 @@ query <-
     if (length(queue) > 0) {
       command_queue <- list(queue = queue)
       data <-
-        createUrlData(
+        formatDataForRequest(
           sid = credentials$sid,
           wid = credentials$wid,
           pid = credentials$pid,
@@ -235,7 +235,7 @@ query <-
     command_queue <- list(queue = queue)
 
     data <-
-      createUrlData(
+      formatDataForRequest(
         sid = credentials$sid,
         wid = credentials$wid,
         pid = credentials$pid,

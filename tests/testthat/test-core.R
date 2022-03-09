@@ -3,6 +3,6 @@ test_that("createCommand returns list", {
 })
 
 
-test_that("createUrlData returns str", {
-  expect_true(is.character(createUrlData(1,2,3, list(), 1)))
+test_that("formatDataForRequest returns str", {
+  expect_true(is.character(formatDataForRequest(1,2,3, list(), 1)))
 })

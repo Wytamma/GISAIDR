@@ -28,7 +28,7 @@ createCommand <-
     return(ev)
   }
 
-createUrlData <-
+formatDataForRequest <-
   function(sid, wid, pid, queue, timestamp, mode = 'ajax') {
     data <- paste0(
       "sid=",
@@ -48,9 +48,6 @@ createUrlData <-
   }
 
 parseResponse <- function(res) {
-  if (res$status_code >= 500) {
-    stop("Server error")
-  }
   j = httr::content(res, as = 'parsed')
   if (length(j$responses) == 0 & length(j) == 2) {
     warning("There was an error please see: https://github.com/Wytamma/GISAIDR/issues/1")
@@ -86,7 +83,7 @@ resetQuery <- function(credentials) {
   queue <- append(queue, list(command))
   command_queue <- list(queue = queue)
   data <-
-    createUrlData(
+    formatDataForRequest(
       sid = credentials$sid,
       wid = credentials$wid,
       pid = credentials$pid,
@@ -95,4 +92,54 @@ resetQuery <- function(credentials) {
     )
   res <-
     httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+}
+
+extract_search_ceid <- function(identifier, t) {
+  ceid <-
+    regmatches(t,
+               regexpr(
+                 paste0(".createFI\\('(.*)','.*Widget','", identifier),
+                 t,
+                 perl = TRUE
+               ))
+  ceid <- strsplit(ceid, "'")
+  ceid <- ceid[[1]][length(ceid[[1]]) - 4]
+  return(ceid)
+}
+
+log.debug <- function(msg) {
+  if (Sys.getenv("GISAIDR_DEBUG") == 1) {
+    message(msg, appendLF=FALSE)
+  }
+  invisible()
+}
+
+send_request <-
+  function(parameter_string = "",
+           data = NULL,
+           method = 'GET') {
+    URL <- paste0(GISAIDR::GISAID_URL, '?', parameter_string)
+    if (is.null(data)) {
+      data <- ""
+    }
+    log.debug(sprintf("Sending request:\n Method -> %s\n URL -> %s\n data -> %s", method, URL, data))
+    if (method == 'GET') {
+      response <- httr::GET(URL)
+    } else if (method == 'POST') {
+      response <-
+        httr::POST(URL, httr::add_headers(.headers = GISAIDR::headers), body = data)
+    } else {
+      stop(sprintf("Method '%s' not allowed", method))
+    }
+    if (response$status_code >= 500) {
+      warning(sprintf("An error occurred while trying to %s %s", method, URL))
+      stop("Server error!")
+    }
+    response
+  }
+
+extract_first_match <- function(regex, text) {
+  log.debug(sprintf("Extracting '%s' from '%s' [...trimmed to 30 chars]", regex, substr(text, 0, 30)))
+  matches <- regmatches(text, regexec(regex, text))
+  return(matches[[1]][[2]])
 }
