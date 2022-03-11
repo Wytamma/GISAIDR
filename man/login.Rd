@@ -4,7 +4,7 @@
 \alias{login}
 \title{Login to GISAID}
 \usage{
-login(username, password)
+login(username, password, database = "EpiCoV")
 }
 \arguments{
 \item{username}{GISAID username.}
