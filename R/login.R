@@ -1,3 +1,5 @@
+
+
 #' Login to GISAID
 #'
 #' @param username GISAID username.
@@ -7,8 +9,10 @@
 #' username = Sys.getenv("GISAIDR_USERNAME")
 #' password = Sys.getenv("GISAIDR_PASSWORD")
 #' login(username, password)
-login <- function(username, password) {
-
+login <- function(username, password, database="EpiCoV") {
+  if (!database %in% c("EpiCoV", "EpiRSV")) {
+    stop(sprintf("Database must be EpiCoV or EpiRSV (database=%s)", database))
+  }
   # get a session ID
   response <- send_request()
   home_page_text = httr::content(response, as = 'text')
@@ -75,70 +79,107 @@ login <- function(username, password) {
   frontend_page <- send_request(paste0('sid=', session_id, '&pid=', frontend_page_ID))
   frontend_page_text = httr::content(frontend_page, as = 'text')
 
-  actionbar_component_ID <-
-    extract_first_match("sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
-                        frontend_page_text)
-  # corona2020 page
-  goto_corona2020_page_command <- createCommand(
-    wid = WID,
-    pid = frontend_page_ID,
-    cid = actionbar_component_ID,
-    cmd = 'Go',
-    params = list(link = 'page_corona2020.PartnerDownloadsPage')
-  )
+  if (database=="EpiRSV") {
+    EpiRSV_CID <- extract_first_match("sys.call\\('(.{5,20})','Go'", frontend_page_text)
 
-  queue <- list(queue = list(goto_corona2020_page_command))
+    goto_EpiCov_page_command <- createCommand(
+      wid = WID,
+      pid = frontend_page_ID,
+      cid = EpiRSV_CID,
+      cmd = 'Go',
+      params = list(page = 'rsv')
+    )
 
-  data <-
-    formatDataForRequest(session_id, WID, frontend_page_ID, queue, timestamp())
+    queue <- list(queue = list(goto_EpiCov_page_command))
 
-  response <- send_request(data)
-  response_data <- parseResponse(response)
+    data <-
+      formatDataForRequest(session_id, WID, login_page_ID, queue, timestamp())
 
-  corona2020_page_ID <-
-    strsplit(response_data$responses[[1]]$data, "'")[[1]][4]
+    response <- send_request(data)
+    response_data <- parseResponse(response)
+    RSV_page_ID <-
+      extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
+    RSV_page <- send_request(paste0('sid=', session_id, '&pid=', RSV_page_ID))
+    RSV_page_text = httr::content(RSV_page, as = 'text')
 
-  corona2020_page <-
-    send_request(paste0('sid=', session_id, '&pid=', corona2020_page_ID))
+    RSV_actionbar_component_ID <-
+      extract_first_match("sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
+                          RSV_page_text)
 
-  corona2020_page_text = httr::content(corona2020_page, as = 'text')
+    response_data <- go_to_page(session_id, WID, RSV_page_ID, RSV_actionbar_component_ID, 'page_rsv.RSVBrowsePage')
+    customSearch_page_ID <-
+      extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
 
-  customSearch_button_component_ID <-
-    extract_first_match("onclick=\"sys.call\\('(.{5,20})','GoAugur'", corona2020_page_text)
+  } else {
+    actionbar_component_ID <-
+      extract_first_match("sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
+                          frontend_page_text)
+    # corona2020 page
+    goto_corona2020_page_command <- createCommand(
+      wid = WID,
+      pid = frontend_page_ID,
+      cid = actionbar_component_ID,
+      cmd = 'Go',
+      params = list(link = 'page_corona2020.PartnerDownloadsPage')
+    )
 
-  # go to custom search
-  ev <- createCommand(
-    wid = WID,
-    pid = corona2020_page_ID,
-    cid = customSearch_button_component_ID,
-    cmd = 'GoAugur',
-    params = setNames(list(), character(0)) #hack for empty {}
-  )
-  queue <- list(queue = list(ev))
-  data <-
-    formatDataForRequest(session_id, WID, corona2020_page_ID, queue, timestamp())
+    queue <- list(queue = list(goto_corona2020_page_command))
 
-  response <- send_request(method="POST", data = data)
-  response_data <- parseResponse(response)
+    data <-
+      formatDataForRequest(session_id, WID, frontend_page_ID, queue, timestamp())
 
-  customSearch_page_ID <-
-    strsplit(response_data$responses[[3]]$data, "'")[[1]][4]
+    response <- send_request(data)
+    response_data <- parseResponse(response)
 
-  # get query CID
-  customSearch_page_response <-
-    send_request(paste0('sid=', session_id, '&pid=', customSearch_page_ID))
+    corona2020_page_ID <-
+      strsplit(response_data$responses[[1]]$data, "'")[[1]][4]
+
+    corona2020_page <-
+      send_request(paste0('sid=', session_id, '&pid=', corona2020_page_ID))
+
+    corona2020_page_text = httr::content(corona2020_page, as = 'text')
+
+    customSearch_button_component_ID <-
+      extract_first_match("onclick=\"sys.call\\('(.{5,20})','GoAugur'", corona2020_page_text)
+
+    # go to custom search
+    ev <- createCommand(
+      wid = WID,
+      pid = corona2020_page_ID,
+      cid = customSearch_button_component_ID,
+      cmd = 'GoAugur',
+      params = setNames(list(), character(0)) #hack for empty {}
+    )
+    queue <- list(queue = list(ev))
+    data <-
+      formatDataForRequest(session_id, WID, corona2020_page_ID, queue, timestamp())
+
+    response <- send_request(method="POST", data = data)
+    response_data <- parseResponse(response)
+    customSearch_page_ID <-
+      strsplit(response_data$responses[[3]]$data, "'")[[1]][4]
+  }
+
+  customSearch_page_response <- send_request(paste0('sid=', session_id, '&pid=', customSearch_page_ID))
   customSearch_page_text = httr::content(customSearch_page_response, as = 'text')
-
   query_cid <- extract_first_match("div class=\"sys-datatable\" id=\"(.*)_table", customSearch_page_text)
 
   # Search
-  search_cid <- extract_first_match("sys.createComponent\\('(.{5,20})','Corona2020ToolSearchComponent'", customSearch_page_text)
+  SearchComponent <- 'Corona2020ToolSearchComponent'
+  if (database == 'EpiRSV'){
+    SearchComponent <- 'RSVSearchComponent'
+  }
+  search_cid <- extract_first_match(sprintf("sys.createComponent\\('(.{5,20})','%s'", SearchComponent), customSearch_page_text)
 
   # Location
   location_ceid <- extract_search_ceid('covv_location', customSearch_page_text)
 
   # Lineage
-  linage_ceid <- extract_search_ceid('pangolin_lineage', customSearch_page_text)
+  if (database != 'EpiRSV'){
+    linage_ceid <- extract_search_ceid('pangolin_lineage', customSearch_page_text)
+  } else {
+    linage_ceid <- NULL
+  }
 
   # From
   from_ceid <- extract_search_ceid('covv_collection_date_from', customSearch_page_text)
@@ -164,45 +205,31 @@ login <- function(username, password) {
     extract_search_ceid('quality2', customSearch_page_text)
 
   # send selection command
-  selection_command <- createCommand(
-    wid = WID,
-    pid = customSearch_page_ID,
-    cid = query_cid,
-    cmd = 'Selection',
-    params = setNames(list(), character(0)) #hack for empty {}
-  )
-  queue <- list(queue = list(selection_command))
-
-  data <-
-    formatDataForRequest(session_id, WID, customSearch_page_ID, queue, timestamp())
-
-  response <-
-    send_request(method='POST', data=data)
-  response_data <- parseResponse(response)
-
-  # extract PID
-  selection_pid <-
-    strsplit(response_data$responses[[1]]$data, "'")[[1]][4]
+  selection_pid_wid <- get_selection_panel(session_id, WID, customSearch_page_ID, query_cid)
 
   #load panel
+  # REFACTOR
   selection_page <-
-    send_request(paste0('sid=', session_id, '&pid=', selection_pid))
+    send_request(paste0('sid=', session_id, '&pid=', selection_pid_wid$pid))
 
   selection_page_text = httr::content(selection_page, as = 'text')
 
-  panel_cid <- extract_first_match("onselect=\"sys.getC\\('(.{5,20})')", selection_page_text)
+  selection_panel_cid <- extract_first_match("onselect=\"sys.getC\\('(.{5,20})')", selection_page_text)
   selection_ceid <- extract_first_match("getFI\\('(.{5,20})').onSelect", selection_page_text)
 
+  send_back_cmd(session_id, selection_pid_wid$wid, selection_pid_wid$pid, selection_panel_cid)
+
+  # back
   credentials <-
     list(
+      database = database,
       pid = customSearch_page_ID,
       sid = session_id,
       wid = WID,
       query_cid = query_cid,
-      panel_cid = panel_cid,
-      selection_pid = selection_pid,
+      selection_panel_cid = selection_panel_cid,
       selection_ceid = selection_ceid,
-      download_cid = query_cid,
+      download_panel_cid = query_cid,
       location_ceid = location_ceid,
       search_cid = search_cid,
       linage_ceid = linage_ceid,
@@ -214,9 +241,6 @@ login <- function(username, password) {
       quality_ceid = quality_ceid,
       collection_date_complete_ceid = collection_date_complete_ceid
     )
-  if (!all(unlist(sapply(credentials, function(x)
-    isTRUE(nchar(x) != 0))))) {
-    stop("Login failed")
-  }
+
   return(credentials)
 }

@@ -1,19 +1,33 @@
-setColumnNames <- function(df) {
-  colnames(df)[colnames(df) %in% c("b", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n")] <-
-    c(
-      "id",
-      "virus_name",
-      "passage_details_history",
-      "accession_id",
-      "collection_date",
-      "submission_date",
-      "information",
-      "length",
-      "host",
-      "location",
-      "originating_lab",
-      "submitting_lab"
-    )
+setColumnNames <- function(df, database) {
+  if (database == 'EpiRSV'){
+    names(df)[names(df) == "b"] <- "id"
+    names(df)[names(df) == "d"] <- "virus_name"
+    names(df)[names(df) == "e"] <- "passage_details_history"
+    names(df)[names(df) == "f"] <- "accession_id"
+    names(df)[names(df) == "g"] <- "collection_date"
+    names(df)[names(df) == "h"] <- "submission_date"
+    names(df)[names(df) == "i"] <- "information"
+    names(df)[names(df) == "j"] <- "length"
+    names(df)[names(df) == "k"] <- "location"
+    names(df)[names(df) == "l"] <- "originating_lab"
+    names(df)[names(df) == "m"] <- "submitting_lab"
+  } else {
+    colnames(df)[colnames(df) %in% c("b", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n")] <-
+      c(
+        "id",
+        "virus_name",
+        "passage_details_history",
+        "accession_id",
+        "collection_date",
+        "submission_date",
+        "information",
+        "length",
+        "host",
+        "location",
+        "originating_lab",
+        "submitting_lab"
+      )
+  }
   return(df)
 }
 
@@ -103,7 +117,7 @@ query <-
           )
         )
     }
-    if (!is.null(lineage)) {
+    if (!is.null(lineage) && credentials$database == "EpiCoV") {
       queue <-
         append(
           queue,
@@ -280,7 +294,7 @@ query <-
         " entries."
       )
     )
-
+    log.debug(j$records)
     if (length(j$records) >= 1) {
       df <- data.frame(do.call(rbind, j$records))
       df <-
@@ -291,11 +305,10 @@ query <-
     } else {
       df <- data.frame(j$records)
     }
-    df <- setColumnNames(df)
+    df <- setColumnNames(df, credentials$database)
     df <- setDataTypes(df)
 
     # reset search params
     resetQuery(credentials)
-
     return(df)
   }
