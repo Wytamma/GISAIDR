@@ -27,8 +27,10 @@ read_fasta <- function (file = NULL, get_sequence=TRUE) {
                           paste(fasta_lines[seq_aa_start:seq_aa_end],
                                 collapse = ""))
     }
+
     return(data.frame(strain, sequence, stringsAsFactors = FALSE))
+  } else {
+    return(data.frame(strain, stringsAsFactors = FALSE))
   }
-  return(data.frame(strain, stringsAsFactors = FALSE))
 
 }

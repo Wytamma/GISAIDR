@@ -9,6 +9,7 @@ test_that("download returns data.frame", {
   expect_true(is.data.frame(full_df))
 })
 
+credentials <- login(username = username, password = password)
 test_that("get sequence works", {
   df <- query(credentials = credentials)
   list_of_accession_ids <- df$accession_id

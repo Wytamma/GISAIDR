@@ -5,6 +5,8 @@
 download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, clean_up=TRUE) {
   if (length(list_of_accession_ids) > 5000) {
     stop('Can only download a maxium of 5000 samples at a time.')
+  } else if (length(list_of_accession_ids) == 0) {
+    stop('Select at least one sequence!')
   }
   # select
   message('Selecting entries...')
@@ -99,12 +101,14 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
     } else {
       sequencesFile <- "gisaidr_data_tmp.fasta"
       download.file(download_url, sequencesFile, quiet = TRUE, method = 'auto')
-      fdf <- read_fasta(sequencesFile, get_sequence=get_sequence)
-      df <- merge(data.frame(do.call('rbind', strsplit(as.character(fdf$strain), '|', fixed=TRUE))), fdf)
+      fdf <- read_fasta(sequencesFile, get_sequence)
+      df <- merge(data.frame(do.call('rbind', strsplit(as.character(fdf$strain), '|', fixed=TRUE))), fdf, by = 0)
+      df <- df[-c(1)]
       if (get_sequence) {
         names(df) <- c('strain', 'accession_id', ' collection_date', 'description', 'sequence')
+      } else {
+        names(df) <- c('strain', 'accession_id', ' collection_date', 'description')
       }
-      names(df) <- c('strain', 'accession_id', ' collection_date', 'description')
     }
 
   }, finally = {
