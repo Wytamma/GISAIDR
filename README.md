@@ -28,7 +28,7 @@ credentials <- login(username = username, password = password)
 
 ## Select a database 
 
-The EpiCoV database is selected, however, GISAIDR also works with the EpiRSV database (limited testing). 
+The EpiCoV database is selected by default, however, GISAIDR also works with the EpiRSV database (limited testing). 
 ```R
 credentials <- login(username = username, password = password, database="EpiRSV")
 ```
