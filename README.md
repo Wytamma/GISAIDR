@@ -172,6 +172,14 @@ length(grep("warn_sign", df$information)) == 0
 ```
 [1] TRUE
 
+### Include only entries with complete collection date
+
+Use `collection_date_complete` to include only entries with complete collection date.
+
+```R
+df <- query(credentials = credentials, collection_date_complete = TRUE)
+```
+
 ### Load all entries
 
 Use `load_all` to get all the entries that match your query without having to specify `nrows`. 

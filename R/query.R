@@ -75,6 +75,19 @@ create_search_queue <- function(credentials, ceid, cvalue, cmd) {
 #' Query GISAID Database
 #'
 #' @param credentials GISAID credentials.
+#' @param location search for entries based on geographic location.
+#' @param lineage search for entries based on pango lineage designations.
+#' @param from search from specific collection date.
+#' @param to search to specific collection date.
+#' @param from_subm search from specific submission date.
+#' @param to_subm search to specific submission date.
+#' @param start_index page through results.
+#' @param nrows number of results to return.
+#' @param load_all return all results.
+#' @param low_coverage_excl exclude low coverage entries from the results.
+#' @param complete include only complete entries in the results.
+#' @param high_coverage include only high coverage entries in the results.
+#' @param collection_date_complete include only entries with complete in collection date the results.
 #' @return Dataframe.
 query <-
   function(credentials,
