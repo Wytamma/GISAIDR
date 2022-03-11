@@ -2,7 +2,7 @@
 [![Build](https://github.com/Wytamma/GISAIDR/actions/workflows/r.yml/badge.svg)](https://github.com/Wytamma/GISAIDR/actions/workflows/r.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5363501.svg)](https://doi.org/10.5281/zenodo.5363501)
 
-Programmatically interact with the GISAID EpiCoV and EpiRSV database.
+Programmatically interact with the GISAID EpiCoV and EpiRSV databases.
 
 ## Installation
 
