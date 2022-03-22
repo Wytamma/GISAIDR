@@ -1,5 +1,5 @@
 setColumnNames <- function(df, database) {
-  if (database == 'EpiRSV'){
+  if (database == 'EpiRSV') {
     names(df)[names(df) == "b"] <- "id"
     names(df)[names(df) == "d"] <- "virus_name"
     names(df)[names(df) == "e"] <- "passage_details_history"
@@ -202,26 +202,55 @@ query <-
           )
         )
     }
-    quality <- list()
 
-    if (complete) {
-      quality <- append(quality, 'complete')
-    }
-    if (high_coverage) {
-      quality <- append(quality, 'highq')
-    }
-
-    if (length(quality) > 0) {
-      queue <-
-        append(
-          queue,
-          create_search_queue(
-            credentials,
-            credentials$quality_ceid,
-            quality,
-            'FilterChange'
+    if (credentials$database == 'EpiCoV') {
+      if (complete) {
+        queue <-
+          append(
+            queue,
+            create_search_queue(
+              credentials,
+              credentials$complete_ceid,
+              list('complete'),
+              'FilterChange'
+            )
           )
-        )
+      }
+
+      if (high_coverage) {
+        queue <-
+          append(
+            queue,
+            create_search_queue(
+              credentials,
+              credentials$highq_ceid,
+              list('highq'),
+              'FilterChange'
+            )
+          )
+      }
+    } else {
+      quality <- list()
+
+      if (complete) {
+        quality <- append(quality, 'complete')
+      }
+      if (high_coverage) {
+        quality <- append(quality, 'highq')
+      }
+
+      if (length(quality) > 0) {
+        queue <-
+          append(
+            queue,
+            create_search_queue(
+              credentials,
+              credentials$quality_ceid,
+              quality,
+              'FilterChange'
+            )
+          )
+      }
     }
 
     if (length(queue) > 0) {
@@ -285,7 +314,8 @@ query <-
           to = to,
           to_subm = to_subm,
           nrows = j$totalRecords,
-          load_all = FALSE, # set to false to break the recursion
+          load_all = FALSE,
+          # set to false to break the recursion
           low_coverage_excl = low_coverage_excl,
           complete = complete,
           high_coverage = high_coverage,

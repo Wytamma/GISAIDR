@@ -22,14 +22,13 @@ test_that("can change index", {
 })
 
 test_that("expried session fails", {
+  sid <- credentials$sid
+  credentials$sid = "890C95496CO0CQ007Z8HDSG34GF1JZ3Z"
   expect_error(query(
-    credentials = list(
-      pid = credentials$pid,
-      wid = credentials$wid,
-      sid = "890C95496CO0CQ007Z8HDSG34GF1JZ3Z"
-    )
+    credentials = credentials
   ),
   "The session has expired. Please login again.")
+  credentials$sid <- sid
 })
 
 test_that("location search works", {

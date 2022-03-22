@@ -175,7 +175,7 @@ login <- function(username, password, database="EpiCoV") {
   location_ceid <- extract_search_ceid('covv_location', customSearch_page_text)
 
   # Lineage
-  if (database != 'EpiRSV'){
+  if (database == 'EpiCoV'){
     linage_ceid <- extract_search_ceid('pangolin_lineage', customSearch_page_text)
   } else {
     linage_ceid <- NULL
@@ -196,13 +196,27 @@ login <- function(username, password, database="EpiCoV") {
   # low_coverage_excl
   low_coverage_excl_ceid <- extract_search_ceid('low_quality', customSearch_page_text)
 
-  # Complete and Highq
-  quality_ceid <-
-    extract_search_ceid("quality'", customSearch_page_text) # avoid match with quality2
-
-  # collection date complete
-  collection_date_complete_ceid <-
-    extract_search_ceid('quality2', customSearch_page_text)
+  if (database == 'EpiCoV'){
+    # Highq
+    highq_ceid <-
+      extract_search_ceid("highq", customSearch_page_text)
+    # Complete
+    complete_ceid <-
+      extract_search_ceid("complete", customSearch_page_text)
+    # collection date complete
+    collection_date_complete_ceid <-
+      extract_search_ceid('coldc', customSearch_page_text)
+    quality_ceid <- NULL
+  } else {
+    complete_ceid <- NULL
+    highq_ceid <- NULL
+    # Complete and Highq
+    quality_ceid <-
+      extract_search_ceid("quality'", customSearch_page_text) # avoid match with quality2
+    # collection date complete
+    collection_date_complete_ceid <-
+      extract_search_ceid('quality2', customSearch_page_text)
+  }
 
   # send selection command
   selection_pid_wid <- get_selection_panel(session_id, WID, customSearch_page_ID, query_cid)
@@ -238,8 +252,10 @@ login <- function(username, password, database="EpiCoV") {
       to_ceid = to_ceid,
       to_sub_ceid = to_sub_ceid,
       low_coverage_excl_ceid = low_coverage_excl_ceid,
-      quality_ceid = quality_ceid,
-      collection_date_complete_ceid = collection_date_complete_ceid
+      highq_ceid = highq_ceid,
+      complete_ceid = complete_ceid,
+      collection_date_complete_ceid = collection_date_complete_ceid,
+      quality_ceid = quality_ceid
     )
 
   return(credentials)

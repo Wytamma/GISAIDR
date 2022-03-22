@@ -219,10 +219,12 @@ resetQuery <- function(credentials) {
 }
 
 extract_search_ceid <- function(identifier, t) {
+  regex <- paste0(".createFI\\('(.*)','.*Widget','", identifier)
+  log.debug(sprintf("Extracting '%s' from '%s'", regex, substr(t, 0, 30)))
   ceid <-
     regmatches(t,
                regexpr(
-                 paste0(".createFI\\('(.*)','.*Widget','", identifier),
+                 regex,
                  t,
                  perl = TRUE
                ))
