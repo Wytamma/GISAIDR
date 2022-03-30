@@ -81,17 +81,8 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
     if (credentials$database == "EpiCoV") {
       tmpTarFile <- "gisaidr_data_tmp.tar"
       download.file(download_url, tmpTarFile, quiet = TRUE, method = 'auto', mode = "wb")
-      message(paste(list.files(tmpTarFile)))
-      # check if the downloaded file is a folder
-      if (dir.exists(tmpTarFile)) {
-        # already unziped so rename
-        file.rename(from = tmpTarFile, to = "gisaidr_data_tmp")
-      } else {
-        # try to unzip
-        message("try to unziping")
-        untar(tmpTarFile, exdir="gisaidr_data_tmp", restore_times = FALSE, verbose=TRUE)
-      }
-
+      # unzip
+      untar(tmpTarFile, exdir="gisaidr_data_tmp", restore_times = FALSE, verbose=FALSE)
       # load into df
       metadataFile <- list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv")[1]
       if (is.na(metadataFile)) {
