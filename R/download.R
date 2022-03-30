@@ -80,8 +80,8 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
 
     if (credentials$database == "EpiCoV") {
       tmpTarFile <- "gisaidr_data_tmp.tar"
-      download.file(download_url, tmpTarFile, quiet = TRUE, method = 'auto', )
-      message(paste(list.files()))
+      download.file(download_url, tmpTarFile, quiet = TRUE, method = 'auto', mode = "wb")
+      message(paste(list.files(tmpTarFile)))
       # check if the downloaded file is a folder
       if (dir.exists(tmpTarFile)) {
         # already unziped so rename
@@ -89,7 +89,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
       } else {
         # try to unzip
         message("try to unziping")
-        untar(tmpTarFile, exdir="gisaidr_data_tmp", restore_times = FALSE)
+        untar(tmpTarFile, exdir="gisaidr_data_tmp", restore_times = FALSE, verbose=TRUE)
       }
 
       # load into df
