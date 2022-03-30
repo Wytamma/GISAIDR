@@ -19,17 +19,23 @@ on:
 
 jobs:
   build:
-    runs-on: macOS-latest
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
     strategy:
+      fail-fast: false
       matrix:
-        r-version: [4.0]
+        config:
+          - {os: macOS-latest,   r: 'release'}
+          - {os: windows-latest, r: 'release'}
+          - {os: ubuntu-18.04,   r: 'release'}
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up R ${{ matrix.r-version }}
+      - name: Set up R ${{ matrix.config.os }} (${{ matrix.config.r }})
         uses: r-lib/actions/setup-r@v1
         with:
-          r-version: ${{ matrix.r-version }}
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
       - name: Install dependencies
         run: |
           install.packages(c("remotes", "rcmdcheck"))
