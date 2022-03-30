@@ -12,6 +12,8 @@ download(
 )
 }
 \arguments{
+\item{credentials}{GISAID credentials.}
+
 \item{list_of_accession_ids}{list of accession_id from GISAID}
 
 \item{get_sequence}{load sequences into data.frame after download}

@@ -88,6 +88,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
         file.rename(from = tmpTarFile, to = "gisaidr_data_tmp")
       } else {
         # try to unzip
+        message("try to unziping")
         untar(tmpTarFile, exdir="gisaidr_data_tmp", restore_times = FALSE)
       }
 
