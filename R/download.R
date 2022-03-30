@@ -88,7 +88,12 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
         message(list.files("gisaidr_data_tmp"))
         stop("Could not find metadata file.")
       }
-      df <- read.csv(paste0("gisaidr_data_tmp/", metadataFile), sep="\t", quote="")
+      if(.Platform$OS.type == "unix") {
+        metadataFilePath <- paste0("gisaidr_data_tmp/", metadataFile)
+      } else {
+        metadataFilePath <- paste0("gisaidr_data_tmp\\", metadataFile)
+      }
+      df <- read.csv(metadataFilePath, sep="\t", quote="")
       df <- df[order(df$gisaid_epi_isl, decreasing = TRUE),]
       colnames(df)[3] <- "accession_id"
       if (get_sequence) {
@@ -97,7 +102,12 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
         if (is.na(sequencesFile)) {
           stop("Could not find sequences file.")
         }
-        seq_df <- read_fasta(paste0("gisaidr_data_tmp/", sequencesFile))
+        if(.Platform$OS.type == "unix") {
+          sequencesFilePath <- paste0("gisaidr_data_tmp/", sequencesFile)
+        } else {
+          sequencesFilePath <- paste0("gisaidr_data_tmp\\", sequencesFile)
+        }
+        seq_df <- read_fasta(sequencesFilePath)
         df <- merge(x = df, y = seq_df, by = "strain", all = TRUE)
       }
     } else {
@@ -119,8 +129,8 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
       if (file.exists("gisaidr_data_tmp.tar")) {
         file.remove("gisaidr_data_tmp.tar")
       }
-      if (file.exists("gisaidr_data_tmp/")) {
-        unlink("gisaidr_data_tmp/", recursive = TRUE)
+      if (file.exists("gisaidr_data_tmp")) {
+        unlink("gisaidr_data_tmp", recursive = TRUE)
       }
     }
   })
