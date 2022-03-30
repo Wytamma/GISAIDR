@@ -1,5 +1,6 @@
 #' Download from GISAID
 #'
+#' @param credentials GISAID credentials.
 #' @param list_of_accession_ids list of accession_id from GISAID
 #' @param get_sequence load sequences into data.frame after download
 #' @param clean_up delete downloaded files (e.g. fasta files) after download
