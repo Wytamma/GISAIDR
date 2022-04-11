@@ -103,3 +103,8 @@ test_that("high coverage works", {
   expect_true(length(grep("warn_sign", df$information)) == 0)
 })
 
+test_that("total returns total", {
+  total <-
+    query(credentials = credentials, total=T)
+  expect_true(is.numeric(total))
+})

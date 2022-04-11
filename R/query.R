@@ -88,6 +88,7 @@ create_search_queue <- function(credentials, ceid, cvalue, cmd) {
 #' @param complete include only complete entries in the results.
 #' @param high_coverage include only high coverage entries in the results.
 #' @param collection_date_complete include only entries with complete in collection date the results.
+#' @param total returns the total number of sequences matching the query.
 #' @return Dataframe.
 query <-
   function(credentials,
@@ -103,7 +104,8 @@ query <-
            low_coverage_excl = FALSE,
            complete = FALSE,
            high_coverage = FALSE,
-           collection_date_complete = FALSE) {
+           collection_date_complete = FALSE,
+           total = FALSE) {
     # search
     queue = list()
     if (!is.null(location)) {
@@ -300,6 +302,10 @@ query <-
       )
     res <- httr::GET(paste0(GISAID_URL, '?', data))
     j <- parseResponse(res)
+
+    if (total) {
+      return(as.numeric(j$totalRecords))
+    }
 
     # Load all
     if (load_all && j$totalRecords > nrows) {

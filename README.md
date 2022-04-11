@@ -189,7 +189,17 @@ nrow(df)
 ```
 [1] 100
 
-Note: you may end up downloading the entire GISAID database if your query is too general.  
+Note: you may end up downloading the entire GISAID database if your query is too general. 
+
+### Get total query matches 
+
+Use `total` to get the number of entries that match you query. 
+
+```R
+total <- query(credentials = credentials, total = TRUE)
+total
+```
+[1] 10145747
 
 ## Download
 
