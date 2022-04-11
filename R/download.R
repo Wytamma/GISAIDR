@@ -128,11 +128,17 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
   }, finally = {
     # clean up
     if (clean_up){
-      if (file.exists(tmpTarFile)) {
-        file.remove(tmpTarFile)
-      }
-      if (file.exists("gisaidr_data_tmp")) {
-        unlink("gisaidr_data_tmp", recursive = TRUE)
+      if (credentials$database == "EpiCoV") {
+        if (file.exists(tmpTarFile)) {
+          file.remove(tmpTarFile)
+        }
+        if (file.exists("gisaidr_data_tmp")) {
+          unlink("gisaidr_data_tmp", recursive = TRUE)
+        }
+      } else {
+        if (file.exists(sequencesFile)) {
+          file.remove(sequencesFile)
+        }
       }
     }
   })
