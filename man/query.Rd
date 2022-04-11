@@ -18,7 +18,8 @@ query(
   low_coverage_excl = FALSE,
   complete = FALSE,
   high_coverage = FALSE,
-  collection_date_complete = FALSE
+  collection_date_complete = FALSE,
+  total = FALSE
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ query(
 \item{high_coverage}{include only high coverage entries in the results.}
 
 \item{collection_date_complete}{include only entries with complete in collection date the results.}
+
+\item{total}{returns the total number of sequences matching the query.}
 }
 \value{
 Dataframe.
