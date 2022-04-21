@@ -82,7 +82,7 @@ login <- function(username, password, database="EpiCoV") {
   if (database=="EpiRSV") {
     EpiRSV_CID <- extract_first_match("sys.call\\('(.{5,20})','Go'", frontend_page_text)
 
-    goto_EpiCov_page_command <- createCommand(
+    goto_EpiRSV_page_command <- createCommand(
       wid = WID,
       pid = frontend_page_ID,
       cid = EpiRSV_CID,
@@ -90,7 +90,7 @@ login <- function(username, password, database="EpiCoV") {
       params = list(page = 'rsv')
     )
 
-    queue <- list(queue = list(goto_EpiCov_page_command))
+    queue <- list(queue = list(goto_EpiRSV_page_command))
 
     data <-
       formatDataForRequest(session_id, WID, login_page_ID, queue, timestamp())
@@ -109,63 +109,22 @@ login <- function(username, password, database="EpiCoV") {
     response_data <- go_to_page(session_id, WID, RSV_page_ID, RSV_actionbar_component_ID, 'page_rsv.RSVBrowsePage')
     customSearch_page_ID <-
       extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
-
   } else {
-    actionbar_component_ID <-
+    COVID_actionbar_component_ID <-
       extract_first_match("sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
                           frontend_page_text)
-    # corona2020 page
-    goto_corona2020_page_command <- createCommand(
-      wid = WID,
-      pid = frontend_page_ID,
-      cid = actionbar_component_ID,
-      cmd = 'Go',
-      params = list(link = 'page_corona2020.PartnerDownloadsPage')
-    )
 
-    queue <- list(queue = list(goto_corona2020_page_command))
-
-    data <-
-      formatDataForRequest(session_id, WID, frontend_page_ID, queue, timestamp())
-
-    response <- send_request(data)
-    response_data <- parseResponse(response)
-
-    corona2020_page_ID <-
-      strsplit(response_data$responses[[1]]$data, "'")[[1]][4]
-
-    corona2020_page <-
-      send_request(paste0('sid=', session_id, '&pid=', corona2020_page_ID))
-
-    corona2020_page_text = httr::content(corona2020_page, as = 'text')
-
-    customSearch_button_component_ID <-
-      extract_first_match("onclick=\"sys.call\\('(.{5,20})','GoAugur'", corona2020_page_text)
-
-    # go to custom search
-    ev <- createCommand(
-      wid = WID,
-      pid = corona2020_page_ID,
-      cid = customSearch_button_component_ID,
-      cmd = 'GoAugur',
-      params = setNames(list(), character(0)) #hack for empty {}
-    )
-    queue <- list(queue = list(ev))
-    data <-
-      formatDataForRequest(session_id, WID, corona2020_page_ID, queue, timestamp())
-
-    response <- send_request(method="POST", data = data)
-    response_data <- parseResponse(response)
+    response_data <- go_to_page(session_id, WID, frontend_page_ID, COVID_actionbar_component_ID, 'page_corona2020.Corona2020BrowsePage')
     customSearch_page_ID <-
-      strsplit(response_data$responses[[3]]$data, "'")[[1]][4]
+      extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
   }
-
   customSearch_page_response <- send_request(paste0('sid=', session_id, '&pid=', customSearch_page_ID))
   customSearch_page_text = httr::content(customSearch_page_response, as = 'text')
+
   query_cid <- extract_first_match("div class=\"sys-datatable\" id=\"(.*)_table", customSearch_page_text)
 
   # Search
-  SearchComponent <- 'Corona2020ToolSearchComponent'
+  SearchComponent <- 'Corona2020SearchComponent'
   if (database == 'EpiRSV'){
     SearchComponent <- 'RSVSearchComponent'
   }

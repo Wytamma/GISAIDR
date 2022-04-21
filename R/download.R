@@ -18,16 +18,49 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
 
   download_cmd <- 'ToolDownload'
   download_pid_wid <- list(pid=credentials$pid, wid=credentials$wid)
-  if (credentials$database == 'EpiRSV') {
-    download_cmd <- 'Download'
-    download_pid_wid <- get_download_panel(credentials$sid, credentials$wid, credentials$pid, credentials$query_cid)
-    #load panel
-    downloal_page <-
-      send_request(paste0('sid=', credentials$sid, '&pid=', download_pid_wid$pid))
+  download_cmd <- 'Download'
+  download_pid_wid <- get_download_panel(credentials$sid, credentials$wid, credentials$pid, credentials$query_cid)
+  #load panel
+  downloal_page <-
+    send_request(paste0('sid=', credentials$sid, '&pid=', download_pid_wid$pid))
 
-    download_page_text = httr::content(downloal_page, as = 'text')
+  download_page_text = httr::content(downloal_page, as = 'text')
+  if (credentials$database == 'EpiRSV') {
     credentials$download_panel_cid <- extract_first_match("'(.{5,20})','RSVDownloadSelectionComponent", download_page_text)
     #send_back_cmd(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, credentials$download_panel_cid)
+  } else {
+    credentials$download_panel_cid <- extract_first_match("'(.{5,20})','DownloadSelectionComponent", download_page_text)
+    radio_button_widget_cid <- extract_first_match("'(.{5,20})','RadiobuttonWidget", download_page_text)
+    # augur
+    queue = list()
+    command <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = 'setTarget',
+      params = list(cvalue="augur_input", ceid=radio_button_widget_cid)
+    )
+    queue <- append(queue, list(command))
+    command <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = 'ChangeValue',
+      params = list(cvalue="augur_input", ceid=radio_button_widget_cid)
+    )
+    queue <- append(queue, list(command))
+    command <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = 'FormatChange',
+      params = list(ceid=radio_button_widget_cid)
+    )
+    queue <- append(queue, list(command))
+    command_queue <- list(queue = queue)
+    data <- formatDataForRequest(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, command_queue, timestamp())
+    response <- send_request(method = 'POST', data=data)
+    response_data <- parseResponse(response)
   }
 
   ev <- createCommand(
