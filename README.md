@@ -4,6 +4,8 @@
 
 Programmatically interact with the GISAID EpiCoV and EpiRSV databases.
 
+## Citation
+
 If you use GISAIDR in your research please cite as:
 
 Wytamma Wirth, & Sebastian Duchene. (2022). GISAIDR. Zenodo. https://doi.org/10.5281/zenodo.6474693
