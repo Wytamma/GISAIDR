@@ -44,6 +44,7 @@ test_that("lineage search works", {
               lineage = 'W.1')
   # need a better way to test this...
   expect_true(is.data.frame(df))
+  expect_true(nrow(df) == 50)
 })
 
 test_that("combination search works", {
@@ -107,4 +108,13 @@ test_that("total returns total", {
   total <-
     query(credentials = credentials, total=T)
   expect_true(is.numeric(total))
+})
+
+test_that("variant search works", {
+  df <-
+    query(credentials = credentials, variant=Variants$omicron)
+  # variant information is not returned from query or download...
+  # need a better way to test this...
+  expect_true(is.data.frame(df))
+  expect_true(nrow(df) == 50)
 })

@@ -289,3 +289,20 @@ go_to_page <- function(session_id, WID, PID, CID, link) {
   response_data <- parseResponse(response)
   return(response_data)
 }
+
+
+Variants <-
+  list(
+    alpha = 'B.1.1.7 / Q.*',
+    beta = 'B.1.351 / B.1.351.2 / B.1.351.3',
+    gamma = 'P.1 / P.1.*',
+    delta = 'B.1.617.2 / AY.*',
+    epsilon = 'B.1.427 / B.1.429',
+    eta = 'B.1.525',
+    iota = 'B.1.526',
+    kappa = 'B.1.617.1',
+    lambda = 'C.37 / C.37.1',
+    mu = 'B.1.621 / B.1.621.1',
+    omicron = 'B.1.1.529 / BA.*',
+    GH_490R = 'B.1.640 / B.1.640.*'
+  )

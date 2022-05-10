@@ -165,6 +165,10 @@ login <- function(username, password, database="EpiCoV") {
     # collection date complete
     collection_date_complete_ceid <-
       extract_search_ceid('coldc', customSearch_page_text)
+    # variants
+    variant_ceid <-
+      extract_search_ceid('variants', customSearch_page_text)
+    # quality not used by EpiCov
     quality_ceid <- NULL
   } else {
     complete_ceid <- NULL
@@ -214,7 +218,8 @@ login <- function(username, password, database="EpiCoV") {
       highq_ceid = highq_ceid,
       complete_ceid = complete_ceid,
       collection_date_complete_ceid = collection_date_complete_ceid,
-      quality_ceid = quality_ceid
+      quality_ceid = quality_ceid,
+      variant_ceid = variant_ceid
     )
 
   return(credentials)

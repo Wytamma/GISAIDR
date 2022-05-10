@@ -77,6 +77,7 @@ create_search_queue <- function(credentials, ceid, cvalue, cmd) {
 #' @param credentials GISAID credentials.
 #' @param location search for entries based on geographic location.
 #' @param lineage search for entries based on pango lineage designations.
+#' @param variant search for entries based on variant designation
 #' @param from search from specific collection date.
 #' @param to search to specific collection date.
 #' @param from_subm search from specific submission date.
@@ -94,6 +95,7 @@ query <-
   function(credentials,
            location = NULL,
            lineage = NULL,
+           variant = NULL,
            from = NULL,
            from_subm = NULL,
            to = NULL,
@@ -141,6 +143,18 @@ query <-
             credentials$linage_ceid,
             lineage,
             'LineageChange'
+          )
+        )
+    }
+    if (!is.null(variant) && credentials$database == "EpiCoV") {
+      queue <-
+        append(
+          queue,
+          create_search_queue(
+            credentials,
+            credentials$variant_ceid,
+            variant,
+            'VariantsChange'
           )
         )
     }

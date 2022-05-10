@@ -95,33 +95,19 @@ full_df$pangolin_lineage
 [11] "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7" "B.1.1.7"  
 [21] ...   
 
-Variants can be queried with special terms (from GISAID). 
+### Search by Variant (EpiCoV)
+
+Variants can be queried with special linage terms (from GISAID). For example omicron is 'B.1.1.529 / BA.*'. GISAIDR has a list of the current variant terms in `GISAIDR::Variants`. Unfortunately GISAID doesn't return the  variant designation from the query or download so variants must be confirmed with pangolin_lineage or GISAID_clade.
 
 ```R
 # VOC Omicron GRA (B.1.1.529+BA.*) first detected in Botswana/Hong Kong/South Africa
-Omicron_df <- query(credentials = credentials, lineage = 'B.1.1.529 / BA.*')
-
-# VUM GH/490R (B.1.640+B.1.640.*) first detected in Congo/France
-GH_df <- query(credentials = credentials, lineage = 'B.1.640 / B.1.640.*')
-
-# VOC Delta GK (B.1.617.2+AY.*) first detected in India
-Delta_df <- query(credentials = credentials, lineage = 'B.1.617.2 / AY.*')
-
-# VOC Alpha GRY (B.1.1.7+Q.*) first detected in the UK
-Alpha_df <- query(credentials = credentials, lineage = 'B.1.1.7 / Q.*')
-
-# VOC Beta GH/501Y.V2 (B.1.351+B.1.351.2+B.1.351.3) first detected in South Africa
-Beta_df <- query(credentials = credentials, lineage = 'B.1.351 / B.1.351.2 / B.1.351.3')
-
-# VOC Gamma GR/501Y.V3 (P.1+P.1.*) first detected in Brazil/Japan
-Gamma_df <- query(credentials = credentials, lineage = 'P.1 / P.1.*')
-
-# VOI Lambda GR/452Q.V1 (C.37+C.37.1) first detected in Peru
-Lambda_df <- query(credentials = credentials, lineage = 'C.37 / C.37.1')
-
-# VOI Mu GH (B.1.621+B.1.621.1) first detected in Colombia
-Mu_df <- query(credentials = credentials, lineage = 'B.1.621 / B.1.621.1')
+omicron_df <- query(credentials = credentials, variant = GISAIDR::Variants$omicron)
+omicron_full_df <- download(credentials = credentials, list_of_accession_ids = omicron_df$accession_id)
+omicron_full_df$pangolin_lineage
 ```
+[1] "BA.2" "BA.2" "BA.2.10.1" "BA.2" "BA.2" "BA.5" "BA.2" "BA.2" "BA.2.3"
+[10] "BA.4" "BA.2" "BA.2" "BA.2" "BA.2" "BA.2" "BA.2" "BA.2" "BA.1.17" 
+[19] ...
 
 ### Search by collection date
 
@@ -327,7 +313,7 @@ head(asia_not_china_df)
 
 ## Dev guide 
 
-1. Go to the custom selection interface on https://www.epicov.org/epi3/frontend (Downloads > Genomic epidemiology > Custom Selection).
+1. Go to the search interface on https://www.epicov.org/epi3/frontend (EpiCoV > Seach).
 2. Right click on the feature you want to add (e.g. the `complete` checkbox) and inspect the source code.
 3. Find the `ceid` for this element (`<div id="ce_qxos9a_bi">`) e.g. `ce_qxos9a_bi` 
 4. Find the the value of the checkbox element (`<input class="sys-event-hook" name="ce_qxos9a_bi_name" style="vertical-align: middle;" type="checkbox" value="complete">`) e.g. `complete`.
@@ -336,7 +322,7 @@ head(asia_not_china_df)
 
 ```R
 # Complete 
-complete_ceid <- extract_search_ceid("quality'", t) # ' to avoid matches with 'quality2'
+quality_ceid <- extract_search_ceid("quality'", customSearch_page_text)
 ```
 7. Add the extracted `ceid` to the list of `credentials` e.g. `complete_ceid = complete_ceid`
 8. Add the new argument and default value to the `query()` function in `query.R` e.g. `complete = FALSE`.
