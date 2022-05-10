@@ -105,9 +105,9 @@ omicron_df <- query(credentials = credentials, variant = GISAIDR::Variants$omicr
 omicron_full_df <- download(credentials = credentials, list_of_accession_ids = omicron_df$accession_id)
 omicron_full_df$pangolin_lineage
 ```
-[1] "BA.2" "BA.2" "BA.2.10.1" "BA.2" "BA.2" "BA.5" "BA.2" "BA.2" "BA.2.3"
-[10] "BA.4" "BA.2" "BA.2" "BA.2" "BA.2" "BA.2" "BA.2" "BA.2" "BA.1.17" 
-[19] ...
+[1] "BA.2" "BA.2" "BA.2.10.1" "BA.2" "BA.2" "BA.5" "BA.2" "BA.2" "BA.2.3"  
+[10] "BA.4" "BA.2" "BA.2" "BA.2" "BA.2" "BA.2" "BA.2" "BA.2" "BA.1.17"   
+[19] ...  
 
 ### Search by collection date
 
