@@ -79,6 +79,7 @@ login <- function(username, password, database="EpiCoV") {
   frontend_page <- send_request(paste0('sid=', session_id, '&pid=', frontend_page_ID))
   frontend_page_text = httr::content(frontend_page, as = 'text')
 
+
   if (database=="EpiRSV") {
     EpiRSV_CID <- extract_first_match("sys.call\\('(.{5,20})','Go'", frontend_page_text)
 
@@ -110,10 +111,35 @@ login <- function(username, password, database="EpiCoV") {
     customSearch_page_ID <-
       extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
   } else {
+    # check for overlay
+    if (grepl('sys.openOverlay', frontend_page_text, fixed = TRUE)) {
+      # extract overlay pid
+      overlay_window_ID <- paste0('wid_', extract_first_match("openOverlay\\('wid_(.{5,20})','pid_.{5,20}'", frontend_page_text))
+      overlay_page_ID <- paste0('pid_', extract_first_match("openOverlay\\('wid_.{5,20}','pid_(.{5,20})'", frontend_page_text))
+
+      # load overlay
+      overlay_page <- send_request(paste0('sid=', session_id, '&pid=', overlay_page_ID))
+      overlay_page_text <- httr::content(overlay_page, as = 'text')
+
+      # extract close cid
+      close_overlay_cid <- extract_first_match("createComponent\\('(.{5,20})','CloseButtonComponent", overlay_page_text)
+
+      # send close cmd
+      close_overlay_command <- createCommand(
+        wid = overlay_window_ID,
+        pid = overlay_page_ID,
+        cid = close_overlay_cid,
+        cmd = 'Back'
+      )
+      queue <- list(queue = list(close_overlay_command))
+      data <-
+        formatDataForRequest(session_id, overlay_window_ID, overlay_page_ID, queue, timestamp())
+      response <- send_request(data)
+      response_data <- parseResponse(response)
+    }
     COVID_actionbar_component_ID <-
       extract_first_match("sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
                           frontend_page_text)
-
     response_data <- go_to_page(session_id, WID, frontend_page_ID, COVID_actionbar_component_ID, 'page_corona2020.Corona2020BrowsePage')
     customSearch_page_ID <-
       extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
