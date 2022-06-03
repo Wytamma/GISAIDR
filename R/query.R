@@ -343,15 +343,12 @@ query <-
         )
       )
     }
-    if (nrows > j$totalRecords) {
-      nrows <- j$totalRecords
-    }
     message(
       paste0(
         "Returning ",
         start_index,
         "-",
-        start_index + nrows,
+        start_index + j$recordsReturned,
         " of ",
         j$totalRecords,
         " entries."
