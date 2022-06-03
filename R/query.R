@@ -11,6 +11,18 @@ setColumnNames <- function(df, database) {
     names(df)[names(df) == "k"] <- "location"
     names(df)[names(df) == "l"] <- "originating_lab"
     names(df)[names(df) == "m"] <- "submitting_lab"
+  } else if (database == 'EpiPox') {
+    names(df)[names(df) == "b"] <- "id"
+    names(df)[names(df) == "d"] <- "virus_name"
+    names(df)[names(df) == "e"] <- "passage_details_history"
+    names(df)[names(df) == "f"] <- "accession_id"
+    names(df)[names(df) == "g"] <- "collection_date"
+    names(df)[names(df) == "h"] <- "submission_date"
+    names(df)[names(df) == "i"] <- "information"
+    names(df)[names(df) == "j"] <- "length"
+    names(df)[names(df) == "k"] <- "location"
+    names(df)[names(df) == "l"] <- "originating_lab"
+    names(df)[names(df) == "m"] <- "submitting_lab"
   } else {
     colnames(df)[colnames(df) %in% c("b", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n")] <-
       c(

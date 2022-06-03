@@ -10,8 +10,8 @@
 #' password = Sys.getenv("GISAIDR_PASSWORD")
 #' login(username, password)
 login <- function(username, password, database="EpiCoV") {
-  if (!database %in% c("EpiCoV", "EpiRSV")) {
-    stop(sprintf("Database must be EpiCoV or EpiRSV (database=%s)", database))
+  if (!database %in% c("EpiCoV", "EpiRSV", "EpiPox")) {
+    stop(sprintf("Database must be EpiCoV, EpiRSV or EpiPox (database=%s)", database))
   }
   # get a session ID
   response <- send_request()
@@ -78,7 +78,31 @@ login <- function(username, password, database="EpiCoV") {
 
   frontend_page <- send_request(paste0('sid=', session_id, '&pid=', frontend_page_ID))
   frontend_page_text = httr::content(frontend_page, as = 'text')
+  if (grepl('sys.openOverlay', frontend_page_text, fixed = TRUE)) {
+    # extract overlay pid
+    overlay_window_ID <- paste0('wid_', extract_first_match("openOverlay\\('wid_(.{5,20})','pid_.{5,20}'", frontend_page_text))
+    overlay_page_ID <- paste0('pid_', extract_first_match("openOverlay\\('wid_.{5,20}','pid_(.{5,20})'", frontend_page_text))
 
+    # load overlay
+    overlay_page <- send_request(paste0('sid=', session_id, '&pid=', overlay_page_ID))
+    overlay_page_text <- httr::content(overlay_page, as = 'text')
+
+    # extract close cid
+    close_overlay_cid <- extract_first_match("createComponent\\('(.{5,20})','CloseButtonComponent", overlay_page_text)
+
+    # send close cmd
+    close_overlay_command <- createCommand(
+      wid = overlay_window_ID,
+      pid = overlay_page_ID,
+      cid = close_overlay_cid,
+      cmd = 'Back'
+    )
+    queue <- list(queue = list(close_overlay_command))
+    data <-
+      formatDataForRequest(session_id, overlay_window_ID, overlay_page_ID, queue, timestamp())
+    response <- send_request(data)
+    response_data <- parseResponse(response)
+  }
 
   if (database=="EpiRSV") {
     EpiRSV_CID <- extract_first_match("sys.call\\('(.{5,20})','Go'", frontend_page_text)
@@ -110,33 +134,38 @@ login <- function(username, password, database="EpiCoV") {
     response_data <- go_to_page(session_id, WID, RSV_page_ID, RSV_actionbar_component_ID, 'page_rsv.RSVBrowsePage')
     customSearch_page_ID <-
       extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
+  } else if (database=="EpiPox") {
+    EpiPox_CID <- extract_first_match("sys.call\\('(.{5,20})','Go'", frontend_page_text)
+
+    goto_EpiPox_page_command <- createCommand(
+      wid = WID,
+      pid = frontend_page_ID,
+      cid = EpiPox_CID,
+      cmd = 'Go',
+      params = list(page = 'mpox')
+    )
+
+    queue <- list(queue = list(goto_EpiPox_page_command))
+
+    data <-
+      formatDataForRequest(session_id, WID, login_page_ID, queue, timestamp())
+
+    response <- send_request(data)
+    response_data <- parseResponse(response)
+    # POX_page_ID <-
+    #   extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
+    # POX_page <- send_request(paste0('sid=', session_id, '&pid=', POX_page_ID))
+    # POX_page_text = httr::content(POX_page, as = 'text')
+    #
+    # POX_actionbar_component_ID <-
+    #   extract_first_match("sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
+    #                       POX_page_text)
+    # response_data <- go_to_page(session_id, WID, POX_page_ID, POX_actionbar_component_ID, 'page_mpox.MPoxBrowsePage')
+    customSearch_page_ID <-
+      extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
   } else {
     # check for overlay
-    if (grepl('sys.openOverlay', frontend_page_text, fixed = TRUE)) {
-      # extract overlay pid
-      overlay_window_ID <- paste0('wid_', extract_first_match("openOverlay\\('wid_(.{5,20})','pid_.{5,20}'", frontend_page_text))
-      overlay_page_ID <- paste0('pid_', extract_first_match("openOverlay\\('wid_.{5,20}','pid_(.{5,20})'", frontend_page_text))
 
-      # load overlay
-      overlay_page <- send_request(paste0('sid=', session_id, '&pid=', overlay_page_ID))
-      overlay_page_text <- httr::content(overlay_page, as = 'text')
-
-      # extract close cid
-      close_overlay_cid <- extract_first_match("createComponent\\('(.{5,20})','CloseButtonComponent", overlay_page_text)
-
-      # send close cmd
-      close_overlay_command <- createCommand(
-        wid = overlay_window_ID,
-        pid = overlay_page_ID,
-        cid = close_overlay_cid,
-        cmd = 'Back'
-      )
-      queue <- list(queue = list(close_overlay_command))
-      data <-
-        formatDataForRequest(session_id, overlay_window_ID, overlay_page_ID, queue, timestamp())
-      response <- send_request(data)
-      response_data <- parseResponse(response)
-    }
     COVID_actionbar_component_ID <-
       extract_first_match("sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
                           frontend_page_text)
@@ -150,9 +179,12 @@ login <- function(username, password, database="EpiCoV") {
   query_cid <- extract_first_match("div class=\"sys-datatable\" id=\"(.*)_table", customSearch_page_text)
 
   # Search
-  SearchComponent <- 'Corona2020SearchComponent'
   if (database == 'EpiRSV'){
     SearchComponent <- 'RSVSearchComponent'
+  } else if (database == 'EpiPox') {
+    SearchComponent <- 'MPoxSearchComponent'
+  } else {
+    SearchComponent <- 'Corona2020SearchComponent'
   }
   search_cid <- extract_first_match(sprintf("sys.createComponent\\('(.{5,20})','%s'", SearchComponent), customSearch_page_text)
 
@@ -179,8 +211,11 @@ login <- function(username, password, database="EpiCoV") {
   to_sub_ceid <- extract_search_ceid('covv_subm_date_to', customSearch_page_text)
 
   # low_coverage_excl
-  low_coverage_excl_ceid <- extract_search_ceid('low_quality', customSearch_page_text)
-
+  if (database != 'EpiPox'){
+    low_coverage_excl_ceid <- extract_search_ceid('low_quality', customSearch_page_text)
+  } else {
+    low_coverage_excl_ceid <- NULL
+  }
   if (database == 'EpiCoV'){
     # Highq
     highq_ceid <-
@@ -197,6 +232,7 @@ login <- function(username, password, database="EpiCoV") {
     # quality not used by EpiCov
     quality_ceid <- NULL
   } else {
+    variant_ceid <- NULL
     complete_ceid <- NULL
     highq_ceid <- NULL
     # Complete and Highq

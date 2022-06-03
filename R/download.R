@@ -28,6 +28,8 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
   if (credentials$database == 'EpiRSV') {
     credentials$download_panel_cid <- extract_first_match("'(.{5,20})','RSVDownloadSelectionComponent", download_page_text)
     #send_back_cmd(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, credentials$download_panel_cid)
+  } else if (credentials$database == 'EpiPox') {
+    credentials$download_panel_cid <- extract_first_match("'(.{5,20})','MPoxDownloadSelectionComponent", download_page_text)
   } else {
     credentials$download_panel_cid <- extract_first_match("'(.{5,20})','DownloadSelectionComponent", download_page_text)
     radio_button_widget_cid <- extract_first_match("'(.{5,20})','RadiobuttonWidget", download_page_text)
