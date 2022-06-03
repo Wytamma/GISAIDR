@@ -12,7 +12,7 @@ Wytamma Wirth, & Sebastian Duchene. (2022). GISAIDR. Zenodo. https://doi.org/10.
 
 ## Known Issues
 
-There's currently a bug in the GISAID client-server state that limits the number of results returned from `query()` to 50. I'm looking into solutions but for now we just have to page through the results 50 at at time...
+There's currently a bug in the GISAID client-server state that limits the number of results returned from `query()` to 50. I'm looking into solutions but for now we just have to page through the results 50 at a time...
 
 ## Installation
 
