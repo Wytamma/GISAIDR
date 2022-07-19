@@ -66,7 +66,7 @@ head(df[0:6])
 
 ### Pagination 
 
-Use `nrows` and `start_index` to page through results.
+Use `nrows` (**Note: theres a bug that limits nrows to 50**) and `start_index` to page through results.
 
 ```R
 df <- query(credentials = credentials, nrows = 1000, start_index = 100)
