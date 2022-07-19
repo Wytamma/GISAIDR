@@ -306,3 +306,17 @@ Variants <-
     omicron = 'B.1.1.529 / BA.*',
     GH_490R = 'B.1.640 / B.1.640.*'
   )
+
+
+create_batches <- function(start_index, nrows, batch_size=50) {
+  batches <- cbind(
+      seq(0,nrows,batch_size),
+      c(seq(batch_size,nrows,batch_size),
+        nrows)
+    )
+  if (batches[nrow(batches),1] - batches[nrow(batches),2] == 0) {
+    batches <- head(batches, -1)
+  }
+  #colnames(batches) <- c('start_index', 'nrows')
+  return (batches)
+}
