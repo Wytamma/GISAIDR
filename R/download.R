@@ -154,9 +154,9 @@ download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, cle
       df <- merge(data.frame(do.call('rbind', strsplit(as.character(fdf$strain), '|', fixed=TRUE))), fdf, by = 0)
       df <- df[-c(1)]
       if (get_sequence) {
-        names(df) <- c('strain', 'accession_id', ' collection_date', 'description', 'sequence')
+        names(df) <- c('strain', 'accession_id', 'collection_date', 'description', 'sequence')
       } else {
-        names(df) <- c('strain', 'accession_id', ' collection_date', 'description')
+        names(df) <- c('strain', 'accession_id', 'collection_date', 'description')
       }
     }
 
