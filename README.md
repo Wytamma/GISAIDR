@@ -107,11 +107,11 @@ full_df$pangolin_lineage
 
 ### Search by Variant (EpiCoV)
 
-Variants can be queried with special linage terms (from GISAID). For example omicron is 'B.1.1.529 / BA.\*'. GISAIDR has a list of the current variant terms in `GISAIDR::Variants`. Unfortunately GISAID doesn't return the variant designation from the query or download so variants must be confirmed with pangolin_lineage or GISAID_clade.
+Variants can be queried by name e.g. 'omicron', 'gh/490r', 'delta', 'alpha', 'beta', 'gamma', 'lambda', or 'mu'. Unfortunately GISAID doesn't return the variant designation from the query or download so variants must be confirmed with pangolin_lineage or GISAID_clade.
 
 ``` r
 # VOC Omicron GRA (B.1.1.529+BA.*) first detected in Botswana/Hong Kong/South Africa
-omicron_df <- query(credentials = credentials, variant = GISAIDR::Variants$omicron)
+omicron_df <- query(credentials = credentials, variant = 'omicron')
 omicron_full_df <- download(credentials = credentials, list_of_accession_ids = omicron_df$accession_id)
 omicron_full_df$pangolin_lineage
 ```

@@ -112,7 +112,7 @@ test_that("total returns total", {
 
 test_that("variant search works", {
   df <-
-    query(credentials = credentials, variant=Variants$omicron)
+    query(credentials = credentials, variant='omicron')
   # variant information is not returned from query or download...
   # need a better way to test this...
   expect_true(is.data.frame(df))
