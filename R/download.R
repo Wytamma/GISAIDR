@@ -5,7 +5,7 @@
 #' @param get_sequence load sequences into data.frame after download
 #' @param clean_up delete downloaded files (e.g. fasta files) after download
 #' @return data.frame of complete data
-download <- function(credentials, list_of_accession_ids, get_sequence=FALSE, clean_up=TRUE) {
+download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clean_up=TRUE) {
   if (length(list_of_accession_ids) > 5000) {
     stop('Can only download a maxium of 5000 samples at a time.')
   } else if (length(list_of_accession_ids) == 0) {
