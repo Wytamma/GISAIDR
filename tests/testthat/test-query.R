@@ -66,16 +66,19 @@ test_that("date search works", {
     query(credentials = credentials,
           from = '2021-04-05',
           to = '2021-04-05')
+  expect_true(nrow(df) == 50)
   expect_true(all(df$collection_date == "2021-04-05"))
 })
 
 test_that("low_coverage_excl works", {
   df <- query(credentials = credentials, low_coverage_excl = TRUE)
+  expect_true(nrow(df) == 50)
   expect_true(length(grep("Long stretches of NNNs", df$information)) == 0)
 })
 
 test_that("complete works", {
   df <- query(credentials = credentials, complete = TRUE)
+  expect_true(nrow(df) == 50)
   expect_true(all(df$length > 29000))
 })
 
@@ -84,6 +87,7 @@ test_that("submission date search works", {
     query(credentials = credentials,
           from_subm = '2021-04-05',
           to_subm = '2021-04-05')
+  expect_true(nrow(df) == 50)
   expect_true(all(df$submission_date == "2021-04-05"))
 })
 
@@ -95,12 +99,14 @@ test_that("collection date complete works", {
       location = 'Australia',
       collection_date_complete = T
     )
+  expect_true(nrow(df) == 50)
   expect_true(all(nchar(df$collection_date) == 10))
 })
 
 test_that("high coverage works", {
   df <-
     query(credentials = credentials, high_coverage = T)
+  expect_true(nrow(df) == 50)
   expect_true(length(grep("warn_sign", df$information)) == 0)
 })
 
@@ -118,3 +124,12 @@ test_that("variant search works", {
   expect_true(is.data.frame(df))
   expect_true(nrow(df) == 50)
 })
+
+
+test_that("fast works", {
+  df <- query(credentials = credentials,
+              lineage = 'W.1',
+              fast = TRUE)
+  expect_true(nrow(df) > 50)
+})
+

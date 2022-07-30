@@ -72,6 +72,90 @@ parseResponse <- function(res) {
 
 }
 
+
+
+get_accession_ids <- function(credentials) {
+  # select all check box
+  #onclick="sys.getC("c_rfsc9v_w9").selectAll(this)"
+  queue = list()
+  # data: {"queue":[{"wid":"wid_rfsc9v_2ktt","pid":"pid_rfsc9v_2kwd","cid":"c_rfsc9v_w9","cmd":"CallAsync","params":{"col_name":"c","checked":true,"_async_cmd":"SelectAll"},"equiv":null}]}
+  command <- createCommand(
+    wid = credentials$wid,
+    pid = credentials$pid,
+    cid = credentials$query_cid,
+    cmd = 'CallAsync',
+    params = list(col_name = 'c', checked = TRUE, '_async_cmd' = 'SelectAll')
+  )
+  queue <- append(queue, list(command))
+  command_queue <- list(queue = queue)
+
+  data <-
+    formatDataForRequest(
+      sid = credentials$sid,
+      wid = credentials$wid,
+      pid = credentials$pid,
+      queue = command_queue,
+      timestamp = timestamp()
+    )
+  res <-
+    httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+  j = httr::content(res, as = 'parsed')
+
+  # {"callback_response": {"msg": null, "async_id": "_rfsc9v_2o8a"}, "__ready__": true}
+  # wait for selection
+  # extract check_async
+  check_async_id = j$callback_response$async_id
+  # while generateDownloadDone not ready
+  is_ready = FALSE
+  while (!is_ready) {
+    res <- httr::GET(paste0('https://www.epicov.org/epi3/check_async/', check_async_id, '?_=', timestamp()))
+    j <- parseResponse(res)
+    is_ready <- j$is_ready
+    if (!is_ready) {
+      Sys.sleep(1)
+    }
+  }
+  log.debug(j)
+
+  # select button
+  selection_pid_wid <- get_selection_panel(credentials$sid, credentials$wid, credentials$pid, credentials$query_cid)
+  selection_page <-
+    send_request(paste0('sid=', credentials$sid, '&pid=', selection_pid_wid$pid))
+
+  # csv button
+  #{"queue":[{"wid":"wid_rfsc9v_2p1c","pid":"pid_rfsc9v_2p1d","cid":"c_rfsc9v_15u","cmd":"Download","params":{},"equiv":null}]}
+  queue = list()
+  command <- createCommand(
+    wid = selection_pid_wid$wid,
+    pid = selection_pid_wid$pid,
+    cid = credentials$selection_panel_cid,
+    cmd = 'Download',
+    params = setNames(list(), character(0))
+  )
+  queue <- append(queue, list(command))
+  command_queue <- list(queue = queue)
+
+  data <-
+    formatDataForRequest(
+      sid = credentials$sid,
+      wid = credentials$wid,
+      pid = credentials$pid,
+      queue = command_queue,
+      timestamp = timestamp()
+    )
+  res <-
+    httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+  j = httr::content(res, as = 'parsed')
+  url <- extract_first_match("sys.downloadFile\\(\"(.*)\",", j$responses[[1]]$data)
+  log.debug(paste0('https://www.epicov.org/', url))
+  df <- read.csv(paste0('https://www.epicov.org/', url), header=F)
+  names(df) <- c('accession_id')
+  # back
+  send_back_cmd(credentials$sid, selection_pid_wid$wid, selection_pid_wid$pid, credentials$selection_panel_cid)
+  resetQuery(credentials)
+  return(df)
+}
+
 get_selection_panel <- function(session_id, WID, customSearch_page_ID, query_cid) {
   # selection changes every time you open it
   selection_command <- createCommand(
@@ -319,4 +403,91 @@ create_batches <- function(start_index, nrows, batch_size=50) {
   }
   #colnames(batches) <- c('start_index', 'nrows')
   return (batches)
+}
+
+
+setColumnNames <- function(df, database) {
+  if (database == 'EpiRSV') {
+    names(df)[names(df) == "b"] <- "id"
+    names(df)[names(df) == "d"] <- "virus_name"
+    names(df)[names(df) == "e"] <- "passage_details_history"
+    names(df)[names(df) == "f"] <- "accession_id"
+    names(df)[names(df) == "g"] <- "collection_date"
+    names(df)[names(df) == "h"] <- "submission_date"
+    names(df)[names(df) == "i"] <- "information"
+    names(df)[names(df) == "j"] <- "length"
+    names(df)[names(df) == "k"] <- "location"
+    names(df)[names(df) == "l"] <- "originating_lab"
+    names(df)[names(df) == "m"] <- "submitting_lab"
+  } else if (database == 'EpiPox') {
+    names(df)[names(df) == "b"] <- "id"
+    names(df)[names(df) == "d"] <- "virus_name"
+    names(df)[names(df) == "e"] <- "passage_details_history"
+    names(df)[names(df) == "f"] <- "accession_id"
+    names(df)[names(df) == "g"] <- "collection_date"
+    names(df)[names(df) == "h"] <- "submission_date"
+    names(df)[names(df) == "i"] <- "information"
+    names(df)[names(df) == "j"] <- "length"
+    names(df)[names(df) == "k"] <- "location"
+    names(df)[names(df) == "l"] <- "originating_lab"
+    names(df)[names(df) == "m"] <- "submitting_lab"
+  } else {
+    colnames(df)[colnames(df) %in% c("b", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n")] <-
+      c(
+        "id",
+        "virus_name",
+        "passage_details_history",
+        "accession_id",
+        "collection_date",
+        "submission_date",
+        "information",
+        "length",
+        "host",
+        "location",
+        "originating_lab",
+        "submitting_lab"
+      )
+  }
+  return(df)
+}
+
+setDataTypes <- function(df) {
+  # date
+  return(df)
+}
+
+create_search_queue <- function(credentials, ceid, cvalue, cmd) {
+  queue = list()
+  command <- createCommand(
+    wid = credentials$wid,
+    pid = credentials$pid,
+    cid = credentials$search_cid,
+    cmd = 'setTarget',
+    params = list(cvalue = cvalue, ceid = ceid),
+    equiv = paste0('ST', ceid)
+  )
+  queue <- append(queue, list(command))
+
+  command <- createCommand(
+    wid = credentials$wid,
+    pid = credentials$pid,
+    cid = credentials$search_cid,
+    cmd = 'ChangeValue',
+    params = list(cvalue = cvalue, ceid = ceid),
+    equiv = paste0('CV', ceid)
+  )
+
+  queue <- append(queue, list(command))
+
+  command <- createCommand(
+    wid = credentials$wid,
+    pid = credentials$pid,
+    cid = credentials$search_cid,
+    cmd = cmd,
+    params = list(ceid = ceid),
+  )
+
+  queue <- append(queue, list(command))
+
+  return(queue)
 }

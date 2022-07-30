@@ -178,7 +178,9 @@ login <- function(username, password, database="EpiCoV") {
 
   query_cid <- extract_first_match("div class=\"sys-datatable\" id=\"(.*)_table", customSearch_page_text)
 
-  # Search
+  #selectAll_ceid <- extract_first_match("onclick=\"sys.getC\\(\"(.{5,20})\"\\).selectAll", customSearch_page_text)
+
+    # Search
   if (database == 'EpiRSV'){
     SearchComponent <- 'RSVSearchComponent'
   } else if (database == 'EpiPox') {

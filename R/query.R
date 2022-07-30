@@ -1,5 +1,5 @@
 
-#' Query GISAID Database in batches of 50
+#' Query GISAID Database
 #'
 #' @param credentials GISAID credentials.
 #' @param location search for entries based on geographic location.
@@ -17,7 +17,8 @@
 #' @param high_coverage include only high coverage entries in the results.
 #' @param collection_date_complete include only entries with complete in collection date the results.
 #' @param total returns the total number of sequences matching the query.
-#' @return Dataframe.
+#' @param fast returns all of the accession_ids that match the query.
+#' @return data.frame
 query <-
   function(credentials,
            location = NULL,
@@ -34,9 +35,10 @@ query <-
            complete = FALSE,
            high_coverage = FALSE,
            collection_date_complete = FALSE,
-           total = FALSE) {
+           total = FALSE,
+           fast = FALSE) {
 
-    if (nrows > 50 && !total && !load_all) {
+    if (nrows > 50 && !total && !load_all && !fast) {
       message(paste0("Loading entries in batches..."))
       batches <- create_batches(start_index = start_index, nrows = nrows)
       results <- data.frame()
@@ -59,7 +61,27 @@ query <-
         ))
       }
       return(results)
-    } else {
+    } else if (total | load_all | fast) {
+      return(
+        internal_query(
+          credentials = credentials,
+          location = location,
+          lineage = lineage,
+          variant = variant,
+          from = from,
+          from_subm = from_subm,
+          to = to,
+          to_subm = to_subm,
+          load_all = load_all,
+          low_coverage_excl = low_coverage_excl,
+          complete = complete,
+          high_coverage = high_coverage,
+          collection_date_complete = collection_date_complete,
+          total = total,
+          fast = fast
+        )
+      )
+    } else  {
       return(
         internal_query(
           credentials = credentials,
@@ -72,12 +94,10 @@ query <-
           to_subm = to_subm,
           start_index = start_index,
           nrows = nrows,
-          load_all = load_all,
           low_coverage_excl = low_coverage_excl,
           complete = complete,
           high_coverage = high_coverage,
-          collection_date_complete = collection_date_complete,
-          total = total
+          collection_date_complete = collection_date_complete
         )
       )
     }

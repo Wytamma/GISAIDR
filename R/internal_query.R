@@ -1,89 +1,3 @@
-setColumnNames <- function(df, database) {
-  if (database == 'EpiRSV') {
-    names(df)[names(df) == "b"] <- "id"
-    names(df)[names(df) == "d"] <- "virus_name"
-    names(df)[names(df) == "e"] <- "passage_details_history"
-    names(df)[names(df) == "f"] <- "accession_id"
-    names(df)[names(df) == "g"] <- "collection_date"
-    names(df)[names(df) == "h"] <- "submission_date"
-    names(df)[names(df) == "i"] <- "information"
-    names(df)[names(df) == "j"] <- "length"
-    names(df)[names(df) == "k"] <- "location"
-    names(df)[names(df) == "l"] <- "originating_lab"
-    names(df)[names(df) == "m"] <- "submitting_lab"
-  } else if (database == 'EpiPox') {
-    names(df)[names(df) == "b"] <- "id"
-    names(df)[names(df) == "d"] <- "virus_name"
-    names(df)[names(df) == "e"] <- "passage_details_history"
-    names(df)[names(df) == "f"] <- "accession_id"
-    names(df)[names(df) == "g"] <- "collection_date"
-    names(df)[names(df) == "h"] <- "submission_date"
-    names(df)[names(df) == "i"] <- "information"
-    names(df)[names(df) == "j"] <- "length"
-    names(df)[names(df) == "k"] <- "location"
-    names(df)[names(df) == "l"] <- "originating_lab"
-    names(df)[names(df) == "m"] <- "submitting_lab"
-  } else {
-    colnames(df)[colnames(df) %in% c("b", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n")] <-
-      c(
-        "id",
-        "virus_name",
-        "passage_details_history",
-        "accession_id",
-        "collection_date",
-        "submission_date",
-        "information",
-        "length",
-        "host",
-        "location",
-        "originating_lab",
-        "submitting_lab"
-      )
-  }
-  return(df)
-}
-
-setDataTypes <- function(df) {
-  # date
-  return(df)
-}
-
-create_search_queue <- function(credentials, ceid, cvalue, cmd) {
-  queue = list()
-  command <- createCommand(
-    wid = credentials$wid,
-    pid = credentials$pid,
-    cid = credentials$search_cid,
-    cmd = 'setTarget',
-    params = list(cvalue = cvalue, ceid = ceid),
-    equiv = paste0('ST', ceid)
-  )
-  queue <- append(queue, list(command))
-
-  command <- createCommand(
-    wid = credentials$wid,
-    pid = credentials$pid,
-    cid = credentials$search_cid,
-    cmd = 'ChangeValue',
-    params = list(cvalue = cvalue, ceid = ceid),
-    equiv = paste0('CV', ceid)
-  )
-
-  queue <- append(queue, list(command))
-
-  command <- createCommand(
-    wid = credentials$wid,
-    pid = credentials$pid,
-    cid = credentials$search_cid,
-    cmd = cmd,
-    params = list(ceid = ceid),
-  )
-
-  queue <- append(queue, list(command))
-
-  return(queue)
-}
-
 #' Query GISAID Database
 #'
 #' @param credentials GISAID credentials.
@@ -102,6 +16,7 @@ create_search_queue <- function(credentials, ceid, cvalue, cmd) {
 #' @param high_coverage include only high coverage entries in the results.
 #' @param collection_date_complete include only entries with complete in collection date the results.
 #' @param total returns the total number of sequences matching the query.
+#' @param fast returns all of the accession_ids that match the query.
 #' @return Dataframe.
 internal_query <-
   function(credentials,
@@ -119,7 +34,8 @@ internal_query <-
            complete = FALSE,
            high_coverage = FALSE,
            collection_date_complete = FALSE,
-           total = FALSE) {
+           total = FALSE,
+           fast= FALSE) {
     # search
     queue = list()
     if (!is.null(location)) {
@@ -333,7 +249,31 @@ internal_query <-
       return(as.numeric(j$totalRecords))
     }
 
-    # Load all
+    if (fast) {
+      log.debug(paste0(GISAID_URL, "?sid=", credentials$sid))
+      accession_id_count <- j$totalRecords
+      message(paste0('Selecting all ', accession_id_count, " accession_ids."))
+      df <- get_accession_ids(credentials = credentials)
+
+      message(
+        paste0(
+          "Returning ",
+          start_index,
+          "-",
+          nrow(df),
+          " of ",
+          accession_id_count,
+          " accession_ids."
+        )
+      )
+
+      if (accession_id_count > nrow(df)) {
+        message(paste0("Could only get ", nrow(df), " accession_ids. Narrow your search."))
+      }
+      return(df)
+
+    }
+
     if (load_all && j$totalRecords > nrows) {
       message(paste0("Loading all ", j$totalRecords, " entries..."))
       return(

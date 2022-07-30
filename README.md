@@ -67,7 +67,7 @@ head(df[0:6])
 
 ### Pagination
 
-Use `nrows` and `start_index` to page through results. GISAID limits the number of results returned with each request to 50. Internally GISAIDR runs a loop to batch queries with > 50 rows requested. 
+Use `nrows` and `start_index` to page through results. GISAID limits the number of results returned with each request to 50. Internally GISAIDR runs a loop to batch queries with > 50 rows requested. See fast option below.
 
 ``` r
 df <- query(credentials = credentials, nrows = 1000, start_index = 100)
@@ -75,6 +75,24 @@ nrow(df)
 ```
 
 [1] 1000
+
+### Fast query
+
+Use `fast` to load all of the accesion_ids that match the query. These accesion_ids can then be used in the `download` function to download up to 5000 sequences at a time. 
+
+``` r
+df <- query(
+  credentials = credentials, 
+  location = "Oceania", 
+  from_subm = "2022-07-26", 
+  to_subm = "2022-07-28",
+  fast = TRUE
+)
+head(df$accession_id)
+```
+Selecting all 484 accession_ids.  
+Returning 0-484 of 484 accession_ids.  
+[1] "EPI_ISL_14061265" "EPI_ISL_14061266" "EPI_ISL_14061267" "EPI_ISL_14061268" "EPI_ISL_14061269" "EPI_ISL_14061270"
 
 ### Search by location
 
