@@ -63,8 +63,63 @@ download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clea
     data <- formatDataForRequest(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, command_queue, timestamp())
     response <- send_request(method = 'POST', data=data)
     response_data <- parseResponse(response)
-  }
 
+    # accept agreement
+    ev <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = "DownloadReminder",
+      params = setNames(list(), character(0)) #hack for empty {}
+    )
+    json_queue <- list(queue = list(ev))
+    data <- formatDataForRequest(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, json_queue, timestamp())
+    res <-
+      httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+    j <- parseResponse(res) #
+
+    download_pid_wid$wid <- extract_first_match("sys.openOverlay\\('(.{5,20})',", j$responses[[3]]$data)
+
+    download_pid_wid$pid <- extract_first_match(",'(.{5,20})',new Object", j$responses[[3]]$data)
+
+    agreement_page <- send_request(paste0('sid=', credentials$sid, '&pid=', download_pid_wid$pid, '&wid=', download_pid_wid$wid, '&mode=page') , method = "POST")
+    agreement_page_text = httr::content(agreement_page, as = 'text')
+    # extract the cid for download button
+    credentials$download_panel_cid <- extract_first_match("'(.{5,20})','Corona2020DownloadReminderButtonsComponent", agreement_page_text)
+    # accept the agreement
+    agree_check_box_ceid <-  extract_first_match("createFI\\('(.{5,20})','CheckboxWidget'", agreement_page_text)
+    queue = list()
+    command <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = 'setTarget',
+      params = list(cvalue=list("agreed"), ceid=agree_check_box_ceid)
+    )
+    queue <- append(queue, list(command))
+    command <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = 'ChangeValue',
+      params = list(cvalue=list("agreed"), ceid=agree_check_box_ceid)
+    )
+    queue <- append(queue, list(command))
+    command <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = 'Agreed',
+      params = list(ceid=agree_check_box_ceid)
+    )
+    queue <- append(queue, list(command))
+    command_queue <- list(queue = queue)
+    data <- formatDataForRequest(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, command_queue, timestamp())
+    response <- send_request(method = 'POST', data=data)
+    response_data <- parseResponse(response)
+
+  }
+  log.debug(response_data)
   ev <- createCommand(
     wid = download_pid_wid$wid,
     pid = download_pid_wid$pid,
