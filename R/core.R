@@ -397,7 +397,8 @@ create_batches <- function(start_index, nrows, batch_size=50) {
       seq(0,nrows,batch_size),
       c(seq(batch_size,nrows,batch_size),
         nrows)
-    )
+  )
+  batches <- batches + start_index
   if (batches[nrow(batches),1] - batches[nrow(batches),2] == 0) {
     batches <- head(batches, -1)
   }
