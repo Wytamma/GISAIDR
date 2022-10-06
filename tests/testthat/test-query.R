@@ -130,6 +130,7 @@ test_that("virus name search works", {
     query(credentials = credentials, virus_name='hCoV-19/Ireland/D-BHTEST/2022')
   expect_true(is.data.frame(df))
   expect_true(nrow(df) == 1)
+  expect_true(df[,'virus_name'] == 'hCoV-19/Ireland/D-BHTEST/2022')
 })
 
 test_that("fast works", {
