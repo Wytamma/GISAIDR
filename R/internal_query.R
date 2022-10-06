@@ -8,6 +8,7 @@
 #' @param to search to specific collection date.
 #' @param from_subm search from specific submission date.
 #' @param to_subm search to specific submission date.
+#' @param virus_name search for a virus_name.
 #' @param start_index page through results.
 #' @param nrows number of results to return.
 #' @param load_all return all results.
@@ -27,6 +28,7 @@ internal_query <-
            from_subm = NULL,
            to = NULL,
            to_subm = NULL,
+           virus_name = NULL,
            start_index = 0,
            nrows = 50,
            load_all = FALSE,
@@ -83,6 +85,18 @@ internal_query <-
             credentials$variant_ceid,
             variant,
             'VariantsChange'
+          )
+        )
+    }
+    if (!is.null(virus_name)) {
+      queue <-
+        append(
+          queue,
+          create_search_queue(
+            credentials,
+            credentials$virus_name_ceid,
+            virus_name,
+            'FilterChange'
           )
         )
     }

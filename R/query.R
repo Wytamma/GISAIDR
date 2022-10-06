@@ -9,6 +9,7 @@
 #' @param to search to specific collection date.
 #' @param from_subm search from specific submission date.
 #' @param to_subm search to specific submission date.
+#' @param virus_name search for a virus_name.
 #' @param start_index page through results.
 #' @param nrows number of results to return.
 #' @param load_all return all results.
@@ -28,6 +29,7 @@ query <-
            from_subm = NULL,
            to = NULL,
            to_subm = NULL,
+           virus_name = NULL,
            start_index = 0,
            nrows = 50,
            load_all = FALSE,
@@ -52,6 +54,7 @@ query <-
           from_subm = from_subm,
           to = to,
           to_subm = to_subm,
+          virus_name = virus_name,
           start_index = batches[i,1],
           nrows = batches[i,2],
           low_coverage_excl = low_coverage_excl,
@@ -72,6 +75,7 @@ query <-
           from_subm = from_subm,
           to = to,
           to_subm = to_subm,
+          virus_name = virus_name,
           load_all = load_all,
           low_coverage_excl = low_coverage_excl,
           complete = complete,
@@ -92,6 +96,7 @@ query <-
           from_subm = from_subm,
           to = to,
           to_subm = to_subm,
+          virus_name = virus_name,
           start_index = start_index,
           nrows = nrows,
           low_coverage_excl = low_coverage_excl,

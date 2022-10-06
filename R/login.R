@@ -199,7 +199,10 @@ login <- function(username, password, database="EpiCoV") {
   } else {
     linage_ceid <- NULL
   }
-
+  
+  # Virus Name
+  virus_name_ceid <- extract_search_ceid('covv_virus_name', customSearch_page_text)
+  
   # From
   from_ceid <- extract_search_ceid('covv_collection_date_from', customSearch_page_text)
 
@@ -274,6 +277,7 @@ login <- function(username, password, database="EpiCoV") {
       location_ceid = location_ceid,
       search_cid = search_cid,
       linage_ceid = linage_ceid,
+      virus_name_ceid = virus_name_ceid,
       from_ceid = from_ceid,
       from_sub_ceid = from_sub_ceid,
       to_ceid = to_ceid,
