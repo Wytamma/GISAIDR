@@ -164,6 +164,27 @@ df$submission_date
 [8] "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05" "2021-04-05"  
 [15] ...
 
+### Search by virus name
+
+Use `virus_name` to search for entries using the virus name.
+
+``` r
+df <- query(credentials = credentials, virus_name="hCoV-19/Ireland/D-BHTEST/2022")
+df$virus_name
+```
+
+[1] "hCoV-19/Ireland/D-BHTEST/2022"
+
+You can also match parts of the virus name e.g.
+
+```
+df <- query(credentials = credentials, virus_name="hCoV-19/Ireland")
+df$virus_name
+```
+[1] "hCoV-19/Ireland/KY-Enfer-260922007_C6/2022"  "hCoV-19/Ireland/KY-Enfer-260922007_C4/2022"   
+[3] "hCoV-19/Ireland/KY-Enfer-260922007_C2/2022"  "hCoV-19/Ireland/KY-Enfer-260922007_C10/2022"  
+[5] "hCoV-19/Ireland/KY-Enfer-260922007_C1/2022"  "hCoV-19/Ireland/CO-Enfer-260922007_B7/2022"...  
+
 ### Exclude low coverage entries
 
 Use `low_coverage_excl` to exclude low coverage entries from the results.
