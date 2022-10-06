@@ -9,6 +9,7 @@
 #' @param to search to specific collection date.
 #' @param from_subm search from specific submission date.
 #' @param to_subm search to specific submission date.
+#' @param virus_name search for a virus_name.
 #' @param start_index page through results.
 #' @param nrows number of results to return.
 #' @param load_all return all results.

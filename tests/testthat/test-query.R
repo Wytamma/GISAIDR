@@ -125,6 +125,12 @@ test_that("variant search works", {
   expect_true(nrow(df) == 50)
 })
 
+test_that("variant search works", {
+  df <-
+    query(credentials = credentials, virus_name='hCoV-19/Ireland/D-BHTEST/2022')
+  expect_true(is.data.frame(df))
+  expect_true(nrow(df) == 1)
+})
 
 test_that("fast works", {
   df <- query(credentials = credentials,
