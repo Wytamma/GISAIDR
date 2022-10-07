@@ -175,6 +175,15 @@ df$virus_name
 
 [1] "hCoV-19/Ireland/D-BHTEST/2022"
 
+Search for multiple virus names using a list.
+
+```
+virus_names <- list("hCoV-19/Ireland/KY-Enfer-230922004_A4/2022", "hCoV-19/Ireland/CO-Enfer-240922010_E9/2022")
+df <- query(credentials = credentials, virus_name=virus_names)
+df$virus_name
+```
+[1] "hCoV-19/Ireland/CO-Enfer-240922010_E9/2022" "hCoV-19/Ireland/KY-Enfer-230922004_A4/2022"
+
 You can also match parts of the virus name e.g.
 
 ```
