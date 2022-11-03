@@ -406,6 +406,37 @@ create_batches <- function(start_index, nrows, batch_size=50) {
   return (batches)
 }
 
+covid_order_by_col_map <-
+  list(
+    id = "b",
+    virus_name = "d",
+    passage_details_history = "e",
+    accession_id = "f",
+    collection_date = "g",
+    submission_date = "h",
+    information = "i",
+    length = "j",
+    host = "k",
+    location = "l",
+    originating_lab = "m",
+    submitting_lab = "n"
+  )
+
+other_order_by_col_map <-
+  list(
+    id = "b",
+    virus_name = "d",
+    passage_details_history = "e",
+    accession_id = "f",
+    collection_date = "g",
+    submission_date = "h",
+    information = "i",
+    length = "j",
+    location = "k",
+    originating_lab = "l",
+    submitting_lab = "m"
+  )
+
 
 setColumnNames <- function(df, database) {
   if (database == 'EpiRSV') {

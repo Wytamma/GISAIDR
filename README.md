@@ -94,6 +94,18 @@ Selecting all 484 accession_ids.
 Returning 0-484 of 484 accession_ids.  
 [1] "EPI_ISL_14061265" "EPI_ISL_14061266" "EPI_ISL_14061267" "EPI_ISL_14061268" "EPI_ISL_14061269" "EPI_ISL_14061270"
 
+### Ordering
+
+Use `oder_by` to order the results or `query` by a column. Use `order_asc` to change the direction of `order_by` (defaults to TRUE).  
+
+``` r
+df <- query(credentials = credentials, order_by = 'submission_date')
+df$submission_date
+```
+[1] "2020-01-10" "2020-01-10" "2020-01-11" "2020-01-11" "2020-01-11" "2020-01-12" "2020-01-14"  
+[8] "2020-01-14" "2020-01-14" "2020-01-14" "2020-01-16" "2020-01-17" "2020-01-17" ...
+
+
 ### Search by location
 
 Use `location` to search for entries based on geographic location.

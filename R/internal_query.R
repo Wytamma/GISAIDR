@@ -9,6 +9,8 @@
 #' @param from_subm search from specific submission date.
 #' @param to_subm search to specific submission date.
 #' @param virus_name search for a virus_name.
+#' @param order_by order results by a column.
+#' @param order_asc order_by results in ascending order.
 #' @param start_index page through results.
 #' @param nrows number of results to return.
 #' @param load_all return all results.
@@ -29,6 +31,8 @@ internal_query <-
            to = NULL,
            to_subm = NULL,
            virus_name = NULL,
+           order_by = NULL,
+           order_asc = TRUE,
            start_index = 0,
            nrows = 50,
            load_all = FALSE,
@@ -37,7 +41,7 @@ internal_query <-
            high_coverage = FALSE,
            collection_date_complete = FALSE,
            total = FALSE,
-           fast= FALSE) {
+           fast = FALSE) {
     df <- tryCatch({
       # search
       queue = list()
@@ -101,6 +105,9 @@ internal_query <-
             )
           )
       }
+
+
+
       if (!is.null(from)) {
         queue <-
           append(
@@ -226,8 +233,27 @@ internal_query <-
           httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
       }
 
-      # pagination
       queue = list()
+
+      # ordering
+      if (!is.null(order_by)) {
+        if (credentials$database == 'EpiCoV') {
+          order_by = covid_order_by_col_map[[order_by]]
+        } else {
+          # epipox and epirsv are missing the host column
+          order_by = other_order_by_col_map[[order_by]]
+        }
+        command <- createCommand(
+          wid = credentials$wid,
+          pid = credentials$pid,
+          cid = credentials$query_cid,
+          cmd = 'SetSorting',
+          params = list(order_by = order_by, order_asc = order_asc)
+        )
+        queue <- append(queue, list(command))
+      }
+
+      # pagination
       command <- createCommand(
         wid = credentials$wid,
         pid = credentials$pid,

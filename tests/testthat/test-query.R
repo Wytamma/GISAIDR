@@ -140,3 +140,7 @@ test_that("fast works", {
   expect_true(nrow(df) > 50)
 })
 
+test_that("order_by works", {
+  df <- query(credentials = credentials, order_by = 'submission_date')
+  expect_true(df$submission_date[1] == "2020-01-10")
+})
