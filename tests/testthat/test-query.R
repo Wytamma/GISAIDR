@@ -9,7 +9,7 @@ test_that("basic query works", {
 })
 
 test_that("can change number of rows", {
-  df <- query(credentials = credentials, nrows = 100)
+  df <- query(credentials = credentials, nrows = 100, location = "Africa / ...")
   expect_equal(nrow(df), 100)
 })
 
