@@ -273,12 +273,27 @@ total
 
 ## Download
 
-To download the full data set you need a list of accession IDs (which can be obtained from `query` results).
+To download the full data set you need a list of accession IDs (which can be obtained from `query` results). This will also download the sequence data for each entry.
+
+``` r
+full_df_with_seq <- download(
+    credentials = credentials, 
+    list_of_accession_ids = list_of_accession_ids, 
+)
+full_df_with_seq$sequence
+```
+
+[1] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
+[2] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
+[3] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
+...
+
+You can stop GISAIDR from loading the sequence data into the memory by setting get_sequence=FALSE. Note: the sequence data will still be downloaded.
 
 ``` r
 df <- query(credentials = credentials)
 list_of_accession_ids <- df$accession_id
-full_df <- download(credentials = credentials, list_of_accession_ids = list_of_accession_ids)
+full_df <- download(credentials = credentials, list_of_accession_ids = list_of_accession_ids, get_sequence=FALSE)
 colnames(full_df)
 ```
 
@@ -291,24 +306,6 @@ colnames(full_df)
 [25] "title" "paper_url" "date_submitted" "purpose_of_sequencing"
 
 Note: a maximum of 5000 results can be downloaded at a time.
-
-### Get sequence data
-
-Use the `get_sequence` argument to download the sequences with the full data.
-
-``` r
-full_df_with_seq <- download(
-    credentials = credentials, 
-    list_of_accession_ids = list_of_accession_ids, 
-    get_sequence=TRUE
-)
-full_df_with_seq$sequence
-```
-
-[1] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
-[2] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
-[3] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
-...
 
 ### Export to fasta file
 
