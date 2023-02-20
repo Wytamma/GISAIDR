@@ -144,3 +144,20 @@ test_that("order_by works", {
   df <- query(credentials = credentials, order_by = 'submission_date')
   expect_true(df$submission_date[1] == "2020-01-10")
 })
+
+test_that("aa_substitution works", {
+  df <- query(credentials = credentials,
+      aa_substitution = 'Spike_H69del, Spike_A222V, Spike_G476S, -N_P13L',
+      order_by='submission_date')
+  expect_true(is.data.frame(df))
+  expect_equal(df$submission_date[1], "2021-04-27") #earliest is 2021-04-27
+  ## to test accuracy - set of 4 rarely co-existing mutations to verify Spike_H69del, Spike_A222V, Spike_G476S, -N_P13L
+})
+
+test_that("nucl_mutation works", {
+  df <- query(credentials = credentials, 
+    nucl_mutation = '-T23599G, -C10029T, -C14408T, -A23403G, T22679C, G28881A, A24424T, C23604A',
+    order_by='submission_date')
+  expect_true(is.data.frame(df))
+  expect_true(df$submission_date[1] == "2022-10-11") #other sequence is 2022-10-19
+})

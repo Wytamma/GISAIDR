@@ -20,6 +20,8 @@
 #' @param collection_date_complete include only entries with complete in collection date the results.
 #' @param total returns the total number of sequences matching the query.
 #' @param fast returns all of the accession_ids that match the query.
+#' @param aa_substitution returns all sequences with the amino acid mutation(s), negative selection by '-' prefix
+#' @param nucl_mutation returns all sequences with the nucleotide mutation(s), negative selection by '-' prefix
 #' @return Dataframe.
 internal_query <-
   function(credentials,
@@ -32,6 +34,8 @@ internal_query <-
            to_subm = NULL,
            virus_name = NULL,
            order_by = NULL,
+           aa_substitution = NULL,
+           nucl_mutation = NULL,
            order_asc = TRUE,
            start_index = 0,
            nrows = 50,
@@ -155,6 +159,35 @@ internal_query <-
             )
           )
       }
+
+      # amino acid changes
+      if (!is.null(aa_substitution)) {
+        queue <-
+          append(
+            queue,
+            create_search_queue(
+              credentials,
+              credentials$aa_substitution_ceid,
+              aa_substitution,
+              'FilterChange'
+            )
+          )
+      }
+
+      # nucleotide changes
+      if (!is.null(nucl_mutation)) {
+        queue <-
+          append (
+            queue,
+            create_search_queue(
+              credentials,
+              credentials$nucl_mutation_ceid,
+              nucl_mutation,
+              'FilterChange'
+            )
+          )
+      }
+
 
       if (low_coverage_excl) {
         queue <-

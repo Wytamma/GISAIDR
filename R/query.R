@@ -21,6 +21,8 @@
 #' @param collection_date_complete include only entries with complete in collection date the results.
 #' @param total returns the total number of sequences matching the query.
 #' @param fast returns all of the accession_ids that match the query.
+#' @param aa_substitution_ceid returns all sequences with the selected amino acid mutation 
+#' @param nucl_mutation_ceid returns all sequences with the selected nucleotide mutation
 #' @return data.frame
 query <-
   function(credentials,
@@ -33,6 +35,8 @@ query <-
            to_subm = NULL,
            virus_name = NULL,
            order_by = NULL,
+           aa_substitution = NULL,
+           nucl_mutation = NULL,
            order_asc = TRUE,
            start_index = 0,
            nrows = 50,
@@ -66,7 +70,9 @@ query <-
           low_coverage_excl = low_coverage_excl,
           complete = complete,
           high_coverage = high_coverage,
-          collection_date_complete = collection_date_complete
+          collection_date_complete = collection_date_complete,
+          aa_substitution = aa_substitution,
+          nucl_mutation = nucl_mutation
         ))
       }
       return(results)
@@ -89,6 +95,8 @@ query <-
           complete = complete,
           high_coverage = high_coverage,
           collection_date_complete = collection_date_complete,
+          aa_substitution = aa_substitution,
+          nucl_mutation = nucl_mutation,
           total = total,
           fast = fast
         )
@@ -112,7 +120,9 @@ query <-
           low_coverage_excl = low_coverage_excl,
           complete = complete,
           high_coverage = high_coverage,
-          collection_date_complete = collection_date_complete
+          collection_date_complete = collection_date_complete,
+          aa_substitution = aa_substitution,
+          nucl_mutation = nucl_mutation
         )
       )
     }
