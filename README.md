@@ -404,7 +404,7 @@ quality_ceid <- extract_search_ceid("quality'", customSearch_page_text)
 ```
 
 1.  Add the extracted `ceid` to the list of `credentials` e.g. `complete_ceid = complete_ceid`
-2.  Add the new argument and default value to the `query()` function in `query.R` e.g. `complete = FALSE`.
+2.  Add the new argument and default value to the `query()` function in `query.R` and `internal_query.R` e.g. `complete = FALSE`.
 3.  Create and append a search queue to the main queue if the `complete` argument is used. Create the command using the `create_search_queue()` function. Use the `complete_ceid` for the `ceid` and the checkbox value (identified in step 4) for the `cvalue` e.g.
 
 ``` r
