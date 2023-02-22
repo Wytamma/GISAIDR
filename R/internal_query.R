@@ -360,6 +360,8 @@ internal_query <-
             from_subm = from_subm,
             to = to,
             to_subm = to_subm,
+            aa_substitution = aa_substitution,
+            nucl_mutation = nucl_mutation,
             nrows = j$totalRecords,
             load_all = FALSE,
             # set load_all to false to break the recursion
