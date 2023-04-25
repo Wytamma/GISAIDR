@@ -216,6 +216,15 @@ df$virus_name
 [3] "hCoV-19/Ireland/KY-Enfer-260922007_C2/2022"  "hCoV-19/Ireland/KY-Enfer-260922007_C10/2022"  
 [5] "hCoV-19/Ireland/KY-Enfer-260922007_C1/2022"  "hCoV-19/Ireland/CO-Enfer-260922007_B7/2022"...  
 
+### Search by AA Substitutions and Nucleotide Mutations
+
+Use `aa_substitution` and `nucl_mutation` to search for entries using amino acid Substitutions and nucleotide mutations.
+
+``` r
+aa_substitution_df <- query(credentials = credentials, aa_substitution = 'Spike_E484Q, Spike_H69del, -N_P13L')
+nucl_mutation_df <- query(credentials = credentials, nucl_mutation = '-T23599G, -C10029T')
+```
+
 ### Exclude low coverage entries
 
 Use `low_coverage_excl` to exclude low coverage entries from the results.
