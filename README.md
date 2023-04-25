@@ -283,12 +283,27 @@ total
 
 ## Download
 
-To download the full data set you need a list of accession IDs (which can be obtained from `query` results).
+To download the full data set you need a list of accession IDs (which can be obtained from `query` results). This will also download the sequence data for each entry.
+
+``` r
+full_df_with_seq <- download(
+    credentials = credentials, 
+    list_of_accession_ids = list_of_accession_ids, 
+)
+full_df_with_seq$sequence
+```
+
+[1] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
+[2] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
+[3] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
+...
+
+You can stop GISAIDR from loading the sequence data into the memory by setting get_sequence=FALSE. Note: the sequence data will still be downloaded.
 
 ``` r
 df <- query(credentials = credentials)
 list_of_accession_ids <- df$accession_id
-full_df <- download(credentials = credentials, list_of_accession_ids = list_of_accession_ids)
+full_df <- download(credentials = credentials, list_of_accession_ids = list_of_accession_ids, get_sequence=FALSE)
 colnames(full_df)
 ```
 
@@ -301,24 +316,6 @@ colnames(full_df)
 [25] "title" "paper_url" "date_submitted" "purpose_of_sequencing"
 
 Note: a maximum of 5000 results can be downloaded at a time.
-
-### Get sequence data
-
-Use the `get_sequence` argument to download the sequences with the full data.
-
-``` r
-full_df_with_seq <- download(
-    credentials = credentials, 
-    list_of_accession_ids = list_of_accession_ids, 
-    get_sequence=TRUE
-)
-full_df_with_seq$sequence
-```
-
-[1] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
-[2] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
-[3] "AGATCTGTTCTCTAAACGAACTTTAAAATCT...  
-...
 
 ### Export to fasta file
 
@@ -417,8 +414,9 @@ quality_ceid <- extract_search_ceid("quality'", customSearch_page_text)
 ```
 
 1.  Add the extracted `ceid` to the list of `credentials` e.g. `complete_ceid = complete_ceid`
-2.  Add the new argument and default value to the `query()` function in `query.R` e.g. `complete = FALSE`.
-3.  Create and append a search queue to the main queue if the `complete` argument is used. Create the command using the `create_search_queue()` function. Use the `complete_ceid` for the `ceid` and the checkbox value (identified in step 4) for the `cvalue` e.g.
+2.  Add the new argument and default value to **all** `query()` function in `query.R` and `internal_query.R` e.g. `complete = FALSE`.
+3.  Add the new argument and default value to the `(load_all && j$totalRecords > nrows)` load_all recursion loop so all paginations will continue using the argument.
+4.  Create and append a search queue to the main queue if the `complete` argument is used. Create the command using the `create_search_queue()` function. Use the `complete_ceid` for the `ceid` and the checkbox value (identified in step 4) for the `cvalue` e.g.
 
 ``` r
 if (complete) {
