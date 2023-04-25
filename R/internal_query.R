@@ -1,6 +1,7 @@
 #' Query GISAID Database
 #'
 #' @param credentials GISAID credentials.
+#' @param text full text search.
 #' @param location search for entries based on geographic location.
 #' @param lineage search for entries based on pango lineage designations.
 #' @param variant search for entries based on variant designation
@@ -23,6 +24,7 @@
 #' @return Dataframe.
 internal_query <-
   function(credentials,
+           text = NULL,
            location = NULL,
            lineage = NULL,
            variant = NULL,
@@ -45,6 +47,18 @@ internal_query <-
     df <- tryCatch({
       # search
       queue = list()
+      if (!is.null(text)) {
+        queue <-
+          append(
+            queue,
+            create_search_queue(
+              credentials,
+              credentials$text_ceid,
+              text,
+              'DoSimpleSearch'
+            )
+          )
+      }
       if (!is.null(location)) {
         queue <-
           append(
@@ -320,6 +334,7 @@ internal_query <-
         return(
           query(
             credentials = credentials,
+            text = text,
             location = location,
             lineage = lineage,
             variant = variant,
@@ -328,8 +343,8 @@ internal_query <-
             to = to,
             to_subm = to_subm,
             nrows = j$totalRecords,
-            load_all = FALSE,
             # set load_all to false to break the recursion
+            load_all = FALSE,
             low_coverage_excl = low_coverage_excl,
             complete = complete,
             high_coverage = high_coverage,

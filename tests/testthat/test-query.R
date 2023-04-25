@@ -9,7 +9,7 @@ test_that("basic query works", {
 })
 
 test_that("can change number of rows", {
-  df <- query(credentials = credentials, nrows = 100, location = "Africa / ...")
+  df <- query(credentials = credentials, nrows = 1000, location = "Africa / ...")
   expect_equal(nrow(df), 100)
 })
 
@@ -143,4 +143,10 @@ test_that("fast works", {
 test_that("order_by works", {
   df <- query(credentials = credentials, order_by = 'submission_date')
   expect_true(df$submission_date[1] == "2020-01-10")
+})
+
+test_that("text search works", {
+  accession_ids = c("EPI_ISL_17398411", "EPI_ISL_17199001", "EPI_ISL_17409201", "EPI_ISL_17243716")
+  df <- query(credentials = credentials, text = paste(accession_ids, collapse = "\n"))
+  expect_true(nrow(df) == 4)
 })

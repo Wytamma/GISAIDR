@@ -199,10 +199,10 @@ login <- function(username, password, database="EpiCoV") {
   } else {
     linage_ceid <- NULL
   }
-  
+
   # Virus Name
   virus_name_ceid <- extract_search_ceid('covv_virus_name', customSearch_page_text)
-  
+
   # From
   from_ceid <- extract_search_ceid('covv_collection_date_from', customSearch_page_text)
 
@@ -222,6 +222,9 @@ login <- function(username, password, database="EpiCoV") {
     low_coverage_excl_ceid <- NULL
   }
   if (database == 'EpiCoV'){
+    # full text search
+    text_ceid <-
+      extract_search_ceid("fts", customSearch_page_text)
     # Highq
     highq_ceid <-
       extract_search_ceid("highq", customSearch_page_text)
@@ -237,6 +240,7 @@ login <- function(username, password, database="EpiCoV") {
     # quality not used by EpiCov
     quality_ceid <- NULL
   } else {
+    text_ceid <- NULL
     variant_ceid <- NULL
     complete_ceid <- NULL
     highq_ceid <- NULL
@@ -274,6 +278,7 @@ login <- function(username, password, database="EpiCoV") {
       selection_panel_cid = selection_panel_cid,
       selection_ceid = selection_ceid,
       download_panel_cid = query_cid,
+      text_ceid = text_ceid,
       location_ceid = location_ceid,
       search_cid = search_cid,
       linage_ceid = linage_ceid,

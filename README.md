@@ -105,6 +105,16 @@ df$submission_date
 [1] "2020-01-10" "2020-01-10" "2020-01-11" "2020-01-11" "2020-01-11" "2020-01-12" "2020-01-14"  
 [8] "2020-01-14" "2020-01-14" "2020-01-14" "2020-01-16" "2020-01-17" "2020-01-17" ...
 
+### Full text search
+
+Use `text` for full text search.
+
+``` r
+accession_ids = c("EPI_ISL_17398411", "EPI_ISL_17199001", "EPI_ISL_17409201", "EPI_ISL_17243716")
+df <- query(credentials = credentials, text = paste(accession_ids, collapse = "\n"))
+> df$accession_id
+```
+[1] "EPI_ISL_17199001" "EPI_ISL_17243716" "EPI_ISL_17398411" "EPI_ISL_17409201"
 
 ### Search by location
 

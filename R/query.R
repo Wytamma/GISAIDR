@@ -2,6 +2,7 @@
 #' Query GISAID Database
 #'
 #' @param credentials GISAID credentials.
+#' @param text full text search.
 #' @param location search for entries based on geographic location.
 #' @param lineage search for entries based on pango lineage designations.
 #' @param variant search for entries based on variant designation
@@ -24,6 +25,7 @@
 #' @return data.frame
 query <-
   function(credentials,
+           text = NULL,
            location = NULL,
            lineage = NULL,
            variant = NULL,
@@ -51,6 +53,7 @@ query <-
       for (i in 1:nrow(batches)) {
         results <- rbind(results, internal_query(
           credentials = credentials,
+          text = text,
           location = location,
           lineage = lineage,
           variant = variant,
@@ -74,6 +77,7 @@ query <-
       return(
         internal_query(
           credentials = credentials,
+          text = text,
           location = location,
           lineage = lineage,
           variant = variant,
@@ -97,6 +101,7 @@ query <-
       return(
         internal_query(
           credentials = credentials,
+          text = text,
           location = location,
           lineage = lineage,
           variant = variant,
