@@ -313,7 +313,14 @@ extract_search_ceid <- function(identifier, t) {
                  perl = TRUE
                ))
   ceid <- strsplit(ceid, "'")
-  ceid <- ceid[[1]][length(ceid[[1]]) - 4]
+  tryCatch(
+    ceid <- ceid[[1]][length(ceid[[1]]) - 4],
+    error = function(e) {
+      warning(paste0("Could not extract ", regex, " from ", substr(t, 0, 30)))
+      e
+    }
+  )
+
   return(ceid)
 }
 

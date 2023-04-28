@@ -200,10 +200,6 @@ login <- function(username, password, database="EpiCoV") {
     linage_ceid <- NULL
   }
 
-  # AA substitution/mutation- ", " separated values
-  aa_substitution_ceid <- extract_search_ceid('mutation', customSearch_page_text)
-  # nucleotide substitution/nuc mutation, ", " separated values
-  nucl_mutation_ceid <- extract_search_ceid('nuc_mutation', customSearch_page_text)
   # Virus Name
   virus_name_ceid <- extract_search_ceid('covv_virus_name', customSearch_page_text)
 
@@ -229,6 +225,10 @@ login <- function(username, password, database="EpiCoV") {
     # full text search
     text_ceid <-
       extract_search_ceid("fts", customSearch_page_text)
+    # AA substitution/mutation- ", " separated values
+    aa_substitution_ceid <- extract_search_ceid('mutation', customSearch_page_text)
+    # nucleotide substitution/nuc mutation, ", " separated values
+    nucl_mutation_ceid <- extract_search_ceid('nuc_mutation', customSearch_page_text)
     # Highq
     highq_ceid <-
       extract_search_ceid("highq", customSearch_page_text)
@@ -245,6 +245,8 @@ login <- function(username, password, database="EpiCoV") {
     quality_ceid <- NULL
   } else {
     text_ceid <- NULL
+    aa_substitution_ceid <- NULL
+    nucl_mutation_ceid <- NULL
     variant_ceid <- NULL
     complete_ceid <- NULL
     highq_ceid <- NULL
@@ -254,12 +256,6 @@ login <- function(username, password, database="EpiCoV") {
     # collection date complete
     collection_date_complete_ceid <-
       extract_search_ceid('quality2', customSearch_page_text)
-    # AA substitution
-    aa_substitution_ceid <-
-      extract_search_ceid('mutation', customSearch_page_text)
-    # nucleotide mutation
-    nucl_mutation_ceid <-
-      extract_search_ceid('nuc_mutation', customSearch_page_text)
   }
 
   # send selection command
