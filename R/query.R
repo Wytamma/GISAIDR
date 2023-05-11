@@ -22,7 +22,7 @@
 #' @param collection_date_complete include only entries with complete in collection date the results.
 #' @param total returns the total number of sequences matching the query.
 #' @param fast returns all of the accession_ids that match the query.
-#' @param aa_substitution_ceid returns all sequences with the selected amino acid mutation 
+#' @param aa_substitution_ceid returns all sequences with the selected amino acid mutation
 #' @param nucl_mutation_ceid returns all sequences with the selected nucleotide mutation
 #' @return data.frame
 query <-
@@ -78,6 +78,8 @@ query <-
           nucl_mutation = nucl_mutation
         ))
       }
+      results <- results[!duplicated(results$accession_id), ] # Remove duplicate entries
+      rownames(results) <- NULL # reset index
       return(results)
     } else if (total | load_all | fast) {
       return(
