@@ -340,6 +340,12 @@ Date format (default: decimal year) and delimiter (default: \@) can be set with 
 export_fasta(full_df_with_seq, out_file_name = 'GISAID_sequences.fasta', date_format='%Y-%m-%d', delimiter='|')
 ```
 
+Use the `columns` argument to choose which columns are included in the export.
+
+``` r
+export_fasta(full_df_with_seq, file, columns = c("accession_id", "country", "pangolin_lineage", "date"))
+```
+
 ## Errors
 
 GISAIDR relies on the custom selection interface of [gisaid.org](https://www.gisaid.org/). If GISAIDR is giving you errors, first check that it is not gisaid.org producing these errors. We can't do anything to fix errors with gisaid.org.
