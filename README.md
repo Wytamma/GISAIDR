@@ -343,7 +343,7 @@ export_fasta(full_df_with_seq, out_file_name = 'GISAID_sequences.fasta', date_fo
 Use the `columns` argument to choose which columns are included in the export.
 
 ``` r
-export_fasta(full_df_with_seq, file, columns = c("accession_id", "country", "pangolin_lineage", "date"))
+export_fasta(full_df_with_seq, out_file_name = 'GISAID_sequences.fasta', columns = c("accession_id", "country", "pangolin_lineage", "date"))
 ```
 
 ## Errors
