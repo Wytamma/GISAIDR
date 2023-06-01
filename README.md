@@ -1,7 +1,8 @@
 # GISAIDR
 
-[![Build](https://github.com/Wytamma/GISAIDR/actions/workflows/r.yml/badge.svg)](https://github.com/Wytamma/GISAIDR/actions/workflows/r.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5363500.svg)](https://doi.org/10.5281/zenodo.5363500)
-
+[![Build](https://github.com/Wytamma/GISAIDR/actions/workflows/r.yml/badge.svg)](https://github.com/Wytamma/GISAIDR/actions/workflows/r.yml) 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5363500.svg)](https://doi.org/10.5281/zenodo.5363500)
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FWytamma%2FGISAIDR&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://github.com/Wytamma/GISAIDR)
 Programmatically interact with the GISAID EpiCoV, EpiPox, and EpiRSV databases.
 
 ## Citation
