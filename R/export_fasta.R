@@ -1,3 +1,12 @@
+#' Export Fasta
+#'
+#' @param seqs dataframe containing sequence information, output of function `query`
+#' @param out_file_name output file name
+#' @param export_dated_only Should entries without dates be exported? Set to TRUE to exlude sequences without a date (default)
+#' @param delimiter fasta sequence delimiter. Default `@`
+#' @param data_format Optional, specify date format eg for ISO format use '%Y-%m-%d'
+#' @param columns Specify columns in the input dataframe to use as fasta headers
+#' @return data.frame of complete data
 export_fasta <- function(
     seqs,
     out_file_name,
