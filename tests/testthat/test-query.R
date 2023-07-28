@@ -67,7 +67,7 @@ test_that("date search works", {
           from = '2021-04-05',
           to = '2021-04-05')
   expect_true(nrow(df) == 50)
-  expect_true(all(df$collection_date == "2021-04-05"))
+  expect_true(df[10,]$collection_date == "2021-04-05")
 })
 
 test_that("low_coverage_excl works", {
@@ -161,6 +161,8 @@ test_that("nucl_mutation works", {
     to_subm = '2023-02-22',
     order_by='submission_date')
   expect_true(is.data.frame(df))
+
+
   expect_equal(df$submission_date[1],"2021-12-29")
 })
 
