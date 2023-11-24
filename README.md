@@ -97,7 +97,7 @@ Returning 0-484 of 484 accession_ids.
 
 ### Ordering
 
-Use `oder_by` to order the results or `query` by a column. Use `order_asc` to change the direction of `order_by` (defaults to TRUE).  
+Use `order_by` to order the results or `query` by a column. Use `order_asc` to change the direction of `order_by` (defaults to TRUE).  
 
 ``` r
 df <- query(credentials = credentials, order_by = 'submission_date')
