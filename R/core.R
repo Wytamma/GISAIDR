@@ -26,7 +26,7 @@ createCommand <-
       equiv = equiv
     )
     return(ev)
-  }
+}
 
 formatDataForRequest <-
   function(sid, wid, pid, queue, timestamp, mode = 'ajax') {
@@ -280,7 +280,7 @@ select_entries <- function(credentials, list_of_accession_ids) {
   return(response)
 }
 
-resetQuery <- function(credentials) {
+resetQuery <- function(credentials, url=GISAID_URL) {
   queue = list()
   command <- createCommand(
     wid = credentials$wid,
@@ -299,7 +299,7 @@ resetQuery <- function(credentials) {
       timestamp = timestamp()
     )
   res <-
-    httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+    httr::POST(url, httr::add_headers(.headers = headers), body = data)
 }
 
 extract_search_ceid <- function(identifier, t) {
@@ -334,8 +334,9 @@ log.debug <- function(msg) {
 send_request <-
   function(parameter_string = "",
            data = NULL,
-           method = 'GET') {
-    URL <- paste0(GISAIDR::GISAID_URL, '?', parameter_string)
+           method = 'GET',
+           url = GISAIDR::GISAID_URL) {
+    URL <- paste0(url, '?', parameter_string)
     if (is.null(data)) {
       data <- ""
     }
@@ -470,6 +471,24 @@ setColumnNames <- function(df, database) {
     names(df)[names(df) == "k"] <- "location"
     names(df)[names(df) == "l"] <- "originating_lab"
     names(df)[names(df) == "m"] <- "submitting_lab"
+  } else if (database == 'EpiFlu') {
+    names(df)[names(df) == "b"] <- "id"
+    names(df)[names(df) == "c"] <- "selected"
+    names(df)[names(df) == "d"] <- "edit"
+    names(df)[names(df) == "e"] <- "virus_name"
+    names(df)[names(df) == "f"] <- "accession_id"
+    names(df)[names(df) == "g"] <- "subtype"
+    names(df)[names(df) == "h"] <- "passage_details_history"
+    names(df)[names(df) == "i"] <- "PB2"
+    names(df)[names(df) == "j"] <- "PB1"
+    names(df)[names(df) == "k"] <- "PA"
+    names(df)[names(df) == "l"] <- "HA"
+    names(df)[names(df) == "m"] <- "NP"
+    names(df)[names(df) == "n"] <- "NA"
+    names(df)[names(df) == "o"] <- "MP"
+    names(df)[names(df) == "p"] <- "NS"
+    names(df)[names(df) == "q"] <- "HE"
+    names(df)[names(df) == "r"] <- "P3"
   } else {
     colnames(df)[colnames(df) %in% c("b", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n")] <-
       c(
@@ -529,4 +548,9 @@ create_search_queue <- function(credentials, ceid, cvalue, cmd) {
   queue <- append(queue, list(command))
 
   return(queue)
+}
+
+remove_html_tags <- function(html) {
+  plain_text <- gsub("<[^>]+>", "", html)
+  return(plain_text)
 }
