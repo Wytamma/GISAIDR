@@ -49,6 +49,9 @@ query <-
            collection_date_complete = FALSE,
            total = FALSE,
            fast = FALSE) {
+    if (credentials$database == "epiflu") {
+      stop("Please use the epiflu_query function for the EpiFlu database.")
+    }
 
     if (nrows > 50 && !total && !load_all && !fast) {
       message(paste0("Loading entries in batches..."))
