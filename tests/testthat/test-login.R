@@ -27,3 +27,10 @@ test_that("EpiRSV login works", {
   credentials <- login(username = username, password = password, database="EpiRSV")
   expect_true(is.list(credentials))
 })
+
+test_that("EpiFlu login works", {
+  username = Sys.getenv("GISAIDR_USERNAME")
+  password = Sys.getenv("GISAIDR_PASSWORD")
+  credentials <- login(username = username, password = password, database="EpiFlu")
+  expect_true(is.list(credentials))
+})
