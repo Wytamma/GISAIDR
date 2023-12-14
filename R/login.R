@@ -10,8 +10,8 @@
 #' password = Sys.getenv("GISAIDR_PASSWORD")
 #' login(username, password)
 login <- function(username, password, database="EpiCoV") {
-  if (!database %in% c("EpiCoV", "EpiRSV", "EpiPox")) {
-    stop(sprintf("Database must be EpiCoV, EpiRSV or EpiPox (database=%s)", database))
+  if (!database %in% c("EpiCoV", "EpiRSV", "EpiPox", "EpiFlu")) {
+    stop(sprintf("Database must be EpiCoV, EpiRSV, EpiPox or EpiFlu (database=%s)", database))
   }
   # get a session ID
   response <- send_request()
@@ -102,6 +102,17 @@ login <- function(username, password, database="EpiCoV") {
       formatDataForRequest(session_id, overlay_window_ID, overlay_page_ID, queue, timestamp())
     response <- send_request(data)
     response_data <- parseResponse(response)
+  }
+
+  if (database=="EpiFlu") {
+    credentials <- get_epiflu_credentials(
+      session_id=session_id,
+      wid=WID,
+      login_page_ID=login_page_ID,
+      frontend_page_ID=frontend_page_ID,
+      frontend_page_text=frontend_page_text
+    )
+    return(credentials)
   }
 
   if (database=="EpiRSV") {
