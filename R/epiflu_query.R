@@ -1,5 +1,6 @@
 epiflu_query <- function(credentials,
                          text = NULL,
+                         type = NULL,
                          location = NULL,
                          lineage = NULL,
                          from = NULL,
@@ -7,15 +8,18 @@ epiflu_query <- function(credentials,
                          to = NULL,
                          to_subm = NULL,
                          total = FALSE,
-                         fast = FALSE,
-                         start_index = 0) {
+                         start_index = 0,
+                         nrows = 27) {
   df <- tryCatch({
     GISAID_URL <- credentials$url
     queue = list()
     results_page_text = NULL
 
-    # reset page
-    send_request(paste0('sid=', credentials$sid), url=GISAID_URL)
+    if (nrows > 27) {
+      message("GISAID does not allow more than 27 EpiFlu results to be returned at a time...")
+      message("Setting nrows to 27.")
+      nrows = 27
+    }
 
     if (!is.null(text)) {
       queue <-
@@ -25,21 +29,26 @@ epiflu_query <- function(credentials,
             credentials,
             credentials$text_ceid,
             text,
-            'DoSimpleSearch'
+            'OnlyCount'
           )
         )
     }
     if (!is.null(location)) {
-      queue <-
-        append(
-          queue,
-          create_search_queue(
-            credentials,
-            credentials$location_ceid,
-            location,
-            'FilterChange'
-          )
-        )
+        # if location is a country, then we need to look up the region ids
+        # if str then convert to list
+        if (is.character(location)) {
+            location <- list(location)
+        }
+        queue <-
+            append(
+            queue,
+            create_search_queue(
+                credentials,
+                credentials$location_ceid,
+                lookup_region_ids(location),
+                'OnlyCount'
+            )
+            )
     }
     if (!is.null(lineage)) {
       queue <-
@@ -174,16 +183,16 @@ epiflu_query <- function(credentials,
     #   )
     #   queue <- append(queue, list(command))
     # }
-    #
-    # # pagination
-    # command <- createCommand(
-    #   wid = credentials$wid,
-    #   pid = credentials$pid,
-    #   cid = credentials$query_cid,
-    #   cmd = 'SetPaginating',
-    #   params = list(start_index = start_index, rows_per_page = nrows)
-    # )
-    # queue <- append(queue, list(command))
+
+    # pagination
+    command <- createCommand(
+      wid = credentials$wid,
+      pid = results_page_ID,
+      cid = getdata_cid,
+      cmd = 'SetPaginating',
+      params = list(start_index = start_index, rows_per_page = nrows)
+    )
+    queue <- append(queue, list(command))
 
     # get data
     command <- createCommand(
@@ -210,35 +219,6 @@ epiflu_query <- function(credentials,
 
     if (total) {
       return(as.numeric(j$totalRecords))
-    }
-
-    if (fast) {
-      log.debug(paste0(GISAID_URL, "?sid=", credentials$sid))
-      accession_id_count <- j$totalRecords
-      message(paste0('Selecting all ', accession_id_count, " accession_ids."))
-      df <- get_accession_ids(credentials = credentials)
-
-      message(
-        paste0(
-          "Returning ",
-          start_index,
-          "-",
-          nrow(df),
-          " of ",
-          accession_id_count,
-          " accession_ids."
-        )
-      )
-
-      if (accession_id_count > nrow(df)) {
-        message(paste0(
-          "Could only get ",
-          nrow(df),
-          " accession_ids. Narrow your search."
-        ))
-      }
-      return(df)
-
     }
 
     # if (load_all && j$totalRecords > nrows) {
