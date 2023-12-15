@@ -1,6 +1,8 @@
 epiflu_query <- function(credentials,
                          text = NULL,
                          type = NULL,
+                         h = NULL,
+                         n = NULL,
                          location = NULL,
                          lineage = NULL,
                          from = NULL,
@@ -45,6 +47,40 @@ epiflu_query <- function(credentials,
             credentials,
             credentials$type_ceid,
             type,
+            'TypeChanged'
+          )
+        )
+    }
+
+    if (!is.null(h)) {
+      if (is.character(h) || is.numeric(h)) {
+        h <- list(h)
+      }
+      h <- lapply(h, as.character)
+      queue <-
+        append(
+          queue,
+          create_search_queue(
+            credentials,
+            credentials$subtype_h_ceid,
+            h,
+            'TypeChanged'
+          )
+        )
+    }
+
+    if (!is.null(n)) {
+      if (is.character(n) || is.numeric(n)) {
+        n <- list(n)
+      }
+      n <- lapply(n, as.character)
+      queue <-
+        append(
+          queue,
+          create_search_queue(
+            credentials,
+            credentials$subtype_n_ceid,
+            n,
             'TypeChanged'
           )
         )
