@@ -33,6 +33,23 @@ epiflu_query <- function(credentials,
           )
         )
     }
+
+    if (!is.null(type)) {
+      if (is.character(type)) {
+        type <- list(type)
+      }
+      queue <-
+        append(
+          queue,
+          create_search_queue(
+            credentials,
+            credentials$type_ceid,
+            type,
+            'TypeChanged'
+          )
+        )
+    }
+
     if (!is.null(location)) {
         # if location is a country, then we need to look up the region ids
         # if str then convert to list
