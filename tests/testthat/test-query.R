@@ -171,3 +171,13 @@ test_that("text search works", {
   df <- query(credentials = credentials, text = paste(accession_ids, collapse = "\n"))
   expect_true(nrow(df) == 4)
 })
+
+test_that("empty result returns empty df", {
+  df <- query(
+    credentials = credentials,
+    lineage =  "FAKE.1.1.2",
+    location = 'Australia',
+    fast = TRUE
+  )
+  expect_true(nrow(df) == 0)
+})
