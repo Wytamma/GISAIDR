@@ -148,8 +148,10 @@ get_accession_ids <- function(credentials) {
   j = httr::content(res, as = 'parsed')
   url <- extract_first_match("sys.downloadFile\\(\"(.*)\",", j$responses[[1]]$data)
   log.debug(paste0('https://www.epicov.org/', url))
-  df <- read.csv(paste0('https://www.epicov.org/', url), header=F)
-  names(df) <- c('accession_id')
+  tryCatch(
+    df <- read.csv(paste0('https://www.epicov.org/', url), header=F, col.names = c('accession_id')),
+    error = function(e) df <- data.frame(col.names = c('accession_id'))
+  )
   # back
   send_back_cmd(credentials$sid, selection_pid_wid$wid, selection_pid_wid$pid, credentials$selection_panel_cid)
   resetQuery(credentials)
