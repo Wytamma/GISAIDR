@@ -41,16 +41,25 @@ jobs:
           install.packages(c("remotes", "rcmdcheck", "curl"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
-      - name: Install CLI
-        if: matrix.os != 'windows-latest'
-        run: mv bin/GISAIDR /usr/local/bin
-      - name: Check
+
+      - name: Check R Package
         env:
           GISAIDR_PASSWORD: ${{ secrets.GISAIDR_PASSWORD }}
           GISAIDR_USERNAME: ${{ secrets.GISAIDR_USERNAME }}
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
-      - name: CLI Check
+
+      - name: Install R Package
+        run: |
+          install.packages("devtools")
+          devtools::install(".")
+        shell: Rscript {0}
+
+      - name: Install CLI
+        if: matrix.os != 'windows-latest'
+        run: mv bin/GISAIDR /usr/local/bin
+
+      - name: Check CLI
         if: matrix.os != 'windows-latest'
         run: |
           GISAIDR --version
