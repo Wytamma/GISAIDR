@@ -178,12 +178,12 @@ args <- commandArgs(trailingOnly = TRUE)
 
 if (length(args) == 0){
     print_help(OptionParser(option_list=option_list))
-    quit(status=1)
+    quit(status=0)
 }
 
 if (opt$version){
     cat(paste0("GISAIDR v", VERSION, "\n"))
-    quit(status=1)
+    quit(status=0)
 }
 
 if (is.na(opt$database)){
