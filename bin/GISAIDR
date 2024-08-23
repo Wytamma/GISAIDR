@@ -1,6 +1,5 @@
 #!/usr/bin/env Rscript
 
-options(warn=-1)
 suppressPackageStartupMessages(require(optparse))
 suppressPackageStartupMessages(require(GISAIDR))
 
@@ -162,6 +161,12 @@ option_list = list(
         help="Query the database for a virus name."
     ),
     make_option(
+        c("--debug"),
+        action="store_true",
+        default=FALSE,
+        help="Enable debugging output."
+    ),
+    make_option(
         c("-v", "--version"),
         action="store_true",
         default=FALSE,
@@ -184,6 +189,10 @@ if (length(args) == 0){
 if (opt$version){
     cat(paste0("GISAIDR v", VERSION, "\n"))
     quit(status=0)
+}
+
+if (opt$debug){
+    Sys.setenv(GISAIDR_DEBUG = 1)
 }
 
 if (is.na(opt$database)){
