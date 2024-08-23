@@ -4,52 +4,54 @@ options(warn=-1)
 suppressPackageStartupMessages(require(optparse))
 suppressPackageStartupMessages(require(GISAIDR))
 
-DATABASES  <- c("EpiPox", "EpiCoV", "EpiRSV")
+DATABASES  <- c("EpiCoV", "EpiPox", "EpiRSV")
 VERSION    <- paste(packageVersion("GISAIDR"))
 DATE_REGEX <- "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
 
-option_list = list(   
+option_list = list(
     make_option(
-        c("--credentials"), 
-        action="store", 
-        default=NA, 
+        c("--database"),
+        action="store",
+        default=NA,
         type='character',
-        help="[REQUIRED] Path to the credentials.yml"
+        help= paste0("[REQUIRED] GISAID database name ( ", paste(DATABASES, collapse=", "), " ).")
     ),
     make_option(
-        c("--database"), 
-        action="store", 
-        default=NA, 
-        type='character', 
-        help="[REQUIRED] GISAID database name"
-    ),
+        c("--credentials"),
+        action="store",
+        default=NA,
+        type='character',
+        help="Path to yaml file with GISAID credentials. Required If GISAIDR_USERNAME and GISAIDR_PASSWORD are not defined as environment variables:\n
+            \tGISAIDR_USERNAME: \"yourUsername\"
+            \tGISAIDR_PASSWORD: \"yourPassword\""
+        ),
     make_option(
-        c("--metadata"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--metadata"),
+        action="store",
+        default=NA,
+        type='character',
         help="Output path for metadata. If not provided, metadata will not be written."
     ),
     make_option(
-        c("--sequences"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--sequences"),
+        action="store",
+        default=NA,
+        type='character',
         help="Output path for sequences. If not provided, sequences will not be written."
     ),
     make_option(
-        c("--aa-substitution"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--aa-substitution"),
+        action="store",
+        default=NA,
+        type='character',
         help="Query the database for amino acid substitutions."
     ),
     make_option(
-        c("--batch"), 
-        action="store", 
-        default=1000, 
-        type='integer', 
-        help="Batch size when downloading sequences and metadata"
+        c("--batch"),
+        action="store",
+        default=1000,
+        type='integer',
+        help="Batch size when downloading sequences and metadata."
     ),
     make_option(
         c("--collection-date-complete"),
@@ -58,23 +60,23 @@ option_list = list(
         help="Include only entries with complete collection date."
     ),
     make_option(
-        c("--complete"), 
+        c("--complete"),
         action="store_true",
         default=FALSE,
         help="Include only complete entries."
     ),
     make_option(
-        c("--from"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--from"),
+        action="store",
+        default=NA,
+        type='character',
         help="Restrict queries to a collection date on or after this date."
     ),
     make_option(
-        c("--from-subm"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--from-subm"),
+        action="store",
+        default=NA,
+        type='character',
         help="Restrict queries to a submission date on or after this date."
     ),
     make_option(
@@ -84,86 +86,85 @@ option_list = list(
         help="Include only high-coverage entries."
     ),
     make_option(
-        c("--lineage"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--lineage"),
+        action="store",
+        default=NA,
+        type='character',
         help="Query the EpiCoV database for a particular lineage."
     ),
     make_option(
-        c("--location"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--location"),
+        action="store",
+        default=NA,
+        type='character',
         help="Restrict queries to a location."
     ),
     make_option(
-        c("--low-coverage-excl"), 
+        c("--low-coverage-excl"),
         action="store_true",
         default=FALSE,
         help="Exclude low coverage entries."
     ),
     make_option(
-        c("--max-records"), 
-        action="store", 
-        default=NA, 
-        type='integer', 
+        c("--max-records"),
+        action="store",
+        default=NA,
+        type='integer',
         help="Limit the number of records to the first N in the query."
     ),
     make_option(
-        c("--nucl-mutation"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--nucl-mutation"),
+        action="store",
+        default=NA,
+        type='character',
         help="Query the database for nucleotide mutations."
     ),
     make_option(
-        c("--retries"), 
-        action="store", 
-        default=3, 
-        type='integer', 
+        c("--retries"),
+        action="store",
+        default=3,
+        type='integer',
         help="If a download error is encountered, retry this number of times before exiting."
     ),
     make_option(
-        c("--text"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--text"),
+        action="store",
+        default=NA,
+        type='character',
         help="Path to a txt file for plain text searches."
-    ),    
+    ),
     make_option(
-        c("--to"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--to"),
+        action="store",
+        default=NA,
+        type='character',
         help="Restrict queries to a collection date on or before this date."
     ),
     make_option(
-        c("--to-subm"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--to-subm"),
+        action="store",
+        default=NA,
+        type='character',
         help="Restrict queries to a submission date on or before this date."
     ),
     make_option(
-        c("--variant"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--variant"),
+        action="store",
+        default=NA,
+        type='character',
         help="Query the EpiCoV database for a particular variant."
     ),
     make_option(
-        c("--virus-name"), 
-        action="store", 
-        default=NA, 
-        type='character', 
+        c("--virus-name"),
+        action="store",
+        default=NA,
+        type='character',
         help="Query the database for a virus name."
     ),
     make_option(
-        c("-v", "--version"), 
-        action="store", 
-        default=NA, 
-        type='character',
+        c("-v", "--version"),
+        action="store_true",
+        default=FALSE,
         help="Display the GISAIDR version."
     )
 )
@@ -180,10 +181,24 @@ if (length(args) == 0){
     quit(status=1)
 }
 
-if (is.na(opt$credentials)){
-    message(paste0(Sys.time(), "\tERROR: --credentials is required. Please provide a credentials.yml file with your GISAID username and password.\n
-    username: \"yourUsername\"
-    password: \"yourPassword\"\n"))
+if (opt$version){
+    cat(paste0("GISAIDR v", VERSION, "\n"))
+    quit(status=1)
+}
+
+if (is.na(opt$database)){
+    message(paste0(Sys.time(), "\tERROR: --database is required. Please provide a GISAID database name (ex. '--database EpiPox', '--database EpiCoV')\n"))
+    quit(status=1)
+}
+
+if (!"GISAIDR_USERNAME" %in% names(Sys.getenv()) && !"GISAIDR_PASSWORD" %in% names(Sys.getenv()) && is.na(opt$credentials)){
+    message(paste0(Sys.time(), "\tERROR: Missing credentials. Please define the environment variables:
+    export GISAIDR_USERNAME='yourUsername'
+    export GISAIDR_PASSWORD='yourPassword'
+
+    Or provide a credentials.yml file with your GISAID username and password.\n
+    GISAIDR_USERNAME: \"yourUsername\"
+    GISAIDR_PASSWORD: \"yourPassword\"\n"))
     quit(status=1)
 }
 
@@ -197,11 +212,6 @@ if (!is.na(opt$text) && !file.exists(opt$text)){
     quit(status=1)
 }
 
-if (is.na(opt$database)){
-    message(paste0(Sys.time(), "\tERROR: --database is required. Please provide a GISAID database name (ex. '--database EpiPox', '--database EpiCoV')\n"))
-    quit(status=1)
-}
-
 if (!opt$database %in% DATABASES){
     message(paste0(Sys.time(), "\tERROR: --database ", opt$database, " is not implemented in GISAIDR v", VERSION, ". Please select one of the following: ", paste(DATABASES, collapse=", "), "\n" ))
     quit(status=1)
@@ -209,37 +219,37 @@ if (!opt$database %in% DATABASES){
 
 if (!is.na(opt$from) && !grepl(DATE_REGEX, opt$from)){
     message(paste0(Sys.time(), "\tERROR: --from ", opt$from, " does not match the format YYYY-MM-DD.", "\n" ))
-    quit(status=1)    
+    quit(status=1)
 }
 
 if (!is.na(opt$to) && !grepl(DATE_REGEX, opt$to)){
     message(paste0(Sys.time(), "\tERROR: --from ", opt$to, " does not match the format YYYY-MM-DD.", "\n" ))
-    quit(status=1)    
+    quit(status=1)
 }
 
 if (!is.na(opt$`from-subm`) && !grepl(DATE_REGEX, opt$`from-subm`)){
     message(paste0(Sys.time(), "\tERROR: --from-subm ", opt$`from-subm`, " does not match the format YYYY-MM-DD.", "\n" ))
-    quit(status=1)    
+    quit(status=1)
 }
 
 if (!is.na(opt$`to-subm`) && !grepl(DATE_REGEX, opt$`to-subm`)){
     message(paste0(Sys.time(), "\tERROR: --to-subm ", opt$`to-subm`, " does not match the format YYYY-MM-DD.", "\n" ))
-    quit(status=1)    
+    quit(status=1)
 }
 
 if (!is.na(opt$lineage) && opt$database != "EpiCoV"){
     message(paste0(Sys.time(), "\tERROR: --lineage ", opt$lineage, " is only implemented for the EpiCoV database", "\n" ))
-    quit(status=1)    
+    quit(status=1)
 }
 
 if (!is.na(opt$variant) && opt$database != "EpiCoV"){
     message(paste0(Sys.time(), "\tERROR: --variant ", opt$variant, " is only implemented for the EpiCoV database", "\n" ))
-    quit(status=1)    
+    quit(status=1)
 }
 
 if (is.na(opt$metadata) && is.na(opt$sequences)){
     message(paste0(Sys.time(), "\tERROR: Either --metadata or --sequences should be supplied.", "\n" ))
-    quit(status=1)    
+    quit(status=1)
 }
 
 # -------------------------------------------------------------------------
@@ -248,24 +258,30 @@ if (is.na(opt$metadata) && is.na(opt$sequences)){
 message(paste0(Sys.time(), "\tBegin."))
 
 # Clean up existing output files, so we can continously write to them as we batch download
-if (!is.na(opt$metadata) && file.exists(opt$metadata)) { 
-    invisible(file.remove(opt$metadata)) 
+if (!is.na(opt$metadata) && file.exists(opt$metadata)) {
+    invisible(file.remove(opt$metadata))
 }
 if (!is.na(opt$sequences)){
-    
+
     # We're going to manually write to the sequences fasta as we process batches
     # To be determined if this is more/less efficient than other line writing methods
     if (file.exists(opt$sequences)){ invisible(file.remove(opt$sequences)) }
-    sequences_file <- file(opt$sequences, open = "a") 
+    sequences_file <- file(opt$sequences, open = "a")
 }
 
 # -------------------------------------------------------------------------
 # Authenticate with GISAID
 
-message(paste0(Sys.time(), " \tReading GISAID credentials from ", opt$credentials))
-credentials <- yaml::read_yaml(opt$credentials)
-username    <- credentials$username
-password    <- credentials$password
+if (!is.na(opt$credentials)){
+    message(paste0(Sys.time(), " \tReading GISAID credentials from ", opt$credentials))
+    credentials <- yaml::read_yaml(opt$credentials)
+    username    <- credentials$GISAIDR_USERNAME
+    password    <- credentials$GISAIDR_PASSWORD
+} else {
+    username = Sys.getenv("GISAIDR_USERNAME")
+    password = Sys.getenv("GISAIDR_PASSWORD")
+}
+
 message(paste0(Sys.time(), " \tAuthenticating with GISAID ", opt$database, "."))
 credentials <- GISAIDR::login(username, password, opt$database)
 message(paste0(Sys.time(), " \tAuthentication successful."))
@@ -353,7 +369,7 @@ for(start in seq(1, length(accession_ids), opt$batch)){
                     record <- paste0(header, "\n", sequence)
                 }))
                 fasta = paste(fasta_records, collapse="\n")
-                # Undetermined if this method of manually appending a large number of 
+                # Undetermined if this method of manually appending a large number of
                 # lines to a file is more efficient.
                 cat(fasta, file= sequences_file, append=TRUE, sep="\n")
             }
@@ -371,8 +387,8 @@ for(start in seq(1, length(accession_ids), opt$batch)){
         error=function(msg) {
             message(msg)
             if (grepl("Please login again", msg)){
-            message(paste0(Sys.time(), " \t\tDownload failed, retry ", num_retries, " / ", opt$retries))  
-            message(paste0(Sys.time(), " \tRe-Authenticating with GISAID ", opt$database, "."))        
+            message(paste0(Sys.time(), " \t\tDownload failed, retry ", num_retries, " / ", opt$retries))
+            message(paste0(Sys.time(), " \tRe-Authenticating with GISAID ", opt$database, "."))
             credentials <- GISAIDR::login(username, password, database)
             return(credentials)
             }
