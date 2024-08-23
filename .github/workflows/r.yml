@@ -26,9 +26,9 @@ jobs:
       max-parallel: 1
       matrix:
         config:
+          - {os: ubuntu-latest , r: 'release'}
           - {os: macOS-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest , r: 'release'}
     steps:
       - uses: actions/checkout@v2
       - name: Set up R ${{ matrix.config.os }} (${{ matrix.config.r }})
