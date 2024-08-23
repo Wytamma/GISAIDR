@@ -89,12 +89,12 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # It's a large docker image (2G), only keep for 24 hours for testing
-      - name: upload image artifact
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: GISAIDR-docker
-          path: GISAIDR.tar
-          retention-days: 1
-          if-no-files-found: error
+      # # Disable uploading image as artifact since it's quite large ~1GB compressed
+      # - name: upload image artifact
+      #   uses: actions/upload-artifact@v3
+      #   if: always()
+      #   with:
+      #     name: GISAIDR-docker
+      #     path: GISAIDR.tar
+      #     retention-days: 1
+      #     if-no-files-found: error
