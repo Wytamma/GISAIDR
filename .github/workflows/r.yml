@@ -28,7 +28,7 @@ jobs:
         config:
           - {os: macOS-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-
+          - {os: ubuntu-latest , r: 'release'}
     steps:
       - uses: actions/checkout@v2
       - name: Set up R ${{ matrix.config.os }} (${{ matrix.config.r }})
@@ -40,8 +40,9 @@ jobs:
         run: |
           install.packages(c("remotes", "rcmdcheck", "curl"))
           remotes::install_deps(dependencies = TRUE)
-          mv bin/GISAIDR /usr/local/bin
-        shell: Rscript {0}
+      - name: Install CLI
+        if: matrix.os != 'windows-latest'
+        run: mv bin/GISAIDR /usr/local/bin
       - name: Check
         env:
           GISAIDR_PASSWORD: ${{ secrets.GISAIDR_PASSWORD }}
@@ -49,6 +50,7 @@ jobs:
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
       - name: CLI Check
+        if: matrix.os != 'windows-latest'
         run: |
           GISAIDR --version
           GISAIDR --help
