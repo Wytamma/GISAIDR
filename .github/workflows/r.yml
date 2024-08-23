@@ -40,6 +40,7 @@ jobs:
         run: |
           install.packages(c("remotes", "rcmdcheck", "curl"))
           remotes::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
       - name: Install CLI
         if: matrix.os != 'windows-latest'
         run: mv bin/GISAIDR /usr/local/bin
