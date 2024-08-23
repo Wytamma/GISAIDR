@@ -10,9 +10,9 @@ name: Build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, cli ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, cli ]
   schedule:
     - cron: '0 0 * * *'
 
@@ -40,6 +40,7 @@ jobs:
         run: |
           install.packages(c("remotes", "rcmdcheck", "curl"))
           remotes::install_deps(dependencies = TRUE)
+          mv bin/GISAIDR /usr/local/bin
         shell: Rscript {0}
       - name: Check
         env:
@@ -47,3 +48,7 @@ jobs:
           GISAIDR_USERNAME: ${{ secrets.GISAIDR_USERNAME }}
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
+      - name: CLI Check
+        run: |
+          GISAIDR --version
+          GISAIDR --help
