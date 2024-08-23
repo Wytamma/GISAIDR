@@ -10,3 +10,5 @@ COPY . /GISAIDR
 RUN micromamba run -n base Rscript -e "devtools::install('/GISAIDR')"
 
 RUN ln -s /GISAIDR/bin/GISAIDR /opt/conda/bin/GISAIDR
+
+RUN micromamba clean --all
