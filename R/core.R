@@ -333,6 +333,12 @@ log.debug <- function(msg) {
   invisible()
 }
 
+log.info <- function(msg) {
+  message(msg)
+  flush.console()
+  invisible()
+}
+
 send_request <-
   function(parameter_string = "",
            data = NULL,
