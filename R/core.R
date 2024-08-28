@@ -333,8 +333,27 @@ log.debug <- function(msg) {
   invisible()
 }
 
-log.info <- function(msg) {
-  message(msg)
+log.error <- function(msg) {
+  message(paste0(Sys.time(), "\tERROR: ", msg))
+  flush.console()
+  invisible()
+}
+
+log.warn <- function(msg) {
+  message(paste0(Sys.time(), "\tWARNING: ", msg))
+  flush.console()
+  invisible()
+}
+
+log.info <- function(msg, level=1) {
+  if (Sys.getenv("GISAIDR_VERBOSITY") != ""){
+    verbosity <- Sys.getenv("GISAIDR_VERBOSITY")
+  } else {
+    verbosity <- 1
+  }
+  if (verbosity >= level){
+    message(paste0(Sys.time(), "\tINFO: ", msg))
+  }
   flush.console()
   invisible()
 }
