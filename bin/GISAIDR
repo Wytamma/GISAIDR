@@ -7,6 +7,8 @@ DATABASES  <- c("EpiCoV", "EpiPox", "EpiRSV")
 VERSION    <- paste(packageVersion("GISAIDR"))
 DATE_REGEX <- "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
 
+mandatory_options = 
+
 option_list = list(
     make_option(
         c("--database"),
@@ -25,18 +27,41 @@ option_list = list(
             \tGISAIDR_PASSWORD: \"yourPassword\""
         ),
     make_option(
-        c("--metadata"),
+        c("--prefix"),
         action="store",
         default=NA,
         type='character',
-        help="Output path for metadata. If not provided, metadata will not be written."
+        help="Optional prefix for output files. If not provided, metadata will be saved to 'metadata.tsv' and sequences to 'sequences.fasta'."
     ),
     make_option(
         c("--sequences"),
-        action="store",
-        default=NA,
-        type='character',
-        help="Output path for sequences. If not provided, sequences will not be written."
+        action="store_true",
+        default=FALSE,
+        help="Download nucleotide sequences."
+    ),
+    make_option(
+        c("--dates-and-location"),
+        action="store_true",
+        default=FALSE,
+        help="Download dates and location metadata."
+    ),
+    make_option(
+        c("--patient-status"),
+        action="store_true",
+        default=FALSE,
+        help="Download patient status metadata."
+    ),
+    make_option(
+        c("--sequencing-technology"),
+        action="store_true",
+        default=FALSE,
+        help="Download sequencing technology metadata."
+    ),
+    make_option(
+        c("--augur-input"),
+        action="store_true",
+        default=FALSE,
+        help="Download augur input sequences and metadata."
     ),
     make_option(
         c("--aa-substitution"),
@@ -121,7 +146,7 @@ option_list = list(
     make_option(
         c("--retries"),
         action="store",
-        default=3,
+        default=2,
         type='integer',
         help="If a download error is encountered, retry this number of times before exiting."
     ),
@@ -167,6 +192,13 @@ option_list = list(
         help="Enable debugging output."
     ),
     make_option(
+        c("--verbosity"),
+        action="store",
+        default=1,
+        type="integer",
+        help="Set verbosity level of logging (ex. '--verbosity 1', '--verbosity 2')."
+    ),
+    make_option(
         c("-v", "--version"),
         action="store_true",
         default=FALSE,
@@ -194,95 +226,119 @@ if (opt$version){
 if (opt$debug){
     Sys.setenv(GISAIDR_DEBUG = 1)
 }
+if (opt$verbosity){
+    Sys.setenv(GISAIDR_VERBOSITY = opt$verbosity)
+}
 
 if (is.na(opt$database)){
-    message(paste0(Sys.time(), "\tERROR: --database is required. Please provide a GISAID database name (ex. '--database EpiPox', '--database EpiCoV')\n"))
+    GISAIDR::log.error(paste("--database is required. Please provide a GISAID database name (", paste(DATABASES, collapse=", "), ")."))
     quit(status=1)
 }
 
 if (!"GISAIDR_USERNAME" %in% names(Sys.getenv()) && !"GISAIDR_PASSWORD" %in% names(Sys.getenv()) && is.na(opt$credentials)){
-    message(paste0(Sys.time(), "\tERROR: Missing credentials. Please define the environment variables:
+    GISAIDR::log.error("Missing credentials. Please define the environment variables:
     export GISAIDR_USERNAME='yourUsername'
     export GISAIDR_PASSWORD='yourPassword'
 
     Or provide a credentials.yml file with your GISAID username and password.\n
     GISAIDR_USERNAME: \"yourUsername\"
-    GISAIDR_PASSWORD: \"yourPassword\"\n"))
+    GISAIDR_PASSWORD: \"yourPassword\"")
     quit(status=1)
 }
 
 if (!file.exists(opt$credentials)){
-    message(paste0(Sys.time(), "\tERROR: --credentials file does not exist: ", opt$credentials, "\n"))
+    GISAIDR::log.error(paste("--credentials file does not exist:", opt$credentials))
     quit(status=1)
 }
 
 if (!is.na(opt$text) && !file.exists(opt$text)){
-    message(paste0(Sys.time(), "\tERROR: --text file does not exist: ", opt$text, "\n"))
+    GISAIDR::log.error(paste("--text file does not exist:", opt$text))
     quit(status=1)
 }
 
 if (!opt$database %in% DATABASES){
-    message(paste0(Sys.time(), "\tERROR: --database ", opt$database, " is not implemented in GISAIDR v", VERSION, ". Please select one of the following: ", paste(DATABASES, collapse=", "), "\n" ))
+    GISAIDR::log.error(paste0("--database ", opt$database, " is not implemented in GISAIDR v", VERSION, ". Please select one of the following: ", paste(DATABASES, collapse=", ")))
     quit(status=1)
 }
 
 if (!is.na(opt$from) && !grepl(DATE_REGEX, opt$from)){
-    message(paste0(Sys.time(), "\tERROR: --from ", opt$from, " does not match the format YYYY-MM-DD.", "\n" ))
+    GISAIDR::log.error(paste("--from", opt$from, "does not match the format YYYY-MM-DD."))
     quit(status=1)
 }
 
 if (!is.na(opt$to) && !grepl(DATE_REGEX, opt$to)){
-    message(paste0(Sys.time(), "\tERROR: --from ", opt$to, " does not match the format YYYY-MM-DD.", "\n" ))
+    GISAIDR::log.error(paste("--from", opt$to, "does not match the format YYYY-MM-DD."))
     quit(status=1)
 }
 
 if (!is.na(opt$`from-subm`) && !grepl(DATE_REGEX, opt$`from-subm`)){
-    message(paste0(Sys.time(), "\tERROR: --from-subm ", opt$`from-subm`, " does not match the format YYYY-MM-DD.", "\n" ))
+    GISAIDR::log.error(paste("--from-subm", opt$`from-subm`, "does not match the format YYYY-MM-DD."))
     quit(status=1)
 }
 
 if (!is.na(opt$`to-subm`) && !grepl(DATE_REGEX, opt$`to-subm`)){
-    message(paste0(Sys.time(), "\tERROR: --to-subm ", opt$`to-subm`, " does not match the format YYYY-MM-DD.", "\n" ))
+    GISAIDR::log.error(paste("--to-subm", opt$`to-subm`, "does not match the format YYYY-MM-DD."))
     quit(status=1)
 }
 
 if (!is.na(opt$lineage) && opt$database != "EpiCoV"){
-    message(paste0(Sys.time(), "\tERROR: --lineage ", opt$lineage, " is only implemented for the EpiCoV database", "\n" ))
+    GISAIDR::log.error(paste("--lineage", opt$lineage, "is only implemented for the EpiCoV database."))
     quit(status=1)
 }
 
 if (!is.na(opt$variant) && opt$database != "EpiCoV"){
-    message(paste0(Sys.time(), "\tERROR: --variant ", opt$variant, " is only implemented for the EpiCoV database", "\n" ))
-    quit(status=1)
-}
-
-if (is.na(opt$metadata) && is.na(opt$sequences)){
-    message(paste0(Sys.time(), "\tERROR: Either --metadata or --sequences should be supplied.", "\n" ))
+    GISAIDR::log.error(paste("--variant", opt$variant, "is only implemented for the EpiCoV database."))
     quit(status=1)
 }
 
 # -------------------------------------------------------------------------
 # Input/Output
 
-message(paste0(Sys.time(), "\tBegin."))
+GISAIDR::log.info("Begin.")
+
+# augur_input and sequences are redundant
+if(opt$`augur-input` && opt$sequences){
+    log.warn("Download types --augur-input and --sequences are redundant. Skipping separate sequences download.")
+    opt$sequences <- FALSE
+}
+
+if (!is.na(opt$prefix)){ 
+    metadata_file_path  <- paste0(opt$prefix, ".metadata.tsv")
+    sequences_file_path <- paste0(opt$prefix, ".sequences.fasta")
+} else {
+    metadata_file_path  <- "metadata.tsv"
+    sequences_file_path <- "sequences.fasta"
+}
 
 # Clean up existing output files, so we can continously write to them as we batch download
-if (!is.na(opt$metadata) && file.exists(opt$metadata)) {
-    invisible(file.remove(opt$metadata))
+if (opt$`augur-input` || opt$`dates-and-location` || opt$`patient-status` || opt$`sequencing-technology`){
+    if (file.exists(metadata_file_path)) {
+        GISAIDR::log.info(paste("Removing existing metadata file:", metadata_file_path))
+        invisible(file.remove(metadata_file_path))
+    }
 }
-if (!is.na(opt$sequences)){
-
+if (opt$`augur-input` || opt$sequences) {
+    if (file.exists(sequences_file_path)) { 
+        GISAIDR::log.info(paste("Removing existing sequences file:", sequences_file_path))
+        invisible(file.remove(sequences_file_path)) 
+    }
     # We're going to manually write to the sequences fasta as we process batches
-    # To be determined if this is more/less efficient than other line writing methods
-    if (file.exists(opt$sequences)){ invisible(file.remove(opt$sequences)) }
-    sequences_file <- file(opt$sequences, open = "a")
+    # To be determined if this is more/less efficient than other line writing methods    
+    sequences_file <- file(sequences_file_path, open = "a")
+}
+if (opt$`augur-input`){
+    augur_input_dir <- "gisaidr_augur_input_tmp"
+    if (dir.exists(augur_input_dir)){
+        GISAIDR::log.info(paste("Removing existing augur input directory:", augur_input_dir))
+        unlink(augur_input_dir, recursive=TRUE)
+    }
 }
 
 # -------------------------------------------------------------------------
 # Authenticate with GISAID
 
 if (!is.na(opt$credentials)){
-    message(paste0(Sys.time(), " \tReading GISAID credentials from ", opt$credentials))
+    GISAIDR::log.info(paste("Reading GISAID credentials file:", opt$credentials))
     credentials <- yaml::read_yaml(opt$credentials)
     username    <- credentials$GISAIDR_USERNAME
     password    <- credentials$GISAIDR_PASSWORD
@@ -291,14 +347,14 @@ if (!is.na(opt$credentials)){
     password = Sys.getenv("GISAIDR_PASSWORD")
 }
 
-message(paste0(Sys.time(), " \tAuthenticating with GISAID ", opt$database, "."))
+GISAIDR::log.info(paste("Authenticating with GISAID:", opt$database))
 credentials <- GISAIDR::login(username, password, opt$database)
-message(paste0(Sys.time(), " \tAuthentication successful."))
+GISAIDR::log.info("Authentication successful.")
 
 # -------------------------------------------------------------------------
 # Query
 
-message(paste0(Sys.time(), " \tQuerying GISAID ", opt$database, "."))
+log.info(paste("Querying GISAID:", opt$database))
 
 # Dynamically create the query from the command-line arguments
 query_args <- c()
@@ -322,12 +378,12 @@ if (!is.na(opt$text))                       { query_args$text <- paste(readLines
 
 suppressMessages(query_result <- do.call(GISAIDR::query, as.list(query_args)))
 
-message(paste0(Sys.time(), " \tFound ", nrow(query_result), " records."))
+log.info(paste("Found", nrow(query_result), "records."))
 # Sort by accession id (newest submissions to oldest)
 query_result$accession_id <- sort(query_result[["accession_id"]], decreasing = TRUE)
 
 if (!is.na(opt$`max-records`) && opt$`max-records` >= 0){
-    message(paste0(Sys.time(), " \tRestricting the number of records to --max-records ", opt$`max-records`))
+    log.info(paste0("Restricting the number of records to --max-records ", opt$`max-records`, "."))
     query_result <- head(query_result, opt$`max-records`)
 }
 
@@ -337,10 +393,11 @@ accession_ids <- query_result[["accession_id"]]
 # Download
 
 # iterate through the accessions in batch chunks
+if (length(accession_ids) < opt$batch){ opt$batch <- length(accession_ids)}
 total_batches <- ceiling(length(accession_ids) / opt$batch)
 num_batches   <- 0
 
-message(paste0(Sys.time(), " \tDownloading ", total_batches, " batch(es) of size ", opt$batch, "."))
+GISAIDR::log.info(paste0("Downloading ", total_batches, " batch(es) of size ", opt$batch, "."))
 
 for(start in seq(1, length(accession_ids), opt$batch)){
 
@@ -349,65 +406,102 @@ for(start in seq(1, length(accession_ids), opt$batch)){
     # Figure out our batch size for the current iteration
     end <- start + opt$batch - 1
     if (end > length(accession_ids)){end <- length(accession_ids)}
-    message(paste0(Sys.time(), " \tBatch: ", num_batches, " / ", total_batches))
+    GISAIDR::log.info(paste("Batch:", num_batches, "/", total_batches))
     batch_accession_ids <- accession_ids[start:end]
 
     num_retries <- 0
-    while(num_retries < opt$retries){
+    while(num_retries <= opt$retries){
 
         num_retries <- num_retries + 1
         # if download fails, we'll log back in and update credentials
-        credentials <- tryCatch(
-        # try
-        {
-            # Download from GISAID
+        credentials <- tryCatch({
+            # Configure download args and types
             download_args <- c()
             download_args$credentials           <- credentials
             download_args$list_of_accession_ids <- batch_accession_ids
-            if (is.na(opt$sequences)) { download_args$get_sequence=FALSE }
-            batch_result <- do.call(GISAIDR::download, as.list(download_args))
 
-            # Put newest submissions first in this batch
-            metadata <- batch_result[order(batch_result$accession_id, decreasing=TRUE), ]
+            download_types <- c()
+            if (opt$`dates-and-location`   ){ download_types <- c(download_types, "dates_and_location") }
+            if (opt$`patient-status`       ){ download_types <- c(download_types, "patient_status") }
+            if (opt$`sequencing-technology`){ download_types <- c(download_types, "sequencing_technology") }
+            if (opt$`augur-input`          ){ download_types <- c(download_types, "augur_input") }
+            if (opt$`sequences`            ){ download_types <- c(download_types, "sequences") }
+            for (download_type in download_types){ download_args[[download_type]] <- TRUE }
 
-            # Write sequences to file
-            if (!is.na(opt$sequences)){
-                fasta_records <- unlist(lapply(seq(1, nrow(metadata)), function(row_i){
-                    header  <- paste0(">", batch_result[row_i, "strain"])
-                    sequence <- paste0(batch_result[row_i, "sequence"])
-                    record <- paste0(header, "\n", sequence)
-                }))
-                fasta = paste(fasta_records, collapse="\n")
-                # Undetermined if this method of manually appending a large number of
-                # lines to a file is more efficient.
-                cat(fasta, file= sequences_file, append=TRUE, sep="\n")
+            # Download files
+            download_results <- do.call(download_files, as.list(download_args))
+
+            # Merge metadata files
+            metadata  <- NULL            
+            for (download_type in download_types){
+
+                if (download_type == "sequences"){ next }
+                result <- download_results[[download_type]]
+                if (download_type == "augur_input"){
+                    df <- result$metadata
+                    join_col <- "gisaid_epi_isl"
+                } else {
+                    df <- result
+                    join_col <- "Accession ID"
+                }
+                if (is.null(metadata)){
+                    metadata <- df
+                } else {
+                    cols <- unique(c(join_col, colnames(df)[!colnames(df) %in% colnames(metadata)]))
+                    metadata <- merge(metadata, df[cols], by.x="Accession ID", by.y = join_col)
+                }
+            }
+            # Write merged metadata
+            if (!is.null(metadata)){
+                # Put newest submissions first if possible
+                if ("gisaid_epi_isl" %in% colnames(metadata)){ order_by <- "gisaid_epi_isl" } 
+                else { order_by <- "Accession ID"}
+                metadata <- metadata[order(metadata[[order_by]], decreasing=TRUE), ]
+                # Append to output file
+                suppressWarnings(write.table(
+                    metadata, 
+                    metadata_file_path,
+                    row.names = FALSE, 
+                    quote = FALSE, 
+                    sep = "\t", 
+                    col.names = !file.exists(metadata_file_path), 
+                    append = TRUE
+                ))
             }
 
-            # Write metadata to file
-            if (!is.na(opt$metadata)){
-                # remove the sequence column
-                if (!is.na(opt$sequences)){ metadata <- subset(metadata, select = -c(sequence)) }
-                write.table(metadata, opt$metadata, row.names = FALSE, quote = FALSE, sep = "\t", col.names = !file.exists(opt$metadata), append = TRUE)
+            # Write sequences to file, either from --sequences or --augur-input
+            sequences <- NULL
+            if (!is.null(download_results$sequences)){
+                sequences <- download_results$sequences
+            } else if (!is.null(download_results$augur) && !is.null(download_results$augur$sequences)){
+                sequences <- download_results$augur$sequences
             }
-            # Break out of the tryCatch block, continue to next batch
+            if (!is.null(sequences)){
+                cat(sequences, file=sequences_file, append=TRUE)
+            }            
+
+            # Break out of the while loop of download retries, continue on to next batch
             break
         },
         # errors
         error=function(msg) {
-            message(msg)
+            GISAIDR::log.info(paste("Download error: ", msg))
             if (grepl("Please login again", msg)){
-            message(paste0(Sys.time(), " \t\tDownload failed, retry ", num_retries, " / ", opt$retries))
-            message(paste0(Sys.time(), " \tRe-Authenticating with GISAID ", opt$database, "."))
-            credentials <- GISAIDR::login(username, password, database)
-            return(credentials)
+                if (num_retries >= opt$retries){
+                    log.info(paste("Download failed, no retries remaining:", num_retries, "/", opt$retries))
+                    quit(status=1)
+                }
+                GISAIDR::log.info(paste("Download failed, retry:", num_retries, "/", opt$retries))
+                GISAIDR::log.info(paste("Re-Authenticating with GISAID:", opt$database))
+                credentials <- GISAIDR::login(username, password, opt$database)
+                return(credentials)
             }
-        }
-        )
+        })
     }
 }
 
-if (!is.na(opt$sequences)){
+if (opt$`augur-input` || opt$sequences) {
     close(sequences_file)
 }
 
-message(paste0(Sys.time(), "\tDone."))
+GISAIDR::log.info("Done")
