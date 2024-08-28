@@ -61,19 +61,14 @@ jobs:
           devtools::install(".")
         shell: Rscript {0}
 
-      # Only for unix-based systems, for windows we'll call directly
-      - name: Install CLI (Unix)
-        if: ${{ matrix.config.os != 'windows-latest' }}
-        run: mv bin/GISAIDR /usr/local/bin
-
       - name: Check CLI (Unix)
         if: ${{ matrix.config.os != 'windows-latest' }}
         run: |
-          GISAIDR --version
-          GISAIDR --help
+          bin/GISAIDR --version
+          bin/GISAIDR --help
 
       - name: Check CLI (Windows)
         if: ${{ matrix.config.os == 'windows-latest' }}
         run: |
-          Rscript.exe bin\GISAIDR --version
-          Rscript.exe bin\GISAIDR --help
+          bin\GISAIDR.bat --version
+          bin\GISAIDR.bat --help
