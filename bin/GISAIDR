@@ -429,6 +429,7 @@ if (!is.na(opt$accessions)){
     if (!is.na(opt$`to-subm`))                  { query_args$to_subm    <- opt$`to-subm`}
     if (!is.na(opt$lineage))                    { query_args$lineage    <- opt$lineage}
     if (!is.na(opt$variant))                    { query_args$variant    <- opt$variant}
+    if (!is.na(opt$subtype))                    { query_args$subtype    <- opt$subtype}
     if (!is.na(opt$`virus-name`))               { query_args$virus_name <- opt$`virus-name`}
     if (!is.na(opt$`aa-substitution`))          { query_args$aa_substitution <- opt$`aa-substitution`}
     if (!is.na(opt$`nucl-mutation`))            { query_args$nucl_mutation <- opt$`nucl-mutation`}

@@ -39,6 +39,7 @@ internal_query <-
     order_by = NULL,
     aa_substitution = NULL,
     nucl_mutation = NULL,
+    subtype = NULL,
     order_asc = TRUE,
     start_index = 0,
     nrows = 50,
@@ -48,8 +49,7 @@ internal_query <-
     high_coverage = FALSE,
     collection_date_complete = FALSE,
     total = FALSE,
-    fast = FALSE,
-    subtype = FALSE
+    fast = FALSE
     ) {
 
     df <- tryCatch({
@@ -84,11 +84,11 @@ internal_query <-
         }
       }
 
-      # # Subtype (EpiRSV)
-      # if (!is.null(subtype) && credentials$database == "EpiRSV") {
-      #   new_queue <- create_search_queue(credentials, credentials$subtype_ceid, subtype, 'FilterChange')
-      #   queue     <- append(queue, new_queue)
-      # }
+      # Subtype (EpiRSV)
+      if (!is.null(subtype) && credentials$database == "EpiRSV") {
+        new_queue <- create_search_queue(credentials, credentials$subtype_ceid, subtype, 'FilterChange')
+        queue     <- append(queue, new_queue)
+      }
 
       # Subtype (EpiCoV)
       if (!is.null(variant) && credentials$database == "EpiCoV") {

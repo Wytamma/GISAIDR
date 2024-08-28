@@ -40,6 +40,7 @@ query <-
            order_by = NULL,
            aa_substitution = NULL,
            nucl_mutation = NULL,
+           subtype = NULL,
            order_asc = TRUE,
            start_index = 0,
            nrows = 50,
@@ -49,8 +50,7 @@ query <-
            high_coverage = FALSE,
            collection_date_complete = FALSE,
            total = FALSE,
-           fast = FALSE,
-           subtype = FALSE
+           fast = FALSE
            ) {
 
     if (nrows > 50 && !total && !load_all && !fast) {
