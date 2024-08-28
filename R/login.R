@@ -11,7 +11,7 @@
 #' login(username, password)
 login <- function(username, password, database="EpiCoV") {
   if (!database %in% c("EpiCoV", "EpiRSV", "EpiPox")) {
-    stop(sprintf("Database must be EpiCoV, EpiRSV or EpiPox (database=%s)", database))
+    stop(log.error(paste("Database must be EpiCoV, EpiRSV or EpiPox", database)))
   }
   # get a session ID
   response <- send_request()
@@ -195,9 +195,18 @@ login <- function(username, password, database="EpiCoV") {
 
   # Lineage
   if (database == 'EpiCoV'){
-    linage_ceid <- extract_search_ceid('pangolin_lineage', customSearch_page_text)
+    lineage_ceid <- extract_search_ceid('pangolin_lineage', customSearch_page_text)
+  } else if (database == 'EpiPox') {
+    lineage_ceid <- extract_search_ceid('covsurver_cladelineage', customSearch_page_text)
   } else {
-    linage_ceid <- NULL
+    lineage_ceid <- NULL
+  }
+
+  # Subtype
+  if (database == 'EpiRSV'){
+    subtype_ceid <- extract_search_ceid('covv_subtype', customSearch_page_text)
+  } else {
+    subtype_ceid <- NULL
   }
 
   # Virus Name
@@ -245,7 +254,7 @@ login <- function(username, password, database="EpiCoV") {
     quality_ceid <- NULL
   } else {
     text_ceid <- NULL
-    aa_substitution_ceid <- NULL
+    aa_substitution_ceid <- extract_search_ceid('mutation', customSearch_page_text)
     nucl_mutation_ceid <- NULL
     variant_ceid <- NULL
     complete_ceid <- NULL
@@ -289,7 +298,7 @@ login <- function(username, password, database="EpiCoV") {
       search_cid = search_cid,
       aa_substitution_ceid = aa_substitution_ceid,
       nucl_mutation_ceid = nucl_mutation_ceid,
-      linage_ceid = linage_ceid,
+      lineage_ceid = lineage_ceid,
       virus_name_ceid = virus_name_ceid,
       from_ceid = from_ceid,
       from_sub_ceid = from_sub_ceid,
@@ -300,7 +309,8 @@ login <- function(username, password, database="EpiCoV") {
       complete_ceid = complete_ceid,
       collection_date_complete_ceid = collection_date_complete_ceid,
       quality_ceid = quality_ceid,
-      variant_ceid = variant_ceid
+      variant_ceid = variant_ceid,
+      subtype_ceid = subtype_ceid
     )
 
   return(credentials)
