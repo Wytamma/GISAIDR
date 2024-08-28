@@ -343,6 +343,12 @@ if (opt$`augur-input` && opt$database != "EpiCoV"){
     quit(status=1)
 }
 
+# No output chosen
+if (!opt$`augur-input` && !opt$`dates-and-location` && !opt$`patient-status` && !opt$`sequencing-technology` && !opt$sequences){
+    GISAIDR::log.error(paste("At least one output must be selected from sequences and metadata, please see --help."))
+    quit(status=1)
+}
+
 # -------------------------------------------------------------------------
 # Input/Output
 
@@ -402,7 +408,6 @@ if (!is.na(opt$credentials)){
 GISAIDR::log.info(paste("Authenticating with GISAID:", opt$database))
 credentials <- GISAIDR::login(username, password, opt$database)
 GISAIDR::log.info("Authentication successful.")
-
 
 # -------------------------------------------------------------------------
 # Query

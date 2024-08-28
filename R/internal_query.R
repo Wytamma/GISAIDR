@@ -23,34 +23,34 @@
 #' @param fast returns all of the accession_ids that match the query.
 #' @param aa_substitution returns all sequences with the amino acid mutation(s), negative selection by '-' prefix
 #' @param nucl_mutation returns all sequences with the nucleotide mutation(s), negative selection by '-' prefix
+#' @param subtype returns all sequences with the subtype
 #' @return Dataframe.
 internal_query <-
   function(credentials,
-           text = NULL,
-           location = NULL,
-           lineage = NULL,
-           variant = NULL,
-           from = NULL,
-           from_subm = NULL,
-           to = NULL,
-           to_subm = NULL,
-           virus_name = NULL,
-           order_by = NULL,
-           aa_substitution = NULL,
-           nucl_mutation = NULL,
-           order_asc = TRUE,
-           start_index = 0,
-           nrows = 50,
-           load_all = FALSE,
-           low_coverage_excl = FALSE,
-           complete = FALSE,
-           high_coverage = FALSE,
-           collection_date_complete = FALSE,
-           total = FALSE,
-           fast = FALSE,
-           subtype = FALSE
-           ) {
-
+    text = NULL,
+    location = NULL,
+    lineage = NULL,
+    variant = NULL,
+    from = NULL,
+    from_subm = NULL,
+    to = NULL,
+    to_subm = NULL,
+    virus_name = NULL,
+    order_by = NULL,
+    aa_substitution = NULL,
+    nucl_mutation = NULL,
+    order_asc = TRUE,
+    start_index = 0,
+    nrows = 50,
+    load_all = FALSE,
+    low_coverage_excl = FALSE,
+    complete = FALSE,
+    high_coverage = FALSE,
+    collection_date_complete = FALSE,
+    total = FALSE,
+    fast = FALSE,
+    subtype = FALSE
+    ) {
 
     df <- tryCatch({
       queue = list()
@@ -84,11 +84,11 @@ internal_query <-
         }
       }
 
-      # Subtype (EpiRSV)
-      if (!is.null(subtype) && credentials$database == "EpiRSV") {
-        new_queue <- create_search_queue(credentials, credentials$subtype_ceid, subtype, 'FilterChange')
-        queue     <- append(queue, new_queue)
-      }
+      # # Subtype (EpiRSV)
+      # if (!is.null(subtype) && credentials$database == "EpiRSV") {
+      #   new_queue <- create_search_queue(credentials, credentials$subtype_ceid, subtype, 'FilterChange')
+      #   queue     <- append(queue, new_queue)
+      # }
 
       # Subtype (EpiCoV)
       if (!is.null(variant) && credentials$database == "EpiCoV") {
@@ -180,7 +180,9 @@ internal_query <-
             queue = command_queue,
             timestamp = timestamp()
           )
-        res <- httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+        response <- httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+        response_data <- parseResponse(response)
+        log.debug(response_data)
       }
 
       queue = list()
