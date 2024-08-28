@@ -7,68 +7,26 @@ DATABASES  <- c("EpiCoV", "EpiPox", "EpiRSV")
 VERSION    <- paste(packageVersion("GISAIDR"))
 DATE_REGEX <- "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
 
-mandatory_options = 
-
 option_list = list(
-    make_option(
-        c("--database"),
-        action="store",
-        default=NA,
-        type='character',
-        help= paste0("[REQUIRED] GISAID database name ( ", paste(DATABASES, collapse=", "), " ).")
-    ),
-    make_option(
-        c("--credentials"),
-        action="store",
-        default=NA,
-        type='character',
-        help="Path to yaml file with GISAID credentials. Required If GISAIDR_USERNAME and GISAIDR_PASSWORD are not defined as environment variables:\n
-            \tGISAIDR_USERNAME: \"yourUsername\"
-            \tGISAIDR_PASSWORD: \"yourPassword\""
-        ),
-    make_option(
-        c("--prefix"),
-        action="store",
-        default=NA,
-        type='character',
-        help="Optional prefix for output files. If not provided, metadata will be saved to 'metadata.tsv' and sequences to 'sequences.fasta'."
-    ),
-    make_option(
-        c("--sequences"),
-        action="store_true",
-        default=FALSE,
-        help="Download nucleotide sequences."
-    ),
-    make_option(
-        c("--dates-and-location"),
-        action="store_true",
-        default=FALSE,
-        help="Download dates and location metadata."
-    ),
-    make_option(
-        c("--patient-status"),
-        action="store_true",
-        default=FALSE,
-        help="Download patient status metadata."
-    ),
-    make_option(
-        c("--sequencing-technology"),
-        action="store_true",
-        default=FALSE,
-        help="Download sequencing technology metadata."
-    ),
-    make_option(
-        c("--augur-input"),
-        action="store_true",
-        default=FALSE,
-        help="Download augur input sequences and metadata."
-    ),
     make_option(
         c("--aa-substitution"),
         action="store",
         default=NA,
         type='character',
         help="Query the database for amino acid substitutions."
+    ),
+    make_option(
+        c("--accessions"),
+        action="store",
+        default=NA,
+        type='character',
+        help="Path to a txt file of GISAID accessions, new-line separated."
+    ),
+    make_option(
+        c("--augur-input"),
+        action="store_true",
+        default=FALSE,
+        help="Download augur input sequences and metadata."
     ),
     make_option(
         c("--batch"),
@@ -88,6 +46,34 @@ option_list = list(
         action="store_true",
         default=FALSE,
         help="Include only complete entries."
+    ),
+    make_option(
+        c("--credentials"),
+        action="store",
+        default=NA,
+        type='character',
+        help="Path to yaml file with GISAID credentials. Required If GISAIDR_USERNAME and GISAIDR_PASSWORD are not defined as environment variables:\n
+            \tGISAIDR_USERNAME: \"yourUsername\"
+            \tGISAIDR_PASSWORD: \"yourPassword\""
+        ),
+    make_option(
+        c("--database"),
+        action="store",
+        default=NA,
+        type='character',
+        help= paste0("[REQUIRED] GISAID database name ( ", paste(DATABASES, collapse=", "), " ).")
+    ),
+    make_option(
+        c("--dates-and-location"),
+        action="store_true",
+        default=FALSE,
+        help="Download dates and location metadata."
+    ),
+    make_option(
+        c("--debug"),
+        action="store_true",
+        default=FALSE,
+        help="Enable debugging output."
     ),
     make_option(
         c("--from"),
@@ -114,7 +100,9 @@ option_list = list(
         action="store",
         default=NA,
         type='character',
-        help="Query the EpiCoV database for a particular lineage."
+        help="Query for a particular lineage. For EpiPox, it must also include the clade:\n
+        \tEpiCoV: --lineage 'KP.3.1'
+        \tEpiPox: --lineage 'IIb A.1'"
     ),
     make_option(
         c("--location"),
@@ -144,11 +132,56 @@ option_list = list(
         help="Query the database for nucleotide mutations."
     ),
     make_option(
+        c("--order-by"),
+        action="store",
+        default=NA,
+        type='character',
+        help="Order the final metadata by this column. Note: sequences will not follow this order."
+    ),
+    make_option(
+        c("--order-by-rev"),
+        action="store_true",
+        default=FALSE,
+        help="Reverse the order of the final metadata."
+    ),
+    make_option(
+        c("--patient-status"),
+        action="store_true",
+        default=FALSE,
+        help="Download patient status metadata."
+    ),
+    make_option(
+        c("--prefix"),
+        action="store",
+        default=NA,
+        type='character',
+        help="Optional prefix for output files. If not provided, metadata will be saved to 'metadata.tsv' and sequences to 'sequences.fasta'."
+    ),
+    make_option(
         c("--retries"),
         action="store",
         default=2,
         type='integer',
         help="If a download error is encountered, retry this number of times before exiting."
+    ),
+    make_option(
+        c("--sequences"),
+        action="store_true",
+        default=FALSE,
+        help="Download nucleotide sequences."
+    ),
+    make_option(
+        c("--sequencing-technology"),
+        action="store_true",
+        default=FALSE,
+        help="Download sequencing technology metadata."
+    ),
+    make_option(
+        c("--subtype"),
+        action="store",
+        default=NA,
+        type='character',
+        help="Query the EpiRSV database for a particular subtype."
     ),
     make_option(
         c("--text"),
@@ -179,19 +212,6 @@ option_list = list(
         help="Query the EpiCoV database for a particular variant."
     ),
     make_option(
-        c("--virus-name"),
-        action="store",
-        default=NA,
-        type='character',
-        help="Query the database for a virus name."
-    ),
-    make_option(
-        c("--debug"),
-        action="store_true",
-        default=FALSE,
-        help="Enable debugging output."
-    ),
-    make_option(
         c("--verbosity"),
         action="store",
         default=1,
@@ -199,10 +219,17 @@ option_list = list(
         help="Set verbosity level of logging (ex. '--verbosity 1', '--verbosity 2')."
     ),
     make_option(
-        c("-v", "--version"),
+        c("--version"),
         action="store_true",
         default=FALSE,
         help="Display the GISAIDR version."
+    ),
+    make_option(
+        c("--virus-name"),
+        action="store",
+        default=NA,
+        type='character',
+        help="Query the database for a virus name."
     )
 )
 
@@ -256,6 +283,11 @@ if (!is.na(opt$text) && !file.exists(opt$text)){
     quit(status=1)
 }
 
+if (!is.na(opt$accessions) && !file.exists(opt$accessions)){
+    GISAIDR::log.error(paste("--accessions file does not exist:", opt$accessions))
+    quit(status=1)
+}
+
 if (!opt$database %in% DATABASES){
     GISAIDR::log.error(paste0("--database ", opt$database, " is not implemented in GISAIDR v", VERSION, ". Please select one of the following: ", paste(DATABASES, collapse=", ")))
     quit(status=1)
@@ -281,13 +313,33 @@ if (!is.na(opt$`to-subm`) && !grepl(DATE_REGEX, opt$`to-subm`)){
     quit(status=1)
 }
 
-if (!is.na(opt$lineage) && opt$database != "EpiCoV"){
-    GISAIDR::log.error(paste("--lineage", opt$lineage, "is only implemented for the EpiCoV database."))
-    quit(status=1)
-}
+# if (!is.na(opt$lineage) && opt$database != "EpiCoV"){
+#     GISAIDR::log.error(paste("--lineage", opt$lineage, "is only implemented for the EpiCoV database."))
+#     quit(status=1)
+# }
 
 if (!is.na(opt$variant) && opt$database != "EpiCoV"){
     GISAIDR::log.error(paste("--variant", opt$variant, "is only implemented for the EpiCoV database."))
+    quit(status=1)
+}
+
+if (!is.na(opt$text) && opt$database != "EpiCoV"){
+    GISAIDR::log.error(paste("--text search is only available for the EpiCoV database. Maybe you would like to try an --accessions file?"))
+    quit(status=1)
+}
+
+if (!is.na(opt$`nucl-mutation`) && opt$database != "EpiCoV"){
+    GISAIDR::log.error(paste("--nucl-mutation is only available for the EpiCoV database."))
+    quit(status=1)
+}
+
+if (!is.na(opt$subtype) && opt$database != "EpiRSV"){
+    GISAIDR::log.error(paste("--subtype is only available for the EpiRSV database."))
+    quit(status=1)
+}
+
+if (opt$`augur-input` && opt$database != "EpiCoV"){
+    GISAIDR::log.error(paste("--augur-input is only available for the EpiCoV database."))
     quit(status=1)
 }
 
@@ -351,43 +403,53 @@ GISAIDR::log.info(paste("Authenticating with GISAID:", opt$database))
 credentials <- GISAIDR::login(username, password, opt$database)
 GISAIDR::log.info("Authentication successful.")
 
+
 # -------------------------------------------------------------------------
 # Query
 
-log.info(paste("Querying GISAID:", opt$database))
+if (!is.na(opt$accessions)){
+    log.info(paste("Reading GISAID accessions file:", opt$accessions))
+    accession_ids <- readLines(opt$accessions)
+} else {
+    log.info(paste("Querying GISAID:", opt$database))
 
-# Dynamically create the query from the command-line arguments
-query_args <- c()
-query_args$fast <- TRUE
-query_args$credentials <- credentials
-if (!is.na(opt$location))                   { query_args$location   <- opt$location}
-if (!is.na(opt$from))                       { query_args$from       <- opt$from}
-if (!is.na(opt$to))                         { query_args$to         <- opt$to}
-if (!is.na(opt$`from-subm`))                { query_args$from_subm  <- opt$`from-subm`}
-if (!is.na(opt$`to-subm`))                  { query_args$to_subm    <- opt$`to-subm`}
-if (!is.na(opt$lineage))                    { query_args$lineage    <- opt$lineage}
-if (!is.na(opt$variant))                    { query_args$variant    <- opt$variant}
-if (!is.na(opt$`virus-name`))               { query_args$virus_name <- opt$`virus-name`}
-if (!is.na(opt$`aa-substitution`))          { query_args$aa_substitution <- opt$`aa-substitution`}
-if (!is.na(opt$`nucl-mutation`))            { query_args$nucl_mutation <- opt$`nucl-mutation`}
-if (!is.na(opt$`low-coverage-excl`))        { query_args$low_coverage_excl <- opt$`low-coverage-excl`}
-if (!is.na(opt$complete))                   { query_args$complete <- opt$complete}
-if (!is.na(opt$`high-coverage`))            { query_args$high_coverage <- opt$`high-coverage`}
-if (!is.na(opt$`collection-date-complete`)) { query_args$collection_date_complete <- opt$`collection-date-complete`}
-if (!is.na(opt$text))                       { query_args$text <- paste(readLines(opt$text), collapse = "\n") }
+    # Dynamically create the query from the command-line arguments
+    query_args <- c()
+    query_args$fast <- TRUE
+    query_args$credentials <- credentials
+    if (!is.na(opt$location))                   { query_args$location   <- opt$location}
+    if (!is.na(opt$from))                       { query_args$from       <- opt$from}
+    if (!is.na(opt$to))                         { query_args$to         <- opt$to}
+    if (!is.na(opt$`from-subm`))                { query_args$from_subm  <- opt$`from-subm`}
+    if (!is.na(opt$`to-subm`))                  { query_args$to_subm    <- opt$`to-subm`}
+    if (!is.na(opt$lineage))                    { query_args$lineage    <- opt$lineage}
+    if (!is.na(opt$variant))                    { query_args$variant    <- opt$variant}
+    if (!is.na(opt$`virus-name`))               { query_args$virus_name <- opt$`virus-name`}
+    if (!is.na(opt$`aa-substitution`))          { query_args$aa_substitution <- opt$`aa-substitution`}
+    if (!is.na(opt$`nucl-mutation`))            { query_args$nucl_mutation <- opt$`nucl-mutation`}
+    if (!is.na(opt$`low-coverage-excl`))        { query_args$low_coverage_excl <- opt$`low-coverage-excl`}
+    if (!is.na(opt$complete))                   { query_args$complete <- opt$complete}
+    if (!is.na(opt$`high-coverage`))            { query_args$high_coverage <- opt$`high-coverage`}
+    if (!is.na(opt$`collection-date-complete`)) { query_args$collection_date_complete <- opt$`collection-date-complete`}
+    if (!is.na(opt$text))                       { query_args$text <- paste(readLines(opt$text), collapse = "\n") }
 
-suppressMessages(query_result <- do.call(GISAIDR::query, as.list(query_args)))
+    suppressMessages(query_result <- do.call(GISAIDR::query, as.list(query_args)))
 
-log.info(paste("Found", nrow(query_result), "records."))
-# Sort by accession id (newest submissions to oldest)
-query_result$accession_id <- sort(query_result[["accession_id"]], decreasing = TRUE)
+    # Sort by accession id (newest submissions to oldest)
+    query_result$accession_id <- sort(query_result[["accession_id"]], decreasing = TRUE)
+    accession_ids <- query_result[["accession_id"]]
+}
+
+log.info(paste("Found", length(accession_ids), "records."))
 
 if (!is.na(opt$`max-records`) && opt$`max-records` >= 0){
     log.info(paste0("Restricting the number of records to --max-records ", opt$`max-records`, "."))
-    query_result <- head(query_result, opt$`max-records`)
+    accession_ids <- head(accession_ids, n=opt$`max-records`)
 }
-
-accession_ids <- query_result[["accession_id"]]
+if (length(accession_ids) == 0 ){
+    GISAIDR::log.info("Done")
+    quit(status=0)
+}
 
 # -------------------------------------------------------------------------
 # Download
@@ -426,10 +488,11 @@ for(start in seq(1, length(accession_ids), opt$batch)){
             if (opt$`sequencing-technology`){ download_types <- c(download_types, "sequencing_technology") }
             if (opt$`augur-input`          ){ download_types <- c(download_types, "augur_input") }
             if (opt$`sequences`            ){ download_types <- c(download_types, "sequences") }
+
             for (download_type in download_types){ download_args[[download_type]] <- TRUE }
 
             # Download files
-            download_results <- do.call(download_files, as.list(download_args))
+            download_results <- do.call(GISAIDR::download_files, as.list(download_args))
 
             # Merge metadata files
             metadata  <- NULL            
@@ -485,7 +548,7 @@ for(start in seq(1, length(accession_ids), opt$batch)){
         },
         # errors
         error=function(msg) {
-            GISAIDR::log.info(paste("Download error: ", msg))
+            GISAIDR::log.error(msg)
             if (grepl("Please login again", msg)){
                 if (num_retries >= opt$retries){
                     log.info(paste("Download failed, no retries remaining:", num_retries, "/", opt$retries))
@@ -495,9 +558,19 @@ for(start in seq(1, length(accession_ids), opt$batch)){
                 GISAIDR::log.info(paste("Re-Authenticating with GISAID:", opt$database))
                 credentials <- GISAIDR::login(username, password, opt$database)
                 return(credentials)
+            } else {
+                GISAIDR::log.error("Unhandled error, exiting.")
+                quit(status=1)
             }
         })
     }
+}
+
+if (!is.na(opt$`order-by`)){
+    GISAIDR::log.info(paste("Ordering metadata by column:", opt$`order-by`))
+    metadata <- metadata <- read.csv(metadata_file_path, sep="\t", quote="", check.names=FALSE)
+    metadata <- metadata[order(metadata[[opt$`order-by`]], decreasing=opt$`order-by-rev`), ]
+    write.table(metadata, metadata_file_path, row.names = FALSE, quote = FALSE, sep = "\t")
 }
 
 if (opt$`augur-input` || opt$sequences) {
