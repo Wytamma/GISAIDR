@@ -289,8 +289,8 @@ download_files <- function(
       stop(log.error("The download type augur_input is only available for EpiCoV"))
     }
     # Downloading both augur_input and sequences is redundant
-    if (download_type == "sequences" && !is.null(download_results["augur_input"])){
-      log.warn("Download types augur_input and sequences are redundant, skipping sequences download")
+    if (download_type == "sequences" && !is.null(download_results[["augur_input"]])){
+      log.warn("Download types augur_input and sequences are redundant, skipping sequences download.")
     }
 
     
@@ -501,11 +501,11 @@ download_files <- function(
         untar(tmpFile, exdir="gisaidr_augur_input_tmp", restore_times = FALSE, verbose=FALSE)
         # Extract Sequences
         sequencesFile <- list.files("gisaidr_augur_input_tmp", pattern = "*.sequences.fasta")[1]
-        if (is.na(sequencesFile)) { stop("Could not find sequences file.") }
+        if (is.na(sequencesFile)) { stop(log.error("Could not find sequences file.")) }
         sequencesFile <- file.path("gisaidr_augur_input_tmp", sequencesFile)       
         # Extract Metadata
         metadataFile <- list.files("gisaidr_augur_input_tmp", pattern = "*.metadata.tsv")[1]
-        if (is.na(metadataFile)) { stop("Could not find metadata file.") }
+        if (is.na(metadataFile)) { stop(log.error("Could not find metadata file.")) }
         metadataFile <- file.path("gisaidr_augur_input_tmp", metadataFile)
       }
 
