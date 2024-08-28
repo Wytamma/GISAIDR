@@ -172,7 +172,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clea
       tmpTarFile <- "gisaidr_data_tmp.tar"
       download.file(download_url, tmpTarFile, quiet = TRUE, method = 'auto', mode = "wb")
       # unzip
-      untar(tmpTarFile, exdir="gisaidr_data_tmp", restore_times = FALSE, verbose=FALSE)
+      sink(untar(tmpTarFile, exdir="gisaidr_data_tmp", restore_times = FALSE, verbose=FALSE))
       # load into df
       metadataFile <- list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv")[1]
       if (is.na(metadataFile)) {
@@ -237,18 +237,18 @@ download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clea
   return(df)
 }
 
-#' Download files from GISAID.
+#' Download additional files from GISAID.
 #'
 #' @param credentials GISAID credentials.
 #' @param list_of_accession_ids list of accession_id from GISAID
 #' @param dates_and_location TRUE if Date and Location metadata should be downloaded
 #' @param patient_status TRUE if Patient Status metadata should be downloaded
-#' @param sequencing_and_technology TRUE if Sequencing Technology metadata should be downloaded
+#' @param sequencing_technology TRUE if Sequencing Technology metadata should be downloaded
 #' @param sequences TRUE if Nucleotide sequences should be downloaded
 #' @param augur_input TRUE if Augur Input should be downloaded (metadata + sequences)
 #' @param clean_up delete downloaded files (e.g. fasta files) after download
 #' @return named list of 'metadata' df and/or 'sequences' CHAR str
-download2 <- function(
+download_files <- function(
   credentials,
   list_of_accession_ids,
   dates_and_location    = NULL,
@@ -272,12 +272,12 @@ download2 <- function(
   # Select Accession
 
   if (length(list_of_accession_ids) > 5000) {
-    stop(paste0(Sys.time(), "\tERROR. Can only download a maxium of 5000 samples at a time."))
+    stop(log.error("Can only download a maxium of 5000 samples at a time."))
   } else if (length(list_of_accession_ids) == 0) {
-    stop(paste0(Sys.time(), "\tERROR. Select at least one sequence!"))
+    stop(log.error("Select at least one sequence!"))
   }
 
-  log.info(paste0(Sys.time(), " \tSelecting entries."))
+  log.info("Selecting entries.", level=2)
   response <- select_entries(credentials = credentials, list_of_accession_ids=list_of_accession_ids)
 
   # ---------------------------------------------------------------------------
@@ -286,14 +286,20 @@ download2 <- function(
   for (download_type in names(download_results)){
     if (is.null(download_results[[download_type]])) { next }
     if (download_type == "augur_input" && credentials$database != "EpiCoV"){
-      stop(paste0(Sys.time(), " \tThe download type augur_input is only available for EpiCoV"))
+      stop(log.error("The download type augur_input is only available for EpiCoV"))
     }
-    log.info(paste0(Sys.time(), " \tDownload type: ", download_type))
+    # Downloading both augur_input and sequences is redundant
+    if (download_type == "sequences" && !is.null(download_results["augur_input"])){
+      log.warn("Download types augur_input and sequences are redundant, skipping sequences download")
+    }
+
+    
+    log.info(paste("Download type:", download_type), level=2)
 
     # ---------------------------------------------------------------------------
     # Open Download Panel
 
-    log.info(paste0(Sys.time(), " \t\tOpening download panel."))
+    log.info("Opening download panel.", level=2)
     download_cmd       <- 'Download'
     download_pid_wid   <- get_download_panel(credentials$sid, credentials$wid, credentials$pid, credentials$query_cid)
     download_page      <- send_request(paste0('sid=', credentials$sid, '&pid=', download_pid_wid$pid))
@@ -341,7 +347,7 @@ download2 <- function(
     # ---------------------------------------------------------------------------
     # Select Download Type
 
-    log.info(paste0(Sys.time(), " \t\tConfiguring download options."))
+    log.info("Configuring download options.", level=2)
     radio_button_widget_cid <- extract_first_match("'(.{5,20})','RadiobuttonWidget", download_page_text)
 
     queue = list()
@@ -378,7 +384,7 @@ download2 <- function(
     # Accept EpiCoV Agreement
 
     if (credentials$database == 'EpiCoV') {
-      log.info(paste0(Sys.time(), " \t\tAccepting EpiCoV agreement."))
+      log.info("Accepting EpiCoV agreement.", level=2)
       ev <- createCommand(
         wid = download_pid_wid$wid,
         pid = download_pid_wid$pid,
@@ -434,7 +440,7 @@ download2 <- function(
     # ---------------------------------------------------------------------------
     # Generate Download URL
 
-    log.info(paste0(Sys.time(), " \t\tGenerating download URL."))
+    log.info("Generating download URL.", level=2)
     ev <- createCommand(
       wid = download_pid_wid$wid,
       pid = download_pid_wid$pid,
@@ -445,7 +451,7 @@ download2 <- function(
     json_queue <- list(queue = list(ev))
     data       <- formatDataForRequest(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, json_queue, timestamp())
 
-    log.info(paste0(Sys.time(), " \t\tCompressing data."))
+    log.info("Compressing data.", level=2)
     response <- httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
     response_data   <- parseResponse(response)
 
@@ -465,7 +471,7 @@ download2 <- function(
     # ---------------------------------------------------------------------------
     # Get Download URL
 
-    log.info(paste0(Sys.time(), " \t\tData ready."))
+    log.info("Data ready.", level=2)
     ev <- createCommand(
       wid = credentials$wid,
       pid = credentials$pid,
@@ -480,33 +486,33 @@ download2 <- function(
 
     # extract download url
     download_url <- paste0("https://www.epicov.org",strsplit(response_data$responses[[1]]$data, '"')[[1]][2])
-    log.info(paste0(Sys.time(), " \t\tDownload url: ", download_url))
+    log.info(paste("Download url:", download_url), level=2)
 
     # ---------------------------------------------------------------------------
     # Download File
 
     tryCatch({
-      log.info(paste0(Sys.time(), " \t\tDownloading file: ", tmpFile))
+      log.info(paste("Downloading file:", tmpFile), level=2)
       download.file(download_url, tmpFile, quiet = TRUE, method = 'auto')
 
       # Augur Input
       if (grepl("\\.tar$", tmpFile)){
         # Decompress tar archive
-        untar(tmpFile, exdir="gisaidr_augur_input", restore_times = FALSE, verbose=FALSE)
+        untar(tmpFile, exdir="gisaidr_augur_input_tmp", restore_times = FALSE, verbose=FALSE)
         # Extract Sequences
-        sequencesFile <- list.files("gisaidr_augur_input", pattern = "*.sequences.fasta")[1]
+        sequencesFile <- list.files("gisaidr_augur_input_tmp", pattern = "*.sequences.fasta")[1]
         if (is.na(sequencesFile)) { stop("Could not find sequences file.") }
-        sequencesFile <- file.path("gisaidr_data_tmp", sequencesFile)
+        sequencesFile <- file.path("gisaidr_augur_input_tmp", sequencesFile)       
         # Extract Metadata
-        metadataFile <- list.files("gisaidr_augur_input", pattern = "*.metadata.tsv")[1]
+        metadataFile <- list.files("gisaidr_augur_input_tmp", pattern = "*.metadata.tsv")[1]
         if (is.na(metadataFile)) { stop("Could not find metadata file.") }
-        metadataFile <- file.path("gisaidr_data_tmp", metadataFile)
+        metadataFile <- file.path("gisaidr_augur_input_tmp", metadataFile)
       }
 
       if (!is.null(metadataFile) && file.exists(metadataFile)){
         metadata <- read.csv(metadataFile, sep="\t", quote="", check.names=FALSE)
         # Replace "?" with "NA" in the augur_input metadata
-        if ( download_type == "augur_input" ) { df[ df == "?" ] <- NA }
+        if ( download_type == "augur_input" ) { metadata[ metadata == "?" ] <- NA }
       }
       if (!is.null(sequencesFile) && file.exists(sequencesFile)){
         sequences <- readChar(sequencesFile, file.info(tmpFile)$size)
@@ -523,10 +529,11 @@ download2 <- function(
 
     }, finally = {
       if (clean_up){
-        log.info(paste0(Sys.time(), " \t\tCleaning up temporary files."))
+        log.info("Cleaning up temporary files.", level=2)
         if (!is.null(tmpFile)       && file.exists(tmpFile))       { file.remove(tmpFile) }
         if (!is.null(metadataFile)  && file.exists(metadataFile))  { file.remove(metadataFile) }
         if (!is.null(sequencesFile) && file.exists(sequencesFile)) { file.remove(sequencesFile) }
+        if (dir.exists("gisaidr_augur_input_tmp"))                 { unlink("gisaidr_augur_input_tmp", recursive=TRUE) }
       }
     })
   }
