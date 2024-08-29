@@ -211,6 +211,12 @@ test_that("EpiPox lineage search works using lineages", {
   expect_true(nrow(df) == 50)
 })
 
+test_that("EpiPox high coverage works", {
+  df <- query(credentials = credentials, high_coverage = TRUE)
+  expect_true(nrow(df) == 50)
+  expect_true(length(grep("warn_sign", df$information)) == 0)
+})
+
 # -----------------------------------------------------------------------------
 # EpiRSV
 
@@ -226,4 +232,16 @@ test_that("EpiRSV subtype search works", {
   total_a <- query(credentials = credentials, subtype="A", total=TRUE)
   total_b <- query(credentials = credentials, subtype="B", total=TRUE)
   expect_true(total_a != total_b)
+})
+
+test_that("EpiRSV complete works", {
+  df <- query(credentials = credentials, complete = TRUE)
+  expect_true(nrow(df) == 50)
+  expect_true(all(df$length > 15000))
+})
+
+test_that("EpiRSV high coverage works", {
+  df <- query(credentials = credentials, high_coverage = TRUE)
+  expect_true(nrow(df) == 50)
+  expect_true(length(grep("warn_sign", df$information)) == 0)
 })

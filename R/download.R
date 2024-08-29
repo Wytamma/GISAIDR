@@ -172,7 +172,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clea
       tmpTarFile <- "gisaidr_data_tmp.tar"
       download.file(download_url, tmpTarFile, quiet = TRUE, method = 'auto', mode = "wb")
       # unzip
-      sink(untar(tmpTarFile, exdir="gisaidr_data_tmp", restore_times = FALSE, verbose=FALSE))
+      untar(tmpTarFile, exdir="gisaidr_data_tmp", restore_times = FALSE, verbose=FALSE)
       # load into df
       metadataFile <- list.files("gisaidr_data_tmp", pattern = "*.metadata.tsv")[1]
       if (is.na(metadataFile)) {

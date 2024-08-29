@@ -78,7 +78,7 @@ internal_query <-
         if (credentials$database == "EpiCoV"){
           new_queue <- create_search_queue(credentials, credentials$lineage_ceid, lineage, 'LineageChange')
           queue     <- append(queue, new_queue)
-        } else {
+        } else if (credentials$database == "EpiPox") {
           new_queue <- create_search_queue(credentials, credentials$lineage_ceid, lineage, 'FilterChange')
           queue     <- append(queue, new_queue)
         }
@@ -147,7 +147,7 @@ internal_query <-
       # Quality (mixed)
       if (credentials$database == 'EpiCoV') {
         if (complete) {
-          new_queue <- create_search_queue(credentials, credentials$completed_ceid, list('complete'), 'FilterChange')
+          new_queue <- create_search_queue(credentials, credentials$complete_ceid, list('complete'), 'FilterChange')
           queue     <- append(queue, new_queue)
         }
         if (high_coverage) {
