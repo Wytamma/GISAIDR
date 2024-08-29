@@ -334,13 +334,13 @@ log.debug <- function(msg) {
 }
 
 log.error <- function(msg) {
-  message(paste0(Sys.time(), "\tERROR: ", msg))
+  message(paste0(Sys.time(), "\tERROR: ", gsub("\n", " ", msg)))
   flush.console()
   invisible()
 }
 
 log.warn <- function(msg) {
-  message(paste0(Sys.time(), "\tWARNING: ", msg))
+  message(paste0(Sys.time(), "\tWARNING: ", gsub("\n", " ", msg)))
   flush.console()
   invisible()
 }
@@ -352,7 +352,7 @@ log.info <- function(msg, level=1) {
     verbosity <- 1
   }
   if (verbosity >= level){
-    message(paste0(Sys.time(), "\tINFO: ", msg))
+    message(paste0(Sys.time(), "\tINFO: ", gsub("\n", " ", msg)))
   }
   flush.console()
   invisible()

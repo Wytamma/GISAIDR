@@ -11,7 +11,7 @@
 #' login(username, password)
 login <- function(username, password, database="EpiCoV") {
   if (!database %in% c("EpiCoV", "EpiRSV", "EpiPox")) {
-    stop(log.error(paste("Database must be EpiCoV, EpiRSV or EpiPox", database)))
+    stop(log.error(paste("Database must be EpiCoV, EpiRSV or EpiPox:", database)))
   }
   # get a session ID
   response <- send_request()

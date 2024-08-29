@@ -162,7 +162,7 @@ option_list = list(
         action="store",
         default=2,
         type='integer',
-        help="If a download error is encountered, retry this number of times before exiting."
+        help="If an error is encountered, retry this number of times before exiting."
     ),
     make_option(
         c("--sequences"),
@@ -405,7 +405,32 @@ if (!is.na(opt$credentials)){
     password = Sys.getenv("GISAIDR_PASSWORD")
 }
 
-GISAIDR::log.info(paste("Authenticating with GISAID:", opt$database))
+GISAIDR::log.info(paste("Authenticating with GISAID database:", opt$database))
+num_retries <- 0
+while(num_retries <= opt$retries){
+    num_retries <- num_retries + 1
+    # if download fails, we'll log back in and update credentials
+    tryCatch({
+        credentials <- GISAIDR::login(username, password, opt$database)
+        # Break out of the while loop of retries if successful
+        break
+    },
+    # errors
+    error=function(msg) {
+        GISAIDR::log.error(msg)
+        if (grepl("Server error", msg)){
+            if (num_retries >= opt$retries){
+                log.info(paste("Authentication failed, no retries remaining:", num_retries, "/", opt$retries))
+                quit(status=1)
+            }
+            GISAIDR::log.info(paste("Authentication failed, retry:", num_retries, "/", opt$retries))
+            return(credentials)
+        } else {
+            GISAIDR::log.error("Unhandled error, exiting.")
+            quit(status=1)
+        }
+    })
+}
 credentials <- GISAIDR::login(username, password, opt$database)
 GISAIDR::log.info("Authentication successful.")
 
