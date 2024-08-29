@@ -22,6 +22,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+
   build:
     strategy:
       fail-fast: true
@@ -36,38 +37,52 @@ jobs:
       packages: write
 
     steps:
-      - name: checkout
+
+      # Inspired by: https://stackoverflow.com/a/70249520
+      - name: Check Secrets
+        id: check-secrets
+        run: |
+          if [[ "${{ matrix.registry }}" == 'ghcr.io' ]]; then
+            echo "pass=true" >> $GITHUB_OUTPUT;
+          elif [[ "${{ matrix.registry }}" == 'docker.io' ]]; then
+            if [[ "${{ secrets.DOCKER_USERNAME }}" != '' && "${{ secrets.DOCKER_PASSWORD }}" != '' ]]; then
+              echo "pass=true" >> $GITHUB_OUTPUT;
+            else
+              echo "pass=false" >> $GITHUB_OUTPUT;
+            fi
+          else
+            echo "pass=false" >> $GITHUB_OUTPUT;
+          fi
+
+      - name: Checkout
+        if: ${{ steps.check-secrets.outputs.pass == 'true' }}
         uses: actions/checkout@v3
 
       - name: Set up QEMU
+        if: ${{ steps.check-secrets.outputs.pass == 'true' }}
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
+        if: ${{ steps.check-secrets.outputs.pass == 'true' }}
         uses: docker/setup-buildx-action@v3
 
-      - name: registry login (GitHub)
-        if: ${{ matrix.registry == 'ghcr.io' }}
+      - name: Registry Login
+        if: ${{ steps.check-secrets.outputs.pass == 'true' }}
         uses: docker/login-action@v3
         with:
           registry: ${{ matrix.registry }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: registry login (DockerHub)
-        if: ${{ matrix.registry == 'docker.io' }}
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ matrix.registry }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: metadata
+      - name: Metadata
+        if: ${{ steps.check-secrets.outputs.pass == 'true' }}
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ matrix.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: build
+      - name: Build
+        if: ${{ steps.check-secrets.outputs.pass == 'true' }}
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -75,14 +90,16 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=docker,dest=GISAIDR.tar
 
-      - name: load
+      - name: Load
+        if: ${{ steps.check-secrets.outputs.pass == 'true' }}
         run: |
           load=$(docker load --input GISAIDR.tar | tee /dev/stderr)
           TAGS=$(echo $load | sed "s/Loaded image: //g")
           echo TAGS="$TAGS" >> $GITHUB_ENV
 
       # output.tags can be an array (ex. v0.2.0, main, latest)
-      - name: help
+      - name: Help
+        if: ${{ steps.check-secrets.outputs.pass == 'true' }}
         run: >
           for tag in $TAGS; do
             echo $tag
@@ -91,9 +108,13 @@ jobs:
 
       # Build the image, only push on 'main' or a tag that starts with 'v'
       # Extra debugging, build and push on 'cli' branch for testing
-      - name: build and push
+      - name: Build and Push
         uses: docker/build-push-action@v5
-        if: ${{ startsWith(github.event.ref, 'refs/tags/v') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cli' }}
+        if: |
+          ${{ 
+            steps.check-secrets.outputs.pass == 'true' &&
+            (startsWith(github.event.ref, 'refs/tags/v') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cli' )
+          }}
         with:
           context: .
           push: true
