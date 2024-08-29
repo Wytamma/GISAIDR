@@ -10,12 +10,15 @@ name: Build
 
 on:
   push:
-    branches: [ master, cli ]
+    branches:
+      - '*'
   pull_request:
-    branches: [ master, cli ]
+    branches:
+      - '*'
+  release:
+    types: [published]
   #schedule:
   #  - cron: '0 0 * * *'
-
 
 jobs:
   build:

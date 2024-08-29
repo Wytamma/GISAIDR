@@ -111,10 +111,8 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@v5
         if: |
-          ${{ 
             steps.check-secrets.outputs.pass == 'true' &&
             (startsWith(github.event.ref, 'refs/tags/v') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/cli' )
-          }}
         with:
           context: .
           push: true
