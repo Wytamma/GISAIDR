@@ -164,6 +164,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clea
 
   # extract download url
   download_url <- paste0("https://www.epicov.org",strsplit(j$responses[[1]]$data, '"')[[1]][2])
+  message(paste("Download url:", download_url))
   # download zip
   tryCatch({
     message('Downloading...')
@@ -466,7 +467,6 @@ download_files <- function(
       is_ready      <- response_data$is_ready
       if (!is_ready) { Sys.sleep(1) }
     }
-    log.debug(response_data)
 
     # ---------------------------------------------------------------------------
     # Get Download URL
@@ -493,12 +493,17 @@ download_files <- function(
 
     tryCatch({
       log.info(paste("Downloading file:", tmpFile), level=2)
-      download.file(download_url, tmpFile, quiet = TRUE, method = 'auto')
 
       # Augur Input
       if (grepl("\\.tar$", tmpFile)){
+        download.file(download_url, tmpFile, quiet = TRUE, method = 'auto', mode = "wb")
+        augur_input_dir <- "gisaidr_augur_input_tmp"
+        # Remove existing directories from tar archives
+        if (dir.exists(augur_input_dir)){
+          unlink(augur_input_dir, recursive=TRUE)
+        }
         # Decompress tar archive
-        untar(tmpFile, exdir="gisaidr_augur_input_tmp", restore_times = FALSE, verbose=FALSE)
+        untar(tmpFile, exdir=augur_input_dir, restore_times = FALSE, verbose=FALSE)
         # Extract Sequences
         sequencesFile <- list.files("gisaidr_augur_input_tmp", pattern = "*.sequences.fasta")[1]
         if (is.na(sequencesFile)) { stop(log.error("Could not find sequences file.")) }
@@ -507,6 +512,9 @@ download_files <- function(
         metadataFile <- list.files("gisaidr_augur_input_tmp", pattern = "*.metadata.tsv")[1]
         if (is.na(metadataFile)) { stop(log.error("Could not find metadata file.")) }
         metadataFile <- file.path("gisaidr_augur_input_tmp", metadataFile)
+      }
+      else {
+        download.file(download_url, tmpFile, quiet = TRUE, method = 'auto')
       }
 
       if (!is.null(metadataFile) && file.exists(metadataFile)){
