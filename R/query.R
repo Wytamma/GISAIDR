@@ -50,8 +50,7 @@ query <-
            high_coverage = FALSE,
            collection_date_complete = FALSE,
            total = FALSE,
-           fast = FALSE
-           ) {
+           fast = FALSE) {
 
     if (nrows > 50 && !total && !load_all && !fast) {
       message(paste0("Loading entries in batches..."))

@@ -90,7 +90,7 @@ internal_query <-
         queue     <- append(queue, new_queue)
       }
 
-      # Subtype (EpiCoV)
+      # Variant (EpiCoV)
       if (!is.null(variant) && credentials$database == "EpiCoV") {
         new_queue <- create_search_queue(credentials, credentials$variant_ceid, variant, 'VariantsChange')
         queue     <- append(queue, new_queue)
