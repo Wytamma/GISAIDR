@@ -6,6 +6,10 @@
 
 Programmatically interact with the GISAID EpiCoV, EpiPox, and EpiRSV databases.
 
+> [!TIP]
+> Please consider moving your research focus to an open pathogen on [pathoplexus.org](https://pathoplexus.org/).
+
+
 ## Citation
 
 If you use GISAIDR in your research please cite as:
