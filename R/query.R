@@ -24,6 +24,7 @@
 #' @param fast returns all of the accession_ids that match the query.
 #' @param aa_substitution_ceid returns all sequences with the selected amino acid mutation
 #' @param nucl_mutation_ceid returns all sequences with the selected nucleotide mutation
+#' @param subtype returns all sequences with the selected subtype
 #' @return data.frame
 query <-
   function(credentials,
@@ -39,6 +40,7 @@ query <-
            order_by = NULL,
            aa_substitution = NULL,
            nucl_mutation = NULL,
+           subtype = NULL,
            order_asc = TRUE,
            start_index = 0,
            nrows = 50,
@@ -75,7 +77,8 @@ query <-
           high_coverage = high_coverage,
           collection_date_complete = collection_date_complete,
           aa_substitution = aa_substitution,
-          nucl_mutation = nucl_mutation
+          nucl_mutation = nucl_mutation,
+          subtype = subtype
         ))
       }
       results <- results[!duplicated(results$accession_id), ] # Remove duplicate entries
@@ -104,7 +107,8 @@ query <-
           aa_substitution = aa_substitution,
           nucl_mutation = nucl_mutation,
           total = total,
-          fast = fast
+          fast = fast,
+          subtype = subtype
         )
       )
     } else  {
@@ -129,7 +133,8 @@ query <-
           high_coverage = high_coverage,
           collection_date_complete = collection_date_complete,
           aa_substitution = aa_substitution,
-          nucl_mutation = nucl_mutation
+          nucl_mutation = nucl_mutation,
+          subtype = subtype
         )
       )
     }

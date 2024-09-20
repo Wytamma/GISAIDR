@@ -333,6 +333,31 @@ log.debug <- function(msg) {
   invisible()
 }
 
+log.error <- function(msg) {
+  message(paste0(Sys.time(), "\tERROR: ", gsub("\n", " ", msg)))
+  flush.console()
+  invisible()
+}
+
+log.warn <- function(msg) {
+  message(paste0(Sys.time(), "\tWARNING: ", gsub("\n", " ", msg)))
+  flush.console()
+  invisible()
+}
+
+log.info <- function(msg, level=1) {
+  if (Sys.getenv("GISAIDR_VERBOSITY") != ""){
+    verbosity <- Sys.getenv("GISAIDR_VERBOSITY")
+  } else {
+    verbosity <- 1
+  }
+  if (verbosity >= level){
+    message(paste0(Sys.time(), "\tINFO: ", gsub("\n", " ", msg)))
+  }
+  flush.console()
+  invisible()
+}
+
 send_request <-
   function(parameter_string = "",
            data = NULL,
