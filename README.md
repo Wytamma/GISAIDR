@@ -22,6 +22,7 @@ Install from github using `devtools`.
 ``` r
 install.packages("devtools") # if you have not installed "devtools" package
 devtools::install_github("Wytamma/GISAIDR")
+library(GISAIDR)
 ```
 
 ## Login
