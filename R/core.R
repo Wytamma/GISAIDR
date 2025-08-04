@@ -360,7 +360,11 @@ send_request <-
 extract_first_match <- function(regex, text) {
   log.debug(sprintf("Extracting '%s' from '%s'", regex, substr(text, 0, 30)))
   matches <- regmatches(text, regexec(regex, text))
-  return(matches[[1]][[2]])
+  tryCatch(
+    return(matches[[1]][[2]]),
+    error = function(e) stop(sprintf("Could not extract '%s' from '%s'", regex, substr(text, 0, 30)))
+  )
+
 }
 
 
