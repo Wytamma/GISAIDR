@@ -128,10 +128,10 @@ login <- function(username, password, database="EpiCoV") {
     RSV_page_text = httr::content(RSV_page, as = 'text')
 
     RSV_actionbar_component_ID <-
-      extract_first_match("sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
+      extract_first_match("sys-actionbar-action-ni\" onclick=\"sys.getC\\('([^']*)",
                           RSV_page_text)
 
-    response_data <- go_to_page(session_id, WID, RSV_page_ID, RSV_actionbar_component_ID, 'page_rsv.RSVBrowsePage')
+    response_data <- go_to_page(session_id, WID, RSV_page_ID, RSV_actionbar_component_ID, 'page_rsv.BrowsePage')
     customSearch_page_ID <-
       extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
   } else if (database=="EpiPox") {
@@ -152,22 +152,23 @@ login <- function(username, password, database="EpiCoV") {
 
     response <- send_request(data)
     response_data <- parseResponse(response)
-    # POX_page_ID <-
-    #   extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
-    # POX_page <- send_request(paste0('sid=', session_id, '&pid=', POX_page_ID))
-    # POX_page_text = httr::content(POX_page, as = 'text')
-    #
-    # POX_actionbar_component_ID <-
-    #   extract_first_match("sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
-    #                       POX_page_text)
-    # response_data <- go_to_page(session_id, WID, POX_page_ID, POX_actionbar_component_ID, 'page_mpox.MPoxBrowsePage')
+    POX_page_ID <-
+      extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
+    POX_page <- send_request(paste0('sid=', session_id, '&pid=', POX_page_ID))
+    POX_page_text = httr::content(POX_page, as = 'text')
+
+    POX_actionbar_component_ID <-
+      extract_first_match("sys-actionbar-action-ni\" onclick=\"sys.getC\\('([^']*)",
+                          POX_page_text)
+    print(POX_actionbar_component_ID)
+    response_data <- go_to_page(session_id, WID, POX_page_ID, POX_actionbar_component_ID, 'page_mpox.BrowsePage')
     customSearch_page_ID <-
       extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
   } else {
     # check for overlay
 
     COVID_actionbar_component_ID <-
-      extract_first_match("sys-actionbar-action.*\" onclick=\"sys.getC\\('([^']*)",
+      extract_first_match("sys-actionbar-action-ni\" onclick=\"sys.getC\\('([^']*)",
                           frontend_page_text)
     response_data <- go_to_page(session_id, WID, frontend_page_ID, COVID_actionbar_component_ID, 'page_corona2020.Corona2020BrowsePage')
     customSearch_page_ID <-
@@ -175,16 +176,16 @@ login <- function(username, password, database="EpiCoV") {
   }
   customSearch_page_response <- send_request(paste0('sid=', session_id, '&pid=', customSearch_page_ID))
   customSearch_page_text = httr::content(customSearch_page_response, as = 'text')
-
-  query_cid <- extract_first_match("div class=\"sys-datatable\" id=\"(.*)_table", customSearch_page_text)
+  print(customSearch_page_text)
+  query_cid <- extract_first_match("div class=\"sys-datatable.{0,30}\" id=\"(.{5,20})_table", customSearch_page_text)
 
   #selectAll_ceid <- extract_first_match("onclick=\"sys.getC\\(\"(.{5,20})\"\\).selectAll", customSearch_page_text)
 
     # Search
   if (database == 'EpiRSV'){
-    SearchComponent <- 'RSVSearchComponent'
+    SearchComponent <- 'SearchComponent'
   } else if (database == 'EpiPox') {
-    SearchComponent <- 'MPoxSearchComponent'
+    SearchComponent <- 'SearchComponent'
   } else {
     SearchComponent <- 'Corona2020SearchComponent'
   }
