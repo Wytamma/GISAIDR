@@ -295,7 +295,97 @@ total
 
 [1] 10145747
 
-## Download
+## Download Files
+
+The `download_files` function provides flexible downloading of specific data types from GISAID. Unlike the deprecated `download` function, it allows you to selectively download different types of files and returns them in a structured format.
+
+### Basic usage
+
+To download specific file types, set the corresponding parameter to `TRUE`:
+
+``` r
+df <- query(credentials = credentials, location = "Australia", nrows = 10)
+list_of_accession_ids <- df$accession_id
+
+# Download dates and location metadata
+results <- download_files(
+  credentials = credentials,
+  list_of_accession_ids = list_of_accession_ids,
+  dates_and_location = TRUE
+)
+head(results$dates_and_location)
+```
+
+### Available download types
+
+The function supports the following download types:
+
+- `dates_and_location`: Date and Location metadata (TSV format)
+- `patient_status`: Patient Status metadata (TSV format) 
+- `sequencing_technology`: Sequencing Technology metadata (TSV format)
+- `sequences`: Nucleotide sequences (FASTA format)
+- `augur_input`: Combined metadata and sequences for Augur analysis (EpiCoV only)
+
+### Download multiple file types
+
+You can download multiple file types in a single call:
+
+``` r
+results <- download_files(
+  credentials = credentials,
+  list_of_accession_ids = list_of_accession_ids,
+  dates_and_location = TRUE,
+  patient_status = TRUE,
+  sequences = TRUE
+)
+
+# Access different data types
+location_data <- results$dates_and_location
+patient_data <- results$patient_status
+sequence_data <- results$sequences
+```
+
+### Augur input format (EpiCoV only)
+
+For phylogenetic analysis with Augur, you can download the special `augur_input` format which includes both metadata and sequences:
+
+``` r
+results <- download_files(
+  credentials = credentials,
+  list_of_accession_ids = list_of_accession_ids,
+  augur_input = TRUE
+)
+
+metadata <- results$augur_input$metadata
+sequences <- results$augur_input$sequences
+```
+
+Note: The `augur_input` option is only available for the EpiCoV database. If you specify both `augur_input` and `sequences`, the standalone `sequences` download will be skipped to avoid redundancy.
+
+### Return format
+
+The function returns a named list where each element corresponds to a requested download type:
+
+- For metadata types (`dates_and_location`, `patient_status`, `sequencing_technology`): Returns a data frame
+- For `sequences`: Returns a character string containing FASTA data
+- For `augur_input`: Returns a list with `metadata` (data frame) and `sequences` (character string) elements
+
+### File cleanup
+
+By default, temporary files are automatically cleaned up after download. You can preserve them by setting `clean_up = FALSE`:
+
+``` r
+results <- download_files(
+  credentials = credentials,
+  list_of_accession_ids = list_of_accession_ids,
+  sequences = TRUE,
+  clean_up = FALSE
+)
+```
+
+Note: A maximum of 5000 sequences can be downloaded at a time.
+
+## Download (deprecated)
 
 To download the full data set you need a list of accession IDs (which can be obtained from `query` results). This will also download the sequence data for each entry.
 
