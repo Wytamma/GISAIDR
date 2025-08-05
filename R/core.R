@@ -68,6 +68,9 @@ parseResponse <- function(res) {
     # make a better check
     stop("No data found.")
   }
+  if (isTRUE(grep('You have no access to this page', j$responses[[1]]$data) == 1)) {
+    stop("You have don't have access to this page!")
+  }
   return(j)
 
 }
@@ -333,6 +336,31 @@ log.debug <- function(msg) {
   invisible()
 }
 
+log.error <- function(msg) {
+  message(paste0(Sys.time(), "\tERROR: ", gsub("\n", " ", msg)))
+  flush.console()
+  invisible()
+}
+
+log.warn <- function(msg) {
+  message(paste0(Sys.time(), "\tWARNING: ", gsub("\n", " ", msg)))
+  flush.console()
+  invisible()
+}
+
+log.info <- function(msg, level=1) {
+  if (Sys.getenv("GISAIDR_VERBOSITY") != ""){
+    verbosity <- Sys.getenv("GISAIDR_VERBOSITY")
+  } else {
+    verbosity <- 1
+  }
+  if (verbosity >= level){
+    message(paste0(Sys.time(), "\tINFO: ", gsub("\n", " ", msg)))
+  }
+  flush.console()
+  invisible()
+}
+
 send_request <-
   function(parameter_string = "",
            data = NULL,
@@ -362,7 +390,7 @@ extract_first_match <- function(regex, text) {
   matches <- regmatches(text, regexec(regex, text))
   tryCatch(
     return(matches[[1]][[2]]),
-    error = function(e) stop(sprintf("Could not extract '%s' from '%s'", regex, substr(text, 0, 30)))
+    error = function(e) stop(sprintf("Could not extract '%s' from '%s'", regex, substr(text, 0, 100)))
   )
 
 }
