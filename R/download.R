@@ -16,8 +16,8 @@ download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clea
 
   response <- select_entries(credentials = credentials, list_of_accession_ids=list_of_accession_ids)
 
-  download_cmd <- 'ToolDownload'
-  download_pid_wid <- list(pid=credentials$pid, wid=credentials$wid)
+  # download_cmd <- 'ToolDownload'
+  # download_pid_wid <- list(pid=credentials$pid, wid=credentials$wid)
   download_cmd <- 'Download'
   download_pid_wid <- get_download_panel(credentials$sid, credentials$wid, credentials$pid, credentials$query_cid)
   #load panel
@@ -25,11 +25,27 @@ download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clea
     send_request(paste0('sid=', credentials$sid, '&pid=', download_pid_wid$pid))
 
   download_page_text = httr::content(downloal_page, as = 'text')
+  if (isTRUE(grep('captcha', download_page_text) == 1)) {
+    # Manual captcha
+    cat("Captcha required! Please go to the following url, enter the captcha and close the window.\n")
+    cat(paste0(GISAIDR::GISAID_URL, '?', 'sid=', credentials$sid))
+    readline(prompt="Press [enter] to continue once you have completed the captcha")
+    downloal_page <- send_request(paste0('sid=', credentials$sid))
+    download_page_text = httr::content(downloal_page, as = 'text')
+
+    download_pid_wid$pid  <- extract_first_match(",'(.{5,20})',new Object\\(\\{'window_name", download_page_text)
+    download_pid_wid$wid  <- extract_first_match("sys.openOverlay\\('(.{5,20})','", download_page_text)
+
+    downloal_page <-
+      send_request(paste0('sid=', credentials$sid, '&pid=', download_pid_wid$pid))
+    download_page_text = httr::content(downloal_page, as = 'text')
+
+  }
   if (credentials$database == 'EpiRSV') {
-    credentials$download_panel_cid <- extract_first_match("'(.{5,20})','RSVDownloadSelectionComponent", download_page_text)
+    credentials$download_panel_cid <- extract_first_match("'(.{5,20})','DownloadSelectionComponent", download_page_text)
     #send_back_cmd(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, credentials$download_panel_cid)
   } else if (credentials$database == 'EpiPox') {
-    credentials$download_panel_cid <- extract_first_match("'(.{5,20})','MPoxDownloadSelectionComponent", download_page_text)
+    credentials$download_panel_cid <- extract_first_match("'(.{5,20})','DownloadSelectionComponent", download_page_text)
   } else {
     credentials$download_panel_cid <- extract_first_match("'(.{5,20})','DownloadSelectionComponent", download_page_text)
     radio_button_widget_cid <- extract_first_match("'(.{5,20})','RadiobuttonWidget", download_page_text)
@@ -117,9 +133,9 @@ download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clea
     data <- formatDataForRequest(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, command_queue, timestamp())
     response <- send_request(method = 'POST', data=data)
     response_data <- parseResponse(response)
-
+    log.debug(response_data)
   }
-  log.debug(response_data)
+
   ev <- createCommand(
     wid = download_pid_wid$wid,
     pid = download_pid_wid$pid,
@@ -164,6 +180,7 @@ download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clea
 
   # extract download url
   download_url <- paste0("https://www.epicov.org",strsplit(j$responses[[1]]$data, '"')[[1]][2])
+  message(paste("Download url:", download_url))
   # download zip
   tryCatch({
     message('Downloading...')
@@ -235,4 +252,332 @@ download <- function(credentials, list_of_accession_ids, get_sequence=TRUE, clea
   # replace ? with NA
   df[ df == "?" ] <- NA
   return(df)
+}
+
+#' Download additional files from GISAID.
+#'
+#' @param credentials GISAID credentials.
+#' @param list_of_accession_ids list of accession_id from GISAID
+#' @param dates_and_location TRUE if Date and Location metadata should be downloaded
+#' @param patient_status TRUE if Patient Status metadata should be downloaded
+#' @param sequencing_technology TRUE if Sequencing Technology metadata should be downloaded
+#' @param sequences TRUE if Nucleotide sequences should be downloaded
+#' @param augur_input TRUE if Augur Input should be downloaded (metadata + sequences)
+#' @param clean_up delete downloaded files (e.g. fasta files) after download
+#' @return named list of 'metadata' df and/or 'sequences' CHAR str
+download_files <- function(
+    credentials,
+    list_of_accession_ids,
+    dates_and_location    = NULL,
+    patient_status        = NULL,
+    sequencing_technology = NULL,
+    sequences             = NULL,
+    augur_input           = NULL,
+    clean_up              = TRUE
+) {
+
+  # Store the possible download type results
+  download_results <- list(
+    dates_and_location    = dates_and_location,
+    patient_status        = patient_status,
+    sequencing_technology = sequencing_technology,
+    augur_input           = augur_input,
+    sequences             = sequences
+  )
+
+  # ---------------------------------------------------------------------------
+  # Select Accession
+
+  if (length(list_of_accession_ids) > 5000) {
+    stop(log.error("Can only download a maxium of 5000 samples at a time."))
+  } else if (length(list_of_accession_ids) == 0) {
+    stop(log.error("Select at least one sequence!"))
+  }
+
+  log.info("Selecting entries.", level=2)
+  response <- select_entries(credentials = credentials, list_of_accession_ids=list_of_accession_ids)
+
+  # ---------------------------------------------------------------------------
+  # Download Type Loop
+
+  for (download_type in names(download_results)){
+    if (is.null(download_results[[download_type]])) { next }
+    if (download_type == "augur_input" && credentials$database != "EpiCoV"){
+      stop(log.error("The download type augur_input is only available for EpiCoV"))
+    }
+    # Downloading both augur_input and sequences is redundant
+    if (download_type == "sequences" && !is.null(download_results[["augur_input"]])){
+      log.warn("Download types augur_input and sequences are redundant, skipping sequences download.")
+    }
+
+
+    log.info(paste("Download type:", download_type), level=2)
+
+    # ---------------------------------------------------------------------------
+    # Open Download Panel
+
+    log.info("Opening download panel.", level=2)
+    download_cmd       <- 'Download'
+    download_pid_wid   <- get_download_panel(credentials$sid, credentials$wid, credentials$pid, credentials$query_cid)
+    download_page      <- send_request(paste0('sid=', credentials$sid, '&pid=', download_pid_wid$pid))
+    download_page_text <- httr::content(download_page, as = 'text')
+
+    if (isTRUE(grep('captcha', download_page_text) == 1)) {
+      # Manual Captcha
+      cat("Captcha required! Please go to the following url, enter the captcha and close the window.\n")
+      cat(paste0(GISAIDR::GISAID_URL, '?', 'sid=', credentials$sid))
+      readline(prompt="Press [enter] to continue once you have completed the captcha")
+      downloal_page <- send_request(paste0('sid=', credentials$sid))
+      download_page_text = httr::content(downloal_page, as = 'text')
+
+      download_pid_wid$pid  <- extract_first_match(",'(.{5,20})',new Object\\(\\{'window_name", download_page_text)
+      download_pid_wid$wid  <- extract_first_match("sys.openOverlay\\('(.{5,20})','", download_page_text)
+
+      downloal_page <-
+        send_request(paste0('sid=', credentials$sid, '&pid=', download_pid_wid$pid))
+      download_page_text = httr::content(downloal_page, as = 'text')
+
+    }
+
+    # Identify the download panel CID basedon which database we're in
+    if (credentials$database == 'EpiRSV') {
+      credentials$download_panel_cid <- extract_first_match("'(.{5,20})','DownloadSelectionComponent", download_page_text)
+    } else if (credentials$database == 'EpiPox') {
+      credentials$download_panel_cid <- extract_first_match("'(.{5,20})','DownloadSelectionComponent", download_page_text)
+    } else {
+      credentials$download_panel_cid <- extract_first_match("'(.{5,20})','DownloadSelectionComponent", download_page_text)
+    }
+
+    # Store separate variables for the initial download (tmpFile) and
+    # any subsequent extraction, such as metadataFile and sequencesFile
+    # which come from the augur_input option.
+    if (download_type == 'dates_and_location'){
+      radio_button_value <- 'dateloc'
+      tmpFile            <- 'gisaidr_dates_and_location_tmp.tsv'
+      metadataFile       <- tmpFile
+      sequencesFile      <- NULL
+    } else if (download_type == 'patient_status'){
+      radio_button_value <- 'meta_epi'
+      tmpFile            <- 'gisaidr_patient_status_tmp.tsv'
+      metadataFile       <- tmpFile
+      sequencesFile      <- NULL
+    } else if (download_type == 'sequencing_technology'){
+      radio_button_value <- 'meta_tech'
+      tmpFile            <- 'gisaidr_sequencing_technology_tmp.tsv'
+      metadataFile       <- tmpFile
+      sequencesFile      <- NULL
+    } else if (download_type == 'sequences'){
+      radio_button_value <- 'fasta'
+      tmpFile            <- 'gisaidr_sequences_tmp.fasta'
+      metadataFile       <- NULL
+      sequencesFile      <- tmpFile
+    } else if (download_type == 'augur_input'){
+      radio_button_value <- 'augur_input'
+      tmpFile            <- 'gisaidr_augur_input_tmp.tar'
+      metadataFile       <- 'gisaidr_augur_input_metadata_tmp.tsv'
+      sequencesFile      <- 'gisaidr_augur_input_sequences_tmp.fasta'
+    }
+
+    # ---------------------------------------------------------------------------
+    # Select Download Type
+
+    log.info("Configuring download options.", level=2)
+    radio_button_widget_cid <- extract_first_match("'(.{5,20})','RadiobuttonWidget", download_page_text)
+
+    queue = list()
+    command <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = 'setTarget',
+      params = list(cvalue=radio_button_value, ceid=radio_button_widget_cid)
+    )
+    queue <- append(queue, list(command))
+    command <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = 'ChangeValue',
+      params = list(cvalue=radio_button_value, ceid=radio_button_widget_cid)
+    )
+    queue <- append(queue, list(command))
+    command <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = 'FormatChange',
+      params = list(ceid=radio_button_widget_cid)
+    )
+    queue         <- append(queue, list(command))
+    command_queue <- list(queue = queue)
+    data          <- formatDataForRequest(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, command_queue, timestamp())
+    response      <- send_request(method = 'POST', data=data)
+    response_data <- parseResponse(response)
+
+    # ---------------------------------------------------------------------------
+    # Accept EpiCoV Agreement
+
+    if (credentials$database == 'EpiCoV') {
+      log.info("Accepting EpiCoV agreement.", level=2)
+      ev <- createCommand(
+        wid = download_pid_wid$wid,
+        pid = download_pid_wid$pid,
+        cid = credentials$download_panel_cid,
+        cmd = "DownloadReminder",
+        params = setNames(list(), character(0)) #hack for empty {}
+      )
+      json_queue    <- list(queue = list(ev))
+      data          <- formatDataForRequest(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, json_queue, timestamp())
+      response      <- httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+      response_data <- parseResponse(response)
+
+      download_pid_wid$wid <- extract_first_match("sys.openOverlay\\('(.{5,20})',", response_data$responses[[3]]$data)
+      download_pid_wid$pid <- extract_first_match(",'(.{5,20})',new Object", response_data$responses[[3]]$data)
+
+      agreement_page      <- send_request(paste0('sid=', credentials$sid, '&pid=', download_pid_wid$pid, '&wid=', download_pid_wid$wid, '&mode=page') , method = "POST")
+      agreement_page_text <- httr::content(agreement_page, as = 'text')
+      # extract the cid for download button
+      credentials$download_panel_cid <- extract_first_match("'(.{5,20})','Corona2020DownloadReminderButtonsComponent", agreement_page_text)
+      # accept the agreement
+      agree_check_box_ceid <-  extract_first_match("createFI\\('(.{5,20})','CheckboxWidget'", agreement_page_text)
+      queue = list()
+      command <- createCommand(
+        wid = download_pid_wid$wid,
+        pid = download_pid_wid$pid,
+        cid = credentials$download_panel_cid,
+        cmd = 'setTarget',
+        params = list(cvalue=list("agreed"), ceid=agree_check_box_ceid)
+      )
+      queue <- append(queue, list(command))
+      command <- createCommand(
+        wid = download_pid_wid$wid,
+        pid = download_pid_wid$pid,
+        cid = credentials$download_panel_cid,
+        cmd = 'ChangeValue',
+        params = list(cvalue=list("agreed"), ceid=agree_check_box_ceid)
+      )
+      queue <- append(queue, list(command))
+      command <- createCommand(
+        wid = download_pid_wid$wid,
+        pid = download_pid_wid$pid,
+        cid = credentials$download_panel_cid,
+        cmd = 'Agreed',
+        params = list(ceid=agree_check_box_ceid)
+      )
+      queue         <- append(queue, list(command))
+      command_queue <- list(queue = queue)
+      data          <- formatDataForRequest(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, command_queue, timestamp())
+      response      <- send_request(method = 'POST', data=data)
+      response_data <- parseResponse(response)
+    }
+
+    # ---------------------------------------------------------------------------
+    # Generate Download URL
+
+    log.info("Generating download URL.", level=2)
+    ev <- createCommand(
+      wid = download_pid_wid$wid,
+      pid = download_pid_wid$pid,
+      cid = credentials$download_panel_cid,
+      cmd = download_cmd,
+      params = setNames(list(), character(0)) #hack for empty {}
+    )
+    json_queue <- list(queue = list(ev))
+    data       <- formatDataForRequest(credentials$sid, download_pid_wid$wid, download_pid_wid$pid, json_queue, timestamp())
+
+    log.info("Compressing data.", level=2)
+    response <- httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+    response_data   <- parseResponse(response)
+
+    # extract check_async
+    check_async_id = strsplit(response_data$responses[[1]]$data, "'")[[1]][4]
+
+    # while generateDownloadDone not ready
+    is_ready = FALSE
+    while (!is_ready) {
+      response      <- httr::GET(paste0('https://www.epicov.org/epi3/check_async/', check_async_id, '?_=', timestamp()))
+      response_data <- parseResponse(response)
+      is_ready      <- response_data$is_ready
+      if (!is_ready) { Sys.sleep(1) }
+    }
+
+    # ---------------------------------------------------------------------------
+    # Get Download URL
+
+    log.info("Data ready.", level=2)
+    ev <- createCommand(
+      wid = credentials$wid,
+      pid = credentials$pid,
+      cid = credentials$query_cid,
+      cmd = "generateDownloadDone",
+      params = setNames(list(), character(0)) #hack for empty {}
+    )
+    json_queue    <- list(queue = list(ev))
+    data          <- formatDataForRequest(credentials$sid, credentials$wid, credentials$pid, json_queue, timestamp())
+    response      <- send_request(method = 'POST', data=data)
+    response_data <- parseResponse(response)
+
+    # extract download url
+    download_url <- paste0("https://www.epicov.org",strsplit(response_data$responses[[1]]$data, '"')[[1]][2])
+    log.info(paste("Download url:", download_url), level=2)
+
+    # ---------------------------------------------------------------------------
+    # Download File
+
+    tryCatch({
+      log.info(paste("Downloading file:", tmpFile), level=2)
+
+      # Augur Input
+      if (grepl("\\.tar$", tmpFile)){
+        download.file(download_url, tmpFile, quiet = TRUE, method = 'auto', mode = "wb")
+        augur_input_dir <- "gisaidr_augur_input_tmp"
+        # Remove existing directories from tar archives
+        if (dir.exists(augur_input_dir)){
+          unlink(augur_input_dir, recursive=TRUE)
+        }
+        # Decompress tar archive
+        untar(tmpFile, exdir=augur_input_dir, restore_times = FALSE, verbose=FALSE)
+        # Extract Sequences
+        sequencesFile <- list.files("gisaidr_augur_input_tmp", pattern = "*.sequences.fasta")[1]
+        if (is.na(sequencesFile)) { stop(log.error("Could not find sequences file.")) }
+        sequencesFile <- file.path("gisaidr_augur_input_tmp", sequencesFile)
+        # Extract Metadata
+        metadataFile <- list.files("gisaidr_augur_input_tmp", pattern = "*.metadata.tsv")[1]
+        if (is.na(metadataFile)) { stop(log.error("Could not find metadata file.")) }
+        metadataFile <- file.path("gisaidr_augur_input_tmp", metadataFile)
+      }
+      else {
+        download.file(download_url, tmpFile, quiet = TRUE, method = 'auto')
+      }
+
+      if (!is.null(metadataFile) && file.exists(metadataFile)){
+        metadata <- read.csv(metadataFile, sep="\t", quote="", check.names=FALSE)
+        # Replace "?" with "NA" in the augur_input metadata
+        if ( download_type == "augur_input" ) { metadata[ metadata == "?" ] <- NA }
+      }
+      if (!is.null(sequencesFile) && file.exists(sequencesFile)){
+        sequences <- readChar(sequencesFile, file.info(tmpFile)$size)
+      }
+
+      # Decide on how we want to organize the download results based on type
+      if (download_type == "augur_input"){
+        download_results[[download_type]] <- list(metadata=metadata, sequences=sequences)
+      } else if (download_type == "sequences"){
+        download_results[[download_type]] <- sequences
+      } else {
+        download_results[[download_type]] <- metadata
+      }
+
+    }, finally = {
+      if (clean_up){
+        log.info("Cleaning up temporary files.", level=2)
+        if (!is.null(tmpFile)       && file.exists(tmpFile))       { file.remove(tmpFile) }
+        if (!is.null(metadataFile)  && file.exists(metadataFile))  { file.remove(metadataFile) }
+        if (!is.null(sequencesFile) && file.exists(sequencesFile)) { file.remove(sequencesFile) }
+        if (dir.exists("gisaidr_augur_input_tmp"))                 { unlink("gisaidr_augur_input_tmp", recursive=TRUE) }
+      }
+    })
+  }
+
+  return(download_results)
 }
