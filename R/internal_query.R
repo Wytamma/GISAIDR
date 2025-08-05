@@ -23,6 +23,7 @@
 #' @param fast returns all of the accession_ids that match the query.
 #' @param aa_substitution returns all sequences with the amino acid mutation(s), negative selection by '-' prefix
 #' @param nucl_mutation returns all sequences with the nucleotide mutation(s), negative selection by '-' prefix
+#' @param subtype returns all sequences with the subtype
 #' @return Dataframe.
 internal_query <-
   function(credentials,
@@ -38,6 +39,7 @@ internal_query <-
            order_by = NULL,
            aa_substitution = NULL,
            nucl_mutation = NULL,
+           subtype = NULL,
            order_asc = TRUE,
            start_index = 0,
            nrows = 50,
@@ -47,200 +49,110 @@ internal_query <-
            high_coverage = FALSE,
            collection_date_complete = FALSE,
            total = FALSE,
-           fast = FALSE) {
+           fast = FALSE
+  ) {
+
     df <- tryCatch({
-      # search
       queue = list()
-      if (!is.null(text)) {
-        queue <-
-          append(
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$text_ceid,
-              text,
-              'DoSimpleSearch'
-            )
-          )
+
+      # Simple Text Filter (EpiCoV only)
+      if (!is.null(text) && credentials$database == "EpiCoV") {
+        new_queue <- create_search_queue(credentials, credentials$text_ceid, text, 'DoSimpleSearch')
+        queue     <- append(queue, new_queue)
       }
+
+      # Location Filter (All)
       if (!is.null(location)) {
-        queue <-
-          append(
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$location_ceid,
-              location,
-              'FilterChange'
-            )
-          )
+        new_queue <- create_search_queue(credentials, credentials$location_ceid, location, 'FilterChange')
+        queue     <- append(queue, new_queue)
       }
+
+      # Collection Date Complete (All)
       if (collection_date_complete) {
-        queue <-
-          append(
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$collection_date_complete_ceid,
-              list('coldc'),
-              'FilterChange'
-            )
-          )
+        new_queue <- create_search_queue(credentials, credentials$collection_date_complete_ceid, list('coldc'), 'FilterChange')
+        queue     <- append(queue, new_queue)
       }
-      if (!is.null(lineage) && credentials$database == "EpiCoV") {
-        queue <-
-          append(
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$linage_ceid,
-              lineage,
-              'LineageChange'
-            )
-          )
+
+      # Lineage (EpiCoV, EpiPox)
+      if (!is.null(lineage)) {
+        if (credentials$database == "EpiCoV"){
+          new_queue <- create_search_queue(credentials, credentials$lineage_ceid, lineage, 'LineageChange')
+          queue     <- append(queue, new_queue)
+        } else if (credentials$database == "EpiPox") {
+          new_queue <- create_search_queue(credentials, credentials$lineage_ceid, lineage, 'FilterChange')
+          queue     <- append(queue, new_queue)
+        }
       }
+
+      # Subtype (EpiRSV)
+      if (!is.null(subtype) && credentials$database == "EpiRSV") {
+        new_queue <- create_search_queue(credentials, credentials$subtype_ceid, subtype, 'FilterChange')
+        queue     <- append(queue, new_queue)
+      }
+
+      # Variant (EpiCoV)
       if (!is.null(variant) && credentials$database == "EpiCoV") {
-        queue <-
-          append(
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$variant_ceid,
-              variant,
-              'VariantsChange'
-            )
-          )
+        new_queue <- create_search_queue(credentials, credentials$variant_ceid, variant, 'VariantsChange')
+        queue     <- append(queue, new_queue)
       }
+
+      # Virus Name (All)
       if (!is.null(virus_name)) {
-        queue <-
-          append(
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$virus_name_ceid,
-              virus_name,
-              'FilterChange'
-            )
-          )
+        new_queue <- create_search_queue(credentials, credentials$virus_name_ceid, virus_name, 'FilterChange')
+        queue     <- append(queue, new_queue)
       }
 
-
-
+      # From, collection date (All)
       if (!is.null(from)) {
-        queue <-
-          append(
-            queue,
-            create_search_queue(credentials,
-                                credentials$from_ceid,
-                                from,
-                                'FilterChange')
-          )
+        new_queue <- create_search_queue(credentials, credentials$from_ceid, from, 'FilterChange')
+        queue     <- append(queue, new_queue)
       }
 
+      # From, submission date (All)
       if (!is.null(from_subm)) {
-        queue <-
-          append(
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$from_sub_ceid,
-              from_subm,
-              'FilterChange'
-            )
-          )
+        new_queue <- create_search_queue(credentials, credentials$from_sub_ceid, from_subm, 'FilterChange')
+        queue     <- append(queue, new_queue)
       }
 
+      # To, collection date (All)
       if (!is.null(to)) {
-        queue <-
-          append(
-            queue,
-            create_search_queue(credentials,
-                                credentials$to_ceid,
-                                to,
-                                'FilterChange')
-          )
+        new_queue <- create_search_queue(credentials, credentials$to_ceid, to, 'FilterChange')
+        queue     <- append(queue, new_queue)
       }
 
+      # To, submission date (All)
       if (!is.null(to_subm)) {
-        queue <-
-          append(
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$to_sub_ceid,
-              to_subm,
-              'FilterChange'
-            )
-          )
+        new_queue <- create_search_queue(credentials, credentials$to_sub_ceid, to_subm, 'FilterChange')
+        queue     <- append(queue, new_queue)
       }
 
-      # amino acid changes
+      # Amino acid changes (all)
       if (!is.null(aa_substitution)) {
-        queue <-
-          append(
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$aa_substitution_ceid,
-              aa_substitution,
-              'FilterChange'
-            )
-          )
+        new_queue <- create_search_queue(credentials, credentials$aa_substitution_ceid, aa_substitution, 'FilterChange')
+        queue     <- append(queue, new_queue)
       }
 
-      # nucleotide changes
-      if (!is.null(nucl_mutation)) {
-        queue <-
-          append (
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$nucl_mutation_ceid,
-              nucl_mutation,
-              'FilterChange'
-            )
-          )
+      # Nucleotide changes (EpiCoV)
+      if (!is.null(nucl_mutation) && credentials$database == "EpiCoV") {
+        new_queue <- create_search_queue(credentials, credentials$nucl_mutation_ceid, nucl_mutation, 'FilterChange')
+        queue     <- append(queue, new_queue)
       }
 
-
+      # Low Coverage Exclude (All)
       if (low_coverage_excl) {
-        queue <-
-          append(
-            queue,
-            create_search_queue(
-              credentials,
-              credentials$low_coverage_excl_ceid,
-              list('lowco'),
-              'FilterChange'
-            )
-          )
+        new_queue <- create_search_queue(credentials, credentials$low_coverage_excl_ceid, list('lowco'), 'FilterChange')
+        queue     <- append(queue, new_queue)
       }
 
+      # Quality (mixed)
       if (credentials$database == 'EpiCoV') {
         if (complete) {
-          queue <-
-            append(
-              queue,
-              create_search_queue(
-                credentials,
-                credentials$complete_ceid,
-                list('complete'),
-                'FilterChange'
-              )
-            )
+          new_queue <- create_search_queue(credentials, credentials$complete_ceid, list('complete'), 'FilterChange')
+          queue     <- append(queue, new_queue)
         }
-
         if (high_coverage) {
-          queue <-
-            append(
-              queue,
-              create_search_queue(
-                credentials,
-                credentials$highq_ceid,
-                list('highq'),
-                'FilterChange'
-              )
-            )
+          new_queue <- create_search_queue(credentials, credentials$highq_ceid, list('highq'), 'FilterChange')
+          queue     <- append(queue, new_queue)
         }
       } else {
         quality <- list()
@@ -253,16 +165,8 @@ internal_query <-
         }
 
         if (length(quality) > 0) {
-          queue <-
-            append(
-              queue,
-              create_search_queue(
-                credentials,
-                credentials$quality_ceid,
-                quality,
-                'FilterChange'
-              )
-            )
+          new_queue <- create_search_queue(credentials, credentials$quality_ceid, quality, 'FilterChange')
+          queue     <- append(queue, new_queue)
         }
       }
 
@@ -276,8 +180,9 @@ internal_query <-
             queue = command_queue,
             timestamp = timestamp()
           )
-        res <-
-          httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+        response <- httr::POST(GISAID_URL, httr::add_headers(.headers = headers), body = data)
+        response_data <- parseResponse(response)
+        log.debug(response_data)
       }
 
       queue = list()
@@ -330,40 +235,28 @@ internal_query <-
           queue = command_queue,
           timestamp = timestamp()
         )
-      res <- httr::GET(paste0(GISAID_URL, '?', data))
-      j <- parseResponse(res)
+      response <- httr::GET(paste0(GISAID_URL, '?', data))
+      response_data <- parseResponse(response)
 
       if (total) {
-        return(as.numeric(j$totalRecords))
+        return(as.numeric(response_data$totalRecords))
       }
 
       if (fast) {
         log.debug(paste0(GISAID_URL, "?sid=", credentials$sid))
-        accession_id_count <- j$totalRecords
-        message(paste0('Selecting all ', accession_id_count, " accession_ids."))
+        accession_id_count <- response_data$totalRecords
+        log.info(paste('Selecting all', accession_id_count, "accession_ids."))
         df <- get_accession_ids(credentials = credentials)
-
-        message(
-          paste0(
-            "Returning ",
-            start_index,
-            "-",
-            nrow(df),
-            " of ",
-            accession_id_count,
-            " accession_ids."
-          )
-        )
+        log.info(paste("Returning", start_index, "-", nrow(df), "of", accession_id_count, "accession_ids."))
 
         if (accession_id_count > nrow(df)) {
-          message(paste0("Could only get ", nrow(df), " accession_ids. Narrow your search."))
+          log.warn(paste("Could only get", nrow(df), "accession_ids. Narrow your search."))
         }
         return(df)
-
       }
 
-      if (load_all && j$totalRecords > nrows) {
-        message(paste0("Loading all ", j$totalRecords, " entries..."))
+      if (load_all && response_data$totalRecords > nrows) {
+        log.info(paste("Loading all", response_data$totalRecords, "entries."))
         return(
           query(
             credentials = credentials,
@@ -377,37 +270,28 @@ internal_query <-
             to_subm = to_subm,
             aa_substitution = aa_substitution,
             nucl_mutation = nucl_mutation,
-            nrows = j$totalRecords,
+            nrows = response_data$totalRecords,
             # set load_all to false to break the recursion
             load_all = FALSE,
             low_coverage_excl = low_coverage_excl,
             complete = complete,
             high_coverage = high_coverage,
             collection_date_complete = collection_date_complete,
+            subtype = subtype
           )
         )
       }
-      message(
-        paste0(
-          "Returning ",
-          start_index,
-          "-",
-          start_index + j$recordsReturned,
-          " of ",
-          j$totalRecords,
-          " entries."
-        )
-      )
-      log.debug(j$records)
-      if (length(j$records) >= 1) {
-        df <- data.frame(do.call(rbind, j$records))
+      log.info(paste("Returning", start_index, "-", start_index + response_data$recordsReturned, "of ", response_data$totalRecords, "entries."))
+      log.debug(response_data$records)
+      if (length(response_data$records) >= 1) {
+        df <- data.frame(do.call(rbind, response_data$records))
         df <-
           data.frame(lapply(df, function(col) {
             col[sapply(col, is.null)] <- NA
             unlist(col)
           }))
       } else {
-        df <- data.frame(j$records)
+        df <- data.frame(response_data$records)
       }
       df <- setColumnNames(df, credentials$database)
       df <- setDataTypes(df)
