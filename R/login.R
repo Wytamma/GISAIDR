@@ -160,7 +160,7 @@ login <- function(username, password, database="EpiCoV") {
     POX_actionbar_component_ID <-
       extract_first_match("sys-actionbar-action-ni\" onclick=\"sys.getC\\('([^']*)",
                           POX_page_text)
-    print(POX_actionbar_component_ID)
+
     response_data <- go_to_page(session_id, WID, POX_page_ID, POX_actionbar_component_ID, 'page_mpox.BrowsePage')
     customSearch_page_ID <-
       extract_first_match("\\('(.*)')",response_data$responses[[1]]$data)
@@ -176,7 +176,7 @@ login <- function(username, password, database="EpiCoV") {
   }
   customSearch_page_response <- send_request(paste0('sid=', session_id, '&pid=', customSearch_page_ID))
   customSearch_page_text = httr::content(customSearch_page_response, as = 'text')
-  print(customSearch_page_text)
+
   query_cid <- extract_first_match("div class=\"sys-datatable.{0,30}\" id=\"(.{5,20})_table", customSearch_page_text)
 
   #selectAll_ceid <- extract_first_match("onclick=\"sys.getC\\(\"(.{5,20})\"\\).selectAll", customSearch_page_text)
@@ -196,9 +196,18 @@ login <- function(username, password, database="EpiCoV") {
 
   # Lineage
   if (database == 'EpiCoV'){
-    linage_ceid <- extract_search_ceid('pangolin_lineage', customSearch_page_text)
+    lineage_ceid <- extract_search_ceid('pangolin_lineage', customSearch_page_text)
+  } else if (database == 'EpiPox') {
+    lineage_ceid <- extract_search_ceid('covsurver_cladelineage', customSearch_page_text)
   } else {
-    linage_ceid <- NULL
+    lineage_ceid <- NULL
+  }
+
+  # Subtype
+  if (database == 'EpiRSV'){
+    subtype_ceid <- extract_search_ceid('covv_subtype', customSearch_page_text)
+  } else {
+    subtype_ceid <- NULL
   }
 
   # Virus Name
@@ -246,7 +255,7 @@ login <- function(username, password, database="EpiCoV") {
     quality_ceid <- NULL
   } else {
     text_ceid <- NULL
-    aa_substitution_ceid <- NULL
+    aa_substitution_ceid <- extract_search_ceid('mutation', customSearch_page_text)
     nucl_mutation_ceid <- NULL
     variant_ceid <- NULL
     complete_ceid <- NULL
@@ -290,7 +299,7 @@ login <- function(username, password, database="EpiCoV") {
       search_cid = search_cid,
       aa_substitution_ceid = aa_substitution_ceid,
       nucl_mutation_ceid = nucl_mutation_ceid,
-      linage_ceid = linage_ceid,
+      lineage_ceid = lineage_ceid,
       virus_name_ceid = virus_name_ceid,
       from_ceid = from_ceid,
       from_sub_ceid = from_sub_ceid,
@@ -301,7 +310,8 @@ login <- function(username, password, database="EpiCoV") {
       complete_ceid = complete_ceid,
       collection_date_complete_ceid = collection_date_complete_ceid,
       quality_ceid = quality_ceid,
-      variant_ceid = variant_ceid
+      variant_ceid = variant_ceid,
+      subtype_ceid = subtype_ceid
     )
 
   return(credentials)
