@@ -181,3 +181,63 @@ test_that("empty result returns empty df", {
   )
   expect_true(nrow(df) == 0)
 })
+
+# -----------------------------------------------------------------------------
+# EpiPox
+
+credentials <- login(username = username, password = password, database="EpiPox")
+# will break if log in fails...
+
+test_that("EpiPox basic query works", {
+  df <- query(credentials = credentials)
+  expect_true(is.data.frame(df))
+})
+
+test_that("EpiPox lineage search works using clades", {
+  df <- query(credentials = credentials, lineage = 'IIb')
+  # need a better way to test this...
+  expect_true(is.data.frame(df))
+  expect_true(nrow(df) == 50)
+})
+
+test_that("EpiPox lineage search works using lineages", {
+  df <- query(credentials = credentials, lineage = 'IIb B.1.20')
+  # need a better way to test this...
+  expect_true(is.data.frame(df))
+  expect_true(nrow(df) == 50)
+})
+
+test_that("EpiPox high coverage works", {
+  df <- query(credentials = credentials, high_coverage = TRUE)
+  expect_true(nrow(df) == 50)
+  expect_true(length(grep("warn_sign", df$information)) == 0)
+})
+
+# -----------------------------------------------------------------------------
+# EpiRSV
+
+credentials <- login(username = username, password = password, database="EpiRSV")
+# will break if log in fails...
+
+test_that("EpiRSV basic query works", {
+  df <- query(credentials = credentials)
+  expect_true(is.data.frame(df))
+})
+
+test_that("EpiRSV subtype search works", {
+  total_a <- query(credentials = credentials, subtype="A", total=TRUE)
+  total_b <- query(credentials = credentials, subtype="B", total=TRUE)
+  expect_true(total_a != total_b)
+})
+
+test_that("EpiRSV complete works", {
+  df <- query(credentials = credentials, complete = TRUE)
+  expect_true(nrow(df) == 50)
+  expect_true(all(df$length > 15000))
+})
+
+test_that("EpiRSV high coverage works", {
+  df <- query(credentials = credentials, high_coverage = TRUE)
+  expect_true(nrow(df) == 50)
+  expect_true(length(grep("warn_sign", df$information)) == 0)
+})
